@@ -603,6 +603,89 @@ console.log('[lint] 公開前に人が埋める箇所');
   }
   console.log(`  info 画面に出るプレースホルダ ${visible} 箇所（赤い破線。公開前に必ず置き換える）`);
   console.log(`  info ソース内の TODO コメント ${comment} 箇所（次フェーズ向けの申し送り）`);
+  // 残っているプレースホルダは連絡先メールアドレスの2箇所（privacy.html の
+  // <dt>連絡先</dt> と 8.お問い合わせ）だけであること。実在しない値を書くと
+  // 開示請求の受け皿が消えるので、埋まるまでここが減らないのは正しい。
+  // これ以上増えたら、公開済みの面に新しい未記入が出たということ。
+  check(visible <= 2, `画面に出るプレースホルダが2箇所以内（実際: ${visible}）`);
+}
+
+// --- タイプページと og:image（16枚）---------------------------------------
+// シェアされたURLの着地先であり、「誰の結果か」を伝える唯一の面。
+// 生成物なので、テンプレートを直して生成し忘れた状態を機械で見つける
+// （weighted-scoring-and-type-pages.md §生成の方針）。
+console.log('[lint] タイプページと og:image');
+{
+  const { renderAll } = await import('./gen-type-pages.mjs');
+  const pages = await renderAll();
+  check(pages.length === 16, `t/*.html が16枚（実際: ${pages.length}）`);
+
+  let stale = [], missing = [];
+  for (const p of pages) {
+    const abs = path.join(ROOT, p.file);
+    if (!fs.existsSync(abs)) { missing.push(p.file); continue; }
+    if (fs.readFileSync(abs, 'utf8') !== p.html) stale.push(p.file);
+  }
+  check(missing.length === 0, `t/*.html が全部ある${missing.length ? ` → 無い: ${missing.join(', ')}` : ''}`);
+  check(stale.length === 0,
+        `t/*.html が最新（make types を忘れていない）${stale.length ? ` → 古い: ${stale.join(', ')}` : ''}`);
+
+  // og:image 16枚。PNG は Chrome のバージョンでバイト単位では再現しないので、
+  // 中身の一致ではなく「在る・1200x630・16枚とも違う絵」を守る。
+  const png = f => {
+    const b = fs.readFileSync(f);
+    return { w: b.readUInt32BE(16), h: b.readUInt32BE(20), key: b.length + ':' + b.subarray(0, 4096).toString('base64') };
+  };
+  const seen = new Map();
+  let badSize = [], dup = [], noimg = [];
+  for (const p of pages) {
+    const f = path.join(ROOT, 'images/ogp', `${p.code}.png`);
+    if (!fs.existsSync(f)) { noimg.push(p.code); continue; }
+    const s = png(f);
+    if (s.w !== 1200 || s.h !== 630) badSize.push(`${p.code}(${s.w}x${s.h})`);
+    if (seen.has(s.key)) dup.push(`${p.code}=${seen.get(s.key)}`);
+    seen.set(s.key, p.code);
+  }
+  check(noimg.length === 0, `og:image が16枚ある${noimg.length ? ` → 無い: ${noimg.join(', ')}` : ''}`);
+  check(badSize.length === 0, `og:image が全部 1200x630${badSize.length ? ` → 違う: ${badSize.join(', ')}` : ''}`);
+  // ここが本題。16人が同じ1枚を配っていたのが D-1 の出発点だった。
+  check(dup.length === 0, `og:image 16枚がすべて別の絵${dup.length ? ` → 同一: ${dup.join(', ')}` : ''}`);
+
+  // 診断前のページなので、送客リンクを置いてはならない（funnel §3）。
+  const withAgent = pages.filter(p => /ab-link|agent-primary|agent-secondary|agent-block/.test(p.html));
+  check(withAgent.length === 0,
+        `t/*.html に送客リンクが無い（診断前の送客は排除）${withAgent.length ? ` → ${withAgent.map(p => p.code).join(', ')}` : ''}`);
+
+  // CTA に ?type= を付けてはならない。?type=X（ref なし）で来ると結果画面が
+  // 即表示されるため、未診断者に他人の結果を出す経路を新設してしまう。
+  const withType = pages.filter(p => /index\.html\?[^"']*\btype=/.test(p.html));
+  check(withType.length === 0,
+        `t/*.html の導線に ?type= が無い（未診断者に他人の結果を出さない）${withType.length ? ` → ${withType.map(p => p.code).join(', ')}` : ''}`);
+
+  // 16枚それぞれが自分の og:image を指していること（テンプレの取り違え検出）
+  const wrongOg = pages.filter(p => !p.html.includes(`images/ogp/${p.code}.png`));
+  check(wrongOg.length === 0, `各ページが自分の og:image を指す${wrongOg.length ? ` → ${wrongOg.map(p => p.code).join(', ')}` : ''}`);
+
+  // shareUrl() が t/ を指していること（?type=&ref=share のままだと16枚が使われない）
+  check(/function shareUrl\(code\)\{return SITE_BASE\+'t\/'/.test(html),
+        `shareUrl() が t/<CODE>.html を返す（16枚の og:image が使われる経路）`);
+}
+
+// --- 公開ディレクトリに置いてあるが、現役ではないページ ---
+// characters.html は index.html からも privacy.html からも参照されていない旧版。
+// オーナー判断で削除せず残しているが、検索から着地されると診断へ進めないまま
+// 終わる（プライバシーポリシーへのリンクも無い）。索引だけは止め続ける。
+console.log('[lint] 現役でない公開ページ');
+{
+  const orphan = 'characters.html';
+  if (fs.existsSync(path.join(ROOT, orphan))) {
+    const s = read(orphan);
+    check(/<meta\s+name=["']robots["'][^>]*noindex/i.test(s),
+          `${orphan} に noindex がある（現役に戻すときは外し、PAGES に足すこと）`);
+    // 現行の一覧は index.html の #type-section。二重管理に戻っていないこと。
+    check(!html.includes(orphan),
+          `index.html が ${orphan} を参照していない（参照するなら noindex を外し PAGES に足す）`);
+  }
 }
 
 console.log(ng === 0 ? '\n[lint] PASS' : `\n[lint] FAIL: ${ng} 件`);

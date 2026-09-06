@@ -214,7 +214,9 @@ try{
   // C-6 でその経路を廃止したため、scores を直接置いて同じ状態を作る。
   w.eval("scores={1:5,2:5,3:5,4:5}"); await sleep(60);
   const SU=w.shareUrl('HALS');
-  chk(SU==='https://w-t-n-b.github.io/syukatsushindan/?type=HALS&ref=share','shareUrl(): '+SU);
+  /* シェア先はタイプページ。ここが16通りの og:image を持つ（D-1）。
+     以前は ?type=X&ref=share で、16人が同じ default.png を配っていた。 */
+  chk(SU==='https://w-t-n-b.github.io/syukatsushindan/t/HALS.html','shareUrl(): '+SU);
   chk(w.topUrl()==='https://w-t-n-b.github.io/syukatsushindan/','topUrl(): '+w.topUrl());
   let opened=null; w.open=(u)=>{opened=u;return null;};
   w.shareX();
@@ -264,7 +266,8 @@ try{
   w.copyLink(); await sleep(80);
   chk(copied==='https://w-t-n-b.github.io/syukatsushindan/','copyLink は診断トップを配る（?type= を含まない）: '+copied);
   w.copyResult(); await sleep(80);
-  chk(copied.indexOf('?type=DBWG&ref=share')>=0,'copyResult に結果URLが入る');
+  chk(copied.indexOf('/t/DBWG.html')>=0,'copyResult に自分のタイプページURLが入る: '+copied.slice(-60));
+  chk(copied.indexOf('?type=')<0,'copyResult に ?type= が無い（16枚の og:image を通る）');
 
   // ---------- D. ref=share 分岐 ----------
   await load('index.html?type=HALS&ref=share'); w=f.contentWindow; d=f.contentDocument;

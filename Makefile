@@ -12,20 +12,20 @@
 #   make serve   … 動作確認用のローカルサーバ
 #   make shot    … 実機幅（390/320）のスクリーンショットと寸法計測 → /tmp/shots
 #   make heads   … キャラ画像の頭頂位置を実測し、object-position 用のCSSを出力
-#   make ogp     … og:image（1200x630）の再生成
+#   make ogp     … og:image（1200x630）の再生成 — タイプ別16枚
+#   make types   … t/<CODE>.html 16枚の再生成
+#   make gen     … ogp + types（TD の文言を直したら両方作り直す）
 #
 # 必要なもの: node（18以上）/ Google Chrome / python3（serve のみ）
 #
 # Chrome の場所は tools/chrome-path.mjs が解決する（環境変数 CHROME_PATH で上書き可）。
 # CI のように OS が違う環境でも同じ `make check` が通るようにするため、
-# ここに直書きしない。ogp だけは Makefile から直接叩くので既定値を用意する。
+# ここに直書きしない。
 
 SHELL := /bin/bash
 NODE  := node
-# 開発機（macOS）の既定値。CI 等では CHROME_PATH で上書きする。
-CHROME ?= $(shell CHROME_PATH="$$CHROME_PATH" $(NODE) -e 'import("./tools/chrome-path.mjs").then(m=>console.log(m.findChrome()||""))')
 
-.PHONY: check lint type typecheck test e2e serve shot heads ogp golden help
+.PHONY: check lint type typecheck test e2e serve shot heads ogp types gen golden help
 
 check: lint typecheck test e2e
 	@echo ""
@@ -74,12 +74,20 @@ heads:
 	@echo "── heads（キャラ画像の頭頂位置の実測）──"
 	@$(NODE) tools/measure-heads.mjs
 
+# og:image。タイプ別16枚を作り直す。
+# default.png は既定では触らない（PNG は Chrome のバージョンで1バイト単位では
+# 再現せず、既に公開済み・各SNSにキャッシュ済みのため）。版下 _default.source.html
+# を意図的に変えたときだけ:  make ogp ARGS=--with-default
 ogp:
-	@"$(CHROME)" --headless=new --disable-gpu --hide-scrollbars \
-	  --force-device-scale-factor=1 --allow-file-access-from-files \
-	  --window-size=1200,630 --virtual-time-budget=4000 \
-	  --screenshot=images/ogp/default.png images/ogp/_default.source.html
-	@echo "images/ogp/default.png を再生成しました"
+	@echo "── ogp（og:image 1200x630）───────────"
+	@$(NODE) tools/gen-ogp.mjs $(ARGS)
+
+# タイプページ。index.html の TD を読んで生成するので、文言を直したら必ず実行する。
+types:
+	@echo "── types（t/<CODE>.html 16枚）─────────"
+	@$(NODE) tools/gen-type-pages.mjs
+
+gen: ogp types
 
 help:
 	@grep -E '^#   make' Makefile | sed 's/^#   //'

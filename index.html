@@ -28,7 +28,9 @@
 <meta name="twitter:title" content="就活キャリアタイプ診断 | 16Types">
 <meta name="twitter:description" content="20問・約3分で、あなたの働き方の傾向を4軸16タイプに分類します。登録不要・無料。">
 <meta name="twitter:image" content="https://w-t-n-b.github.io/syukatsushindan/images/ogp/default.png">
-<!-- TODO: タイプ別OGP（r/<CODE>.html 16枚 / og:image 16枚）は未決事項 U-11 決定後に追加する -->
+<!-- タイプ別OGP は t/<CODE>.html 16枚が持つ（tools/gen-type-pages.mjs が生成）。
+     このページ自身は「タイプが決まっていない面」なので default.png のままでよい。
+     16枚の表現（未決事項 U-11）は images/ogp/_type.source.html の冒頭に記録した。 -->
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1456,8 +1458,8 @@ html,body{background:var(--ink-field);}
       <a href="privacy.html#operator">運営者情報</a>
       <a href="privacy.html#contact">お問い合わせ</a>
     </nav>
-    <!-- TODO: 運営者情報（未決事項 U-6）— 開示する表示名が決まったら下の <span class="ftr-todo"> ごと置き換える -->
-    <div class="ftr-copy">© <span class="ftr-todo">TODO: 運営者名</span></div>
+    <!-- privacy.html の同じ表記と揃えること（片方だけ変えない） -->
+    <div class="ftr-copy">© キャリアタイプ診断 運営事務局</div>
   </div>
 </footer>
 
@@ -2611,13 +2613,21 @@ function showResult(_unusedSkipIntro=false,source='quiz'){
    シェアURL
    -------------------------------------------------------------------------
    これまでシェア文にURLが1文字も入っておらず、拡散しても新規流入が0だった。
-   shareUrl(code) … 自分の結果を見せるためのURL。ref=share を付けることで、
-                    踏んだ人には他人の結果を出さず LP を見せる（§A-6）。
+   shareUrl(code) … 自分の結果を見せるためのURL。タイプページ t/<CODE>.html を
+                    指す。ここが16通りの og:image を持つので、シェアされた時点で
+                    「誰の結果か」が絵で伝わる（それ以前は16人が同じ1枚だった）。
    topUrl()       … 「診断リンクをコピー」用。?type= を含まない診断トップ。
-   TODO: タイプ別OGP r/<CODE>.html（未決事項 U-11）を用意したら、shareUrl() の
-         戻り値を SITE_BASE+'r/'+code+'.html' に差し替える。呼び出し側は無変更で済む。
+
+   t/ は薄い中継ではなく中身のあるページである（weighted-scoring-and-type-pages.md
+   §D が r/<CODE>.html 案を却下した）。中継は location.replace するので検索
+   エンジンにとって中身がゼロで、OGP は中身のあるページからでも同じように出せる。
+   中継の唯一の役目だった「踏んだ人に他人の結果全文を見せない」（§A-6）は、
+   t/ がタイプ紹介までしか載せないことで満たしている。
+
+   ★旧 URL（?type=X&ref=share）はもう配らないが、既に配られたものが生きている。
+     .shared-banner の分岐は消さないこと。
    ========================================================================= */
-function shareUrl(code){return SITE_BASE+'?type='+encodeURIComponent(code)+'&ref=share';}
+function shareUrl(code){return SITE_BASE+'t/'+encodeURIComponent(code)+'.html';}
 function topUrl(){return SITE_BASE;}
 
 /* クリップボードは HTTPS 以外・古い端末・権限拒否で失敗する。

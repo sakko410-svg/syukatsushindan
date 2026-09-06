@@ -335,8 +335,23 @@ console.log('[test] 送客ブロックの出し分け');
 console.log('[test] シェアURL');
 {
   const T = load(TARGET, '?type=DBWG');
-  check(T.shareUrl('HALS') === 'https://w-t-n-b.github.io/syukatsushindan/?type=HALS&ref=share',
+  /* シェア先はタイプページ t/<CODE>.html。ここが16通りの og:image を持つので、
+     シェアされた時点で「誰の結果か」が絵で伝わる。それ以前は ?type=X&ref=share で、
+     16人が同じ default.png を配っていた（＝拡散が誰の結果かを1文字も伝えていない）。
+     旧URLはもう配らないが、既に配られたものは生きている。踏んだときに他人の結果を
+     出さない分岐（.shared-banner）は上の (4) と e2e が別途守っている。 */
+  check(T.shareUrl('HALS') === 'https://w-t-n-b.github.io/syukatsushindan/t/HALS.html',
     `shareUrl('HALS') = ${T.shareUrl('HALS')}`);
+  check(!T.shareUrl('HALS').includes('?type='),
+    'shareUrl() に ?type= が無い（16枚の og:image を通る経路になっている）');
+  /* 16タイプすべてが別のURLになること。テンプレートの取り違えで同じURLを
+     配ると、og:image を16枚作った意味がそこで消える。 */
+  {
+    const codes = Object.keys(T.__eval('TD'));
+    const urls = new Set(codes.map(c => T.shareUrl(c)));
+    check(urls.size === codes.length,
+      `shareUrl() が16タイプで16通り（実際: ${urls.size}通り / ${codes.length}タイプ）`);
+  }
   check(T.topUrl() === 'https://w-t-n-b.github.io/syukatsushindan/',
     `topUrl() = ${T.topUrl()}（?type= を含まない）`);
   let opened = '';

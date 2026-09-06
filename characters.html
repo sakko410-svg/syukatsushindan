@@ -3,6 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- このページは index.html からも privacy.html からも参照されていない旧版で、
+     現行の16タイプ一覧は index.html の #type-section が持っている。
+     消していないのは素材として残す判断（オーナー）。ただし公開ディレクトリに
+     置かれている以上、検索から着地されうる。着地しても診断への導線は弱く、
+     プライバシーポリシーへのリンクも無いため、索引だけを止める。
+     ★現役に戻すときは noindex を外し、tools/lint.mjs の PAGES に足して
+       文言監査の対象に入れること（現在このファイルは lint の対象外）。 -->
+<meta name="robots" content="noindex, follow">
 <title>キャリアタイプ一覧 — 16タイプ診断</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

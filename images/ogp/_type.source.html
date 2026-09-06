@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<!--
+  タイプ別 og:image（1200x630）の版下テンプレート。未決事項 U-11 の決定。
+
+  このファイルは直接スクリーンショットしない。tools/gen-ogp.mjs が
+  二重波カッコの差し込み記号を TD[code] の値で置換して一時ファイルを作り、
+  それを撮る（この注記に記号そのものを書くと未置換の検査に引っかかる）。
+  再生成:  make ogp        （default.png も 16枚も両方作り直す）
+
+  U-11（16枚の表現）で決めたこと:
+    ・1枚に1体だけ大きく置く。default.png は4体並べて「診断そのもの」を
+      表しているが、タイプ別は「誰の結果か」を伝えるのが唯一の仕事である。
+      並べると顔が小さくなり、タイムラインの縮小表示で判別できない。
+    ・見出しはタイプ名（「オンオフのエース」）。タイプコード（HALS）は
+      ラベルとして小さく上に置く。受け手はコードを知らないため、
+      コードを主役にすると意味を持たない4文字が最大の文字になる。
+    ・カテゴリ4色を大きな面（カードの影・下端のルール・コード）に使い、
+      HA/HB/DA/DB を色で見分けられるようにする。
+    ・地・集中線・リング・下端の4色ルール・バッジは default.png と同一。
+      並んだときに同じサービスのものだと分かる必要がある。
+
+  ・和文は macOS の Hiragino Sans を使用（Webフォントに依存しない＝オフラインで再現可能）
+  ・キャラクターは images/chars/ の既存素材（2:3・800x1200）をそのまま使用
+-->
+<html lang="ja"><head><meta charset="UTF-8">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{width:1200px;height:630px;overflow:hidden;}
+body{
+  font-family:'Hiragino Sans','Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif;
+  background:#132043; position:relative; display:flex; align-items:center;
+  -webkit-font-smoothing:antialiased;
+}
+/* 集中線（default.png と同一） */
+body::before{
+  content:''; position:absolute; inset:0;
+  background-image:repeating-conic-gradient(from 0deg at 68% 46%,
+    rgba(255,255,255,.055) 0deg 1.05deg, transparent 1.05deg 3.6deg);
+}
+/* 下端の4色ルール（カテゴリの並び。default.png と同一） */
+body::after{
+  content:''; position:absolute; left:0; right:0; bottom:0; height:11px;
+  background:linear-gradient(90deg,#1a56db 0 25%,#1d6b4c 25% 50%,#c8412e 50% 75%,#4b4483 75% 100%);
+}
+.ring{position:absolute;border-radius:50%;}
+.r1{width:360px;height:360px;border:26px solid rgba(255,255,255,.07);top:-150px;right:-90px;}
+.r2{width:200px;height:200px;border:22px solid rgba(207,154,36,.28);bottom:-84px;left:-60px;}
+
+.left{position:relative;z-index:2;width:660px;padding:0 0 0 58px;}
+.badge{
+  display:inline-block;background:#cf9a24;color:#111a30;
+  font-weight:800;font-size:19px;letter-spacing:.14em;
+  padding:8px 18px;border:3px solid #111a30;box-shadow:6px 6px 0 #c8412e;
+  margin-bottom:26px;
+}
+/* タイプコード＋系統。名前より前に出さない（受け手はコードを知らない） */
+.code-row{display:flex;align-items:center;gap:13px;margin-bottom:12px;}
+.code{
+  font-family:'Archivo Narrow','Helvetica Neue',Arial,sans-serif;
+  font-weight:700;font-size:34px;letter-spacing:.10em;line-height:1;
+  color:#111a30;background:{{CAT}};padding:8px 15px 7px;
+  border:3px solid #111a30;box-shadow:5px 5px 0 rgba(0,0,0,.42);
+}
+.cat{font-size:20px;font-weight:700;color:#c3cbdd;letter-spacing:.06em;}
+h1{
+  font-weight:900;font-size:{{NAME_SIZE}}px;line-height:1.16;letter-spacing:-.05em;
+  color:#f2ece0;font-feature-settings:'palt' 1;
+  text-shadow:4px 4px 0 rgba(0,0,0,.45);
+}
+.tag{
+  margin-top:22px;font-size:26px;line-height:1.55;color:#c3cbdd;font-weight:600;
+  font-feature-settings:'palt' 1;
+}
+.url{margin-top:26px;font-size:18px;color:#8792a8;letter-spacing:.02em;font-weight:600;}
+
+/* 1体だけ大きく。default.png のカード（4px枠 / 下端7px / 影9px）と同じ作り */
+.right{position:relative;z-index:2;flex:1;display:flex;justify-content:center;
+  align-items:center;padding-right:46px;}
+.card{
+  width:296px;height:444px;overflow:hidden;
+  border:5px solid #111a30;border-radius:8px;background:#f7f6f3;
+  position:relative;flex-shrink:0;
+  transform:rotate(-3deg);
+  box-shadow:14px 14px 0 {{CAT}};
+}
+/* object-position は index.html の .tc img と同じ考え方（頭の位置を上に寄せる）。
+   枠が 296x444（2:3）で素材と同じ比なので、cover による切り落としは起きない。 */
+.card img{width:100%;height:100%;object-fit:cover;object-position:50% 4%;display:block;}
+.card::after{content:'';position:absolute;left:0;right:0;bottom:0;height:9px;background:{{CAT}};}
+</style></head>
+<body>
+<div class="ring r1"></div><div class="ring r2"></div>
+<div class="left">
+  <div class="badge">就活キャリアタイプ診断</div>
+  <div class="code-row">
+    <span class="code">{{CODE}}</span>
+    <span class="cat">{{CAT_LABEL}}</span>
+  </div>
+  <h1>{{NAME}}</h1>
+  <div class="tag">{{TAG}}</div>
+  <div class="url">w-t-n-b.github.io/syukatsushindan/</div>
+</div>
+<div class="right">
+  <div class="card"><img src="../chars/{{IMG}}.webp" alt=""></div>
+</div>
+</body></html>
