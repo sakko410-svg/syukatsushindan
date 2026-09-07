@@ -173,12 +173,13 @@ function build(){
    'cont-banner','cont-sub',
    'type-overview','screen-result','l-bar','hdr','drawer','ham',
    'screen-title','screen-quiz','screen-loading','company-list','res-code-el',
+   'screen-extra','extra-page-label','extra-count','extra-list','extra-next','extra-back','extra-warning',
    /* LP埋め込み質問。診断画面と同じ部品を lq- 接頭辞で持つ */
    'lp-quiz','lq-list','lq-prog-seg','lq-done','lq-continue','lq-remain',
    'cta-grid','cta-drawer'
   ].forEach(mk);
 
-  const screens = ['screen-title','screen-quiz','screen-loading','screen-result'].map(i=>byId.get(i));
+  const screens = ['screen-title','screen-quiz','screen-loading','screen-result','screen-extra'].map(i=>byId.get(i));
   screens[0].classList.add('active');
   const heroInner = new El('div'); heroInner.classList.add('hero-inner');
   const footer = new El('footer'); footer.classList.add('ftr');

@@ -122,6 +122,45 @@ main{background:var(--paper2);padding:28px 0 40px;}
   h1{font-size:2.05rem;}
   .face{width:220px;height:330px;}
 }
+/* Shared pages follow the editorial diagnosis design. */
+:root{--paper:#fff;--paper2:#edf1f7;--ink-field:#101c36;--navy:#15213b;
+  --mid:#53617a;--border:#dce3ef;--must:#edc74c;}
+html,body{font-size:16px;}
+.wrap,.hdr-in{max-width:760px;}
+.hdr{background:rgba(255,255,255,.97);border-bottom:1px solid var(--border);}
+.hdr-in{min-height:64px;}
+.logo{font-size:1.25rem;letter-spacing:1px;}
+.logo i{background:#315ee8;border-radius:3px;}
+.hdr-cta{font-size:.875rem;background:#315ee8;color:#fff;border:0;border-radius:10px;
+  padding:9px 14px;box-shadow:none;min-height:44px;}
+.hero{padding:40px 0 36px;}
+.hero::before{background:none;}
+.hero::after{height:4px;}
+.crumb{font-size:.8125rem;color:#b9c4d9;}
+.pill{border:0;border-radius:99px;box-shadow:none;font-size:.8125rem;padding:5px 14px;}
+.face{border:1px solid rgba(255,255,255,.18);border-radius:100px 100px 20px 20px;
+  background:#e7edf8;box-shadow:0 16px 40px rgba(0,0,0,.16);}
+.code{font-size:3rem;letter-spacing:4px;color:#b9cbff;}
+h1{font-size:clamp(1.75rem,5vw,2.5rem);margin-top:14px;}
+.tag{font-size:1rem;}
+main{padding:32px 0 48px;}
+.card{border:1px solid var(--border);border-radius:18px;padding:24px;
+  box-shadow:0 6px 24px rgba(16,28,54,.04);margin-bottom:18px;}
+.card h2{font-size:1.125rem;border-bottom:1px solid var(--border);padding-bottom:12px;}
+.card p{font-size:1rem;line-height:1.95;}
+.kw span{font-size:.875rem;border:1px solid var(--border);box-shadow:none;padding:5px 13px;}
+.jobs span{font-size:.875rem;border-radius:8px;padding:5px 12px;}
+.mini{border:1px solid var(--border);border-radius:14px;padding:14px 6px;box-shadow:none;
+  transition:transform .18s ease,border-color .18s ease;}
+.mini:hover{transform:translateY(-3px);border-color:#315ee8;}
+.mini-t{font-size:.8125rem;line-height:1.6;}.mini-t b{font-size:1rem;}
+.cta{background:#315ee8;border:0;border-radius:14px;box-shadow:0 8px 24px rgba(49,94,232,.18);
+  transition:background .18s ease;}.cta:hover{background:#254cca;}
+.note,.cta-note{font-size:.875rem;line-height:1.85;}
+.ftr{border-top:1px solid #27354f;}.ftr p,.ftr nav a,.ftr .cp{font-size:.8125rem;}
+a:focus-visible{outline:3px solid #edc74c;outline-offset:4px;}
+@media(max-width:360px){.card{padding:18px;}.logo{font-size:1.1rem;}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;}}
 </style>
 </head>
 <body>

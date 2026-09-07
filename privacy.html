@@ -98,6 +98,15 @@ th{background:var(--paper2);font-weight:900;white-space:nowrap;}
 .ftr-todo{display:inline-block;border:1.5px dashed var(--verm);color:#ffb3a6;
   background:rgba(200,65,46,.14);padding:1px 8px;border-radius:var(--r-1);font-weight:700;}
 @media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important;}}
+:root{--paper:#fff;--paper2:#edf1f7;--off:#f5f7fb;--ink-field:#101c36;--navy:#15213b;--mid:#53617a;--light:#63718a;--border:#dce3ef;--border2:#b7c4d9;--r-1:12px;}
+.wrap,.pg-head-in{max-width:760px;}.hdr{border-bottom:1px solid var(--border);}.hdr-logo{font-size:22px;letter-spacing:-.04em;}
+.hdr-dot{width:18px;height:18px;background:var(--blue2);border:0;border-radius:5px;transform:rotate(-12deg);}
+.hdr-back{border:1px solid var(--border);box-shadow:none;font-size:.875rem;}
+.pg-head{padding:48px 24px;}.pg-lbl{font-size:.75rem;letter-spacing:.15em;}.pg-sub{font-size:.9375rem;}
+.card{padding:24px;border:1px solid var(--border);box-shadow:0 8px 24px rgba(16,28,54,.05);border-radius:16px;}
+p,li,dd{font-size:1rem;}h3{font-size:1rem;}dt,.note,.rev{font-size:.8125rem;letter-spacing:0;}table{font-size:.875rem;}
+dd{overflow-wrap:anywhere;}.ftr-copy{font-size:.75rem;}
+@media(max-width:380px){.card{padding:20px 16px;}th{white-space:normal;}}
 </style>
 </head>
 <body>
@@ -152,6 +161,7 @@ th{background:var(--paper2);font-weight:900;white-space:nowrap;}
     <h2>2. 当サイトが取得しない情報</h2>
     <p>当サイトは、利用者の氏名・メールアドレス・電話番号・学校名などの個人情報を<strong>一切取得しません</strong>。サイト内に入力フォームや会員登録の仕組みはありません。</p>
     <p>診断の回答内容と結果は、利用者の端末内（ブラウザの localStorage）にのみ保存され、当サイトのサーバーへ送信されることはありません。ブラウザのデータを削除すれば消去されます。</p>
+    <p>任意の追加9問の回答も、途中再開のために同じ端末内へ一時保存します。結果表示時に途中保存を削除し、追加の回答・数値は共有リンクやアクセス解析へ含めません。</p>
   </section>
 
   <section class="card">
@@ -199,6 +209,7 @@ th{background:var(--paper2);font-weight:900;white-space:nowrap;}
   <section class="card">
     <h2>6. 診断結果の位置づけ（免責）</h2>
     <p>当サイトの診断は、20問の回答から働き方の傾向を4つの軸・16タイプに分類するものです。心理検査としての妥当性・信頼性の検証は行っていません。</p>
+    <p>任意の追加9問では、ストレスへの対処の自己評価、プレイヤー志向、マネジメント志向を、それぞれ3問の回答から0〜100%に換算して表示します。これらは基本の4軸・16タイプの判定には反映しません。数値は他の人との比較・順位、実際のストレス耐性、心身の健康状態、仕事の能力や適性を表すものではありません。追加質問も妥当性・信頼性は検証しておらず、採用・配置の判断を目的としていません。</p>
     <p>職業への適性、選考の合否、入社後の活躍を判定・保証するものではありません。進路の決定にあたっては、必ずご自身で情報を確認し、判断してください。当サイトの利用によって生じた損害について、運営者は責任を負いません。</p>
     <p>結果画面に表示する業界・職種は例示であり、特定の企業の採用基準や選考とは関係ありません。</p>
   </section>

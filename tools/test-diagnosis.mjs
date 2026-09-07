@@ -448,11 +448,13 @@ console.log('[test] 1画面5問・診断画面は3ページ（Q6 から始まる
   }
   check(L.__byId.get('prog-msg').textContent === '最後のページです',
     `最終ページの文脈表示: ${L.__byId.get('prog-msg').textContent}`);
-  check(L.__byId.get('q-next').textContent === '結果を見る →',
-    `最終ページのボタンは「結果を見る」: ${L.__byId.get('q-next').textContent}`);
+  check(L.__byId.get('q-next').textContent === '追加の指標へ →',
+    `最終ページのボタンは「追加の指標へ」: ${L.__byId.get('q-next').textContent}`);
   L.nextPage();
+  check(L.__byId.get('screen-extra').classList.contains('active'), '基本20問の後に独立した追加質問へ進む');
+  L.skipExtra();
   L.__timers.splice(0).forEach(fn => fn());
-  check(L.__byId.get('screen-result').classList.contains('active'), '最終ページの「次へ」で結果へ進む');
+  check(L.__byId.get('screen-result').classList.contains('active'), '追加質問をスキップして基本の結果へ進む');
 }
 
 // ---- (6b) 進捗は4群のまま。群0＝LPの5問、群1-3＝診断画面（§B-5）----
@@ -775,5 +777,51 @@ console.log('[test] 戻るの意味（1問 → 1ページ）');
   check(T.document.querySelectorAll('#q-list .sdw.sel').length === 5, '5問とも選択済みのまま');
 }
 
+console.log('[test] 追加9問は独立した自己評価・役割志向');
+{
+  const T=load(TARGET,'');boot(T);
+  const base=answer(T,Array(20).fill(3));
+  T.startExtra();
+  check(T.document.querySelectorAll('#extra-list .extra-card').length===3,'追加質問は1ページ3問');
+  T.extraNext();
+  check(T.__eval('extraPage')===0,'未回答で追加ページを進めない');
+  check(T.getExtraMetrics()===null,'未回答は点数を捏造しない');
+  for(let page=0;page<3;page++){
+    for(let j=0;j<3;j++){
+      const pos=page*3+j,v=[1,5,3][j];
+      T.pickExtra(T.document.querySelector(`[data-extra-pos="${pos}"][data-extra-value="${v}"]`));
+    }
+    if(page<2)T.extraNext();
+  }
+  check(JSON.stringify(T.getExtraMetrics())===JSON.stringify({stress:0,player:100,management:50}),'指標ごとに3問を独立集計し0/100/50になる');
+  check(T.getCode()===base.code&&T.getSubCode()===base.sub&&T.__eval('JSON.stringify(scores)')===base.scores,'追加9問で元の4軸・タイプ・サブタイプは一切変わらない');
+  check(T.__eval('curQ')===20&&T.__eval('ans.length')===20,'基本20問の回答数・配列に追加回答が混ざらない');
+  const markup=T.buildExtraMetrics('quiz');
+  check((markup.match(/role="meter"/g)||[]).length===3,'3本のメーターを表示');
+  check(markup.includes('妥当性や信頼性は検証していません')&&markup.includes('能力や順位'),'数値の限界と用途を明示');
+  check(T.buildExtraMetrics('shared')===''&&T.buildExtraMetrics('url')==='','共有・未診断の閲覧では追加数値を出さない');
+  const saved=T.__eval("localStorage.getItem('cq_p3')");
+  const R=load(TARGET,'');R.__eval(`localStorage.setItem('cq_p3',${JSON.stringify(saved)})`);boot(R);R.continueDiag();
+  check(R.__byId.get('screen-extra').classList.contains('active'),'基本20問終了後の途中保存から追加質問へ復帰');
+  check(JSON.stringify(R.getExtraMetrics())===JSON.stringify(T.getExtraMetrics()),'追加の回答を復元');
+  R.extraBack();
+  check(R.__eval('extraPage')===1&&JSON.stringify(R.getExtraMetrics())===JSON.stringify(T.getExtraMetrics()),'戻っても追加回答は保持');
+  R.__eval('extraAnswers=Array(9).fill(5)');
+  check(R.getExtraMetrics().player===100&&R.getExtraMetrics().management===100,'プレイヤーとマネジメントは同時に100になれる');
+  R.__eval('extraAnswers=Array(9).fill(1)');
+  check(Object.values(R.getExtraMetrics()).every(v=>v===0),'全項目最低値は0');
+  R.__eval('extraAnswers=Array(9).fill(3)');
+  check(Object.values(R.getExtraMetrics()).every(v=>v===50),'全項目中間値は50');
+  R.__eval('extraAnswers[0]=99');
+  check(R.getExtraMetrics()===null,'不正な値では数値を出さない');
+  R.__eval('extraAnswers=Array(9).fill(4)');
+  R.skipExtra();
+  check(!R.buildExtraMetrics('quiz').includes('role="meter"'),'スキップした補足指標は表示しない');
+  R.startExtra();R.extraNext();R.__timers.splice(0).forEach(fn=>fn());
+  check(R.__byId.get('screen-result').classList.contains('active'),'追加9問完了から結果へ到達');
+  check(R.__byId.get('screen-result').innerHTML.includes('role="meter"'),'結果に追加パラメーターを表示');
+  R.startFresh('test');
+  check(R.__eval('extraAnswers.length')===0,'新規診断では追加回答も初期化');
+}
 console.log(ng === 0 ? '\n[test] PASS' : `\n[test] FAIL: ${ng} 件`);
 process.exit(ng === 0 ? 0 : 1);

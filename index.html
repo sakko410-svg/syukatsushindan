@@ -1494,13 +1494,261 @@ body::before{
      （noindex・どこからも参照なし）なので触っていない。現役に戻すなら
      ここと同じ方針で外すこと。
    ========================================================================== */
+/* Editorial refresh. Keep the current five-question flow and shared answer state. */
+:root{
+  --paper:#ffffff;--paper2:#edf1f7;--off:#f5f7fb;--ink-field:#101c36;
+  --navy:#15213b;--ink:#202d45;--mid:#53617a;--light:#63718a;
+  --border:#dce3ef;--border2:#b7c4d9;--blue:#214fd3;--blue2:#315ee8;
+  --blue-l:#edf2ff;--verm:#cb3c27;--must:#edc74c;
+  --r-1:12px;--r-2:20px;
+  --sh-1:0 3px 10px rgba(16,28,54,.06);
+  --sh-2:0 8px 24px rgba(16,28,54,.09);
+  --sh-3:0 16px 44px rgba(16,28,54,.12);
+  --ease:cubic-bezier(.22,1,.36,1);
+}
+body::before{display:none;}
+body::after{opacity:.022;}
+button,a{-webkit-tap-highlight-color:transparent;}
+button{touch-action:manipulation;}
+:focus-visible{outline:3px solid var(--blue2);outline-offset:4px;}
+.skip-link{position:fixed;top:-100px;left:16px;z-index:1200;background:#fff;color:var(--navy);padding:12px 20px;border-radius:8px;}
+.skip-link:focus{top:8px;}
+.hdr{background:rgba(255,255,255,.96);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding-inline:max(20px,calc((100vw - 1120px)/2));}
+.hdr-logo{font-size:22px;letter-spacing:-.04em;text-transform:none;background:none;border:0;padding:0;gap:4px;}
+.hdr-dot{width:18px;height:18px;margin-right:6px;transform:rotate(-12deg);background:var(--blue2);border:0;border-radius:5px;animation:none;}
+.hdr-logo span{color:var(--blue2);}
+.ham{border:1px solid var(--border);border-radius:50%;width:40px;height:40px;}
+.ham-l{width:18px;height:2px;}
+.ham.open .ham-l:nth-child(1){transform:translateY(7px) rotate(45deg);}
+.ham.open .ham-l:nth-child(3){transform:translateY(-7px) rotate(-45deg);}
+.drawer{left:auto;width:min(100%,420px);padding:24px;border:1px solid var(--border);border-radius:0 0 0 20px;box-shadow:var(--sh-3);}
+.d-title{font-size:12px;letter-spacing:.14em;}
+.d-cta,.btn,.friend-btn,.retry-btn{border-radius:12px;border:1px solid transparent;box-shadow:0 5px 0 #173a9d;background:var(--blue2);color:#fff;font-size:1rem;letter-spacing:.02em;min-height:52px;transition:transform .25s var(--ease),box-shadow .25s var(--ease),background .25s;}
+.btn:hover,.d-cta:hover,.friend-btn:hover{background:var(--blue);transform:translateY(-2px);box-shadow:0 7px 0 #173a9d;}
+.btn:active,.d-cta:active,.friend-btn:active{transform:translateY(3px);box-shadow:0 2px 0 #173a9d;}
+.hero{display:grid;grid-template-columns:minmax(0,1fr);padding:94px 24px 0;min-height:0;background:var(--ink-field);text-align:left;border:0;isolation:isolate;}
+.hero::before{background:none;}
+.hero-inner{max-width:560px;width:100%;grid-row:1;}
+.hero-badge{background:none;border:0;box-shadow:none;padding:0;color:#b9cafa;font-size:.8rem;letter-spacing:.08em;margin-bottom:18px;}
+.hero-badge::before{content:none;}
+.hero-title{font-size:clamp(1.7rem,5.9vw,2.65rem);line-height:1.45;letter-spacing:-.035em;color:white;margin-bottom:18px;}
+.hero-title em{color:var(--must);font-size:inherit;line-height:inherit;margin-top:0;}
+.hero-sub{font-size:.9375rem;line-height:1.9;margin-bottom:12px;color:#d2dbed;}
+.hero-trust{font-size:.75rem;color:#d2dbed;letter-spacing:0;}
+.hero-cast{position:relative;inset:auto;grid-row:2;width:100%;max-width:560px;height:166px;margin:16px auto 0;overflow:hidden;}
+.hero-cast::before{content:'16 TYPES';position:absolute;bottom:10px;left:50%;transform:translateX(-50%);white-space:nowrap;font-family:var(--lat);font-size:86px;font-weight:700;line-height:1;color:rgba(255,255,255,.07);}
+.hero-cast .hc{display:block;top:0;bottom:auto;height:220px;width:146px;object-fit:contain;opacity:1;mask-image:linear-gradient(#000 0 78%,transparent 100%);-webkit-mask-image:linear-gradient(#000 0 78%,transparent 100%);animation:castDrift 7s ease-in-out infinite;filter:drop-shadow(0 10px 14px rgba(0,0,0,.2));}
+.hero-cast .hc-1{left:15%;z-index:3;}
+.hero-cast .hc-4{right:12%;top:16px;z-index:2;animation-delay:-3.5s;}
+.hero-cast .hc-2,.hero-cast .hc-3{display:none;}
+@keyframes castDrift{0%,100%{transform:translateY(0) rotate(-2deg);}50%{transform:translateY(-8px) rotate(1deg);}}
+.cont-banner{background:#fff;border:0;border-radius:12px;box-shadow:none;margin-block:20px 0;max-width:440px;}
+.cont-title{font-size:.9375rem;}.cont-sub{font-size:.75rem;line-height:1.7;}
+#lp-quiz-sec{padding:24px 0 56px;background:var(--ink-field);background-image:none;}
+#lp-quiz-sec::after{height:4px;}
+#lp-quiz-sec>.wrap,.quiz-inner{max-width:680px;padding-inline:20px;}
+.quiz-intro{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;color:#fff;margin-bottom:24px;}
+.quiz-eyebrow{display:block;font-family:var(--lat);color:#b9cafa;font-size:.75rem;letter-spacing:.14em;margin-bottom:8px;}
+.quiz-intro h2{font-family:var(--jp-disp);font-size:1.3rem;line-height:1.6;letter-spacing:-.02em;}
+.quiz-intro p{font-size:.875rem;line-height:1.8;color:#d2dbed;margin-top:8px;}
+.quiz-intro .page-label{flex:none;border:1px solid #526180;border-radius:99px;padding:8px 12px;font-family:var(--lat);font-size:.875rem;white-space:nowrap;}
+.q-list{gap:20px;}
+.q-card{border:1px solid #dce3ef;border-radius:18px;background:#fff;box-shadow:0 6px 20px rgba(0,0,0,.12);transition:border-color .3s,box-shadow .3s;}
+.q-card:has(.sdw.sel){border-color:#91aaf2;box-shadow:0 0 0 2px rgba(92,128,242,.14);}
+.q-top{padding:22px 24px 16px;background:#fff;border-bottom:0;align-items:flex-start;gap:12px;}
+.q-text{font-size:1.0625rem;line-height:1.75;font-weight:700;letter-spacing:0;color:var(--navy);}
+.q-badge{font-family:var(--lat);font-size:.875rem;letter-spacing:.03em;border:0;border-radius:7px;background:var(--blue-l);color:var(--blue);padding:5px 8px;margin-top:2px;box-shadow:none;}
+.q-card:has(.sdw.sel) .q-badge{background:var(--blue2);color:white;}
+.q-body{padding:0 24px 20px;background:#fff;}
+.choice-list{gap:8px;margin-bottom:18px;}
+.opt-line{font-size:.9375rem;line-height:1.7;padding:9px 12px;border-left-width:3px;background:#f7f8fb;border-radius:0 8px 8px 0;transition:background .25s,color .25s;}
+.opt-a{border-left-color:#a96a0b;}.opt-b{border-left-color:#315ee8;}
+.opt-a .opt-key{color:#82520b;}.opt-b .opt-key{color:#214fd3;}
+.opt-a.on{background:#fff1cc;color:#674007;}.opt-b.on{background:#e8efff;color:#2147b1;}
+.opt-key{font-size:.9375rem;}
+.spec-track{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:0;padding:0;margin:0;}
+.spec-track::before{left:8%;right:8%;top:24px;background:#d6deed;}
+.sdw{min-width:0;min-height:48px;display:flex;flex-direction:column;gap:4px;padding:0;background:transparent;outline-offset:1px;}
+.sdw .sd{flex:none;border-width:2px;transition:background .2s,transform .25s var(--ease),box-shadow .25s;box-shadow:none;}
+.sdw.sel .sd{box-shadow:0 0 0 4px #e5ebfa;transform:scale(1.08);}
+.sdw:nth-child(-n+3) .sd{border-color:#97600b;}
+.sdw:nth-child(n+4) .sd{border-color:#315ee8;}
+.sdw:nth-child(-n+3).sel .sd{background:#a86a0b;border-color:#a86a0b;}
+.sdw:nth-child(n+4).sel .sd{background:#315ee8;border-color:#315ee8;}
+.sdw:nth-child(1) .sd,.sdw:nth-child(6) .sd{width:38px;height:38px;margin:5px 0;}
+.sdw:nth-child(2) .sd,.sdw:nth-child(5) .sd{width:32px;height:32px;margin:8px 0;}
+.sdw:nth-child(3) .sd,.sdw:nth-child(4) .sd{width:26px;height:26px;margin:11px 0;}
+.strength-label{font-size:.75rem;line-height:1.5;color:#53617a;font-family:var(--jp-body);font-weight:500;}
+.spec-hint{margin-top:10px;padding:0;font-size:.75rem;}
+.spec-hint .sh-a{color:#82520b;}.spec-hint .sh-b{color:#214fd3;}
+.q-card.qin{animation:qIn .45s var(--ease) both;}
+.q-card.qin:nth-child(2){animation-delay:.035s;}.q-card.qin:nth-child(3){animation-delay:.07s;}
+.q-card.qin:nth-child(4){animation-delay:.105s;}.q-card.qin:nth-child(5){animation-delay:.14s;}
+.quiz-bg{background:var(--ink-field);background-image:none;}
+.quiz-inner{padding-top:28px;padding-bottom:56px;}
+.prog-area{background:rgba(255,255,255,.97);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:12px max(20px,calc((100vw - 640px)/2)) 14px;}
+.prog-num{font-size:.875rem;letter-spacing:.04em;}.prog-msg{font-size:.75rem;}
+.ps-cell{border:0;border-radius:3px;transition:background .3s;}
+.ps-group{border-radius:5px;}.prog-seg{gap:6px;}
+.prog-area .prog-seg{margin-bottom:8px;}
+.q-nav{margin-top:24px;}.q-remain{font-size:.875rem;}
+.back-btn{border:1px solid #53627f;background:none;color:#d2dbed;box-shadow:none;width:auto;min-height:44px;border-radius:99px;font-size:.875rem;padding:10px 16px;margin-bottom:24px;}
+.back-btn:hover{color:#fff;border-color:#fff;}
+.lq-done{background:#fff;border:1px solid var(--border);border-radius:16px;padding:24px;box-shadow:none;}
+.lq-done-txt{font-size:1rem;line-height:1.8;}.lq-next-list{font-size:.9375rem;line-height:1.9;}
+.lq-next-lbl,.lq-done-meta{font-size:.8125rem;}
+.lq-foot .prog-seg{right:max(16px,env(safe-area-inset-right));bottom:max(16px,env(safe-area-inset-bottom));border:1px solid #b7c4d9;box-shadow:0 6px 24px rgba(16,28,54,.22);}
+.lq-foot .prog-seg::after{font-size:.75rem;}
+#screen-quiz .q-card,#screen-quiz #q-next{scroll-margin-top:170px;}
+#type-section{padding:64px 0!important;}
+#type-section .wrap{max-width:896px;}
+.sec-lbl{font-size:.75rem;color:var(--blue);letter-spacing:.18em;}
+.sec-title{font-size:clamp(1.65rem,4vw,2.25rem);letter-spacing:-.035em;}
+.sec-sub{font-size:.9375rem;color:var(--mid);margin-bottom:32px;}
+.type-cat-hd{margin-bottom:16px;}.tc-pill{font-size:.8125rem;border:0;border-radius:99px;padding:7px 14px;box-shadow:none;}
+.type-grid{gap:12px;}
+.tc{border:1px solid var(--border);border-radius:16px;padding-bottom:16px;background:#fff;box-shadow:var(--sh-1);transition:transform .35s var(--ease),box-shadow .35s var(--ease),border-color .25s;}
+.tc::after{content:none;}
+.tc-code{font-size:1.5rem;margin-top:8px;letter-spacing:.08em;}
+#type-section .tc-name{font-size:.875rem;line-height:1.65;padding:0 10px;color:var(--navy);}
+.tc img{transition:transform .5s var(--ease);}
+@media(hover:hover){.tc:hover{transform:translateY(-6px);box-shadow:var(--sh-3);border-color:#8fa6db;}.tc:hover img{transform:scale(1.035);}.sdw:hover .sd{transform:scale(1.12);}}
+.type-peek{border:1px solid var(--border);border-radius:16px;box-shadow:var(--sh-2);padding:24px;}
+.tp-name{font-size:1.125rem;}.tp-tag{font-size:.875rem;}.tp-str-txt{font-size:1rem;}.tp-str-lbl{font-size:.75rem;}
+.loading-wrap{background:var(--ink-field);gap:0;}
+.loading-wrap::before{background:none;}
+.loading-cast{position:relative;width:180px;height:216px;margin-bottom:32px;}
+.loading-cast img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;animation:castDrift 5s ease-in-out infinite;filter:drop-shadow(0 12px 20px rgba(0,0,0,.2));}
+.loading-cast::after{content:'';position:absolute;inset:8px -24px;border:1px solid rgba(255,255,255,.2);border-radius:50%;transform:rotate(-20deg);}
+.l-philosophy{max-width:440px;margin-bottom:24px;}
+.l-philosophy::before{font-size:.75rem;color:#b9cafa;letter-spacing:.2em;}
+.l-phi-item{font-size:1rem;color:#fff;line-height:2;}
+.l-bar-wrap{height:6px;width:220px;border:0;padding:0;border-radius:99px;background:#34415e;}
+.l-bar{background:var(--must);border-radius:99px;}
+.ldot{border-radius:50%;background:#b9cafa;}
+.result-wrap{background:var(--paper2);}
+.result-hero{background:var(--ink-field);padding:100px 24px 40px;}
+.result-hero::before{background:none;}.result-hero .ro{display:none;}
+.result-inner{max-width:980px;}
+.res-announce{font-size:.75rem;letter-spacing:.17em;margin-bottom:24px;color:#b9cafa;}
+.res-announce::before,.res-announce::after{content:none;}
+.result-art{position:relative;width:100%;max-width:320px;margin:0 auto 24px;}
+.char-frame{width:210px;aspect-ratio:2/3;border:0;border-radius:100px 100px 20px 20px;background:#e6ecfb;box-shadow:none;margin:0 auto;}
+.res-char{object-fit:contain;}
+.res-code{margin:-34px 0 0;font-size:4.75rem;letter-spacing:.07em;line-height:1;text-shadow:0 3px 0 var(--cat),0 6px 18px rgba(0,0,0,.3);}
+.res-type-name{font-size:clamp(1.5rem,5.7vw,2.25rem);line-height:1.4;padding:0;margin-bottom:12px;color:#fff;-webkit-text-fill-color:#fff;}
+.res-type-name::before{content:none;}
+.res-tagline{font-size:1rem;color:#d2dbed;line-height:1.9;}
+.rar-badge{border:0;box-shadow:none;background:none;color:#b9cafa;padding:0;font-size:.75rem;}
+.res-kws{gap:8px;}.res-kw{font-size:.8125rem;padding:6px 12px;border-color:#526180;}
+.famous-box{border:0;border-left:3px solid var(--must);background:rgba(255,255,255,.06);box-shadow:none;border-radius:0 8px 8px 0;}
+.famous-box::before{content:none;}.famous-text,.famous-text span{color:#fff;font-size:.9375rem;line-height:1.8;}
+.share-grid{gap:10px;}.sh{font-size:.8125rem;border:0;border-radius:10px;box-shadow:none;min-height:48px;letter-spacing:0;}
+.sh-ln{background:#087d37;}.sh-cp{background:#e9efff;color:#2147b1;}
+.friend-card{background:transparent;border:0;box-shadow:none;padding:12px 0 0;}
+.friend-text{color:#d2dbed;font-size:.8125rem;}.friend-btn{min-height:44px;font-size:.875rem;padding:10px 16px;background:transparent;border:1px solid #63749a;box-shadow:none;}
+.result-wrap>.wrap{max-width:760px;padding-inline:20px;}
+.narration{background:transparent;border:0;border-radius:0;box-shadow:none;font-size:1.0625rem;line-height:2.05;color:var(--navy);padding:24px 4px;}
+.reason-box,.r-panel{border:1px solid var(--border);border-radius:16px;box-shadow:var(--sh-1);margin-bottom:18px;}
+.reason-box{padding:24px;}.rb-title{font-size:.8125rem;letter-spacing:.08em;}.rb-text{font-size:1rem;line-height:1.9;}
+.rbt{font-size:.75rem;border:0;padding:5px 10px;border-radius:6px;}
+.r-ph{padding:20px 24px;background:#fff;border-bottom:0;gap:12px;}
+.r-ph.aopen{border-bottom:1px solid var(--border);}
+.r-pt{font-size:1rem;letter-spacing:0;}.r-tog{font-size:.75rem;}
+.r-ph:hover{background:#f8faff;}.r-pb{padding:24px;}
+.body-txt,.env-lines,.tp-str-txt{font-size:1rem;line-height:1.95;}
+.d-lbl{font-size:.8125rem;border:0;border-radius:6px;padding:5px 10px;letter-spacing:.03em;}
+.av-l,.av-result,.sub-note,.co-note,.ind-lbl{font-size:.875rem;line-height:1.8;}
+.av-track{border:0;border-radius:99px;height:10px;overflow:hidden;}.av-marker{display:none;}
+.av-center{top:0;bottom:0;background:#fff;}.av-row{margin-bottom:24px;}
+.subtype-card{border:0;background:var(--off);box-shadow:none;}.sub-name,.co-info h4{font-size:1rem;}
+.sub-tag,.sub-pct,.compat-tag,.ca-txt{font-size:.8125rem;line-height:1.8;}
+.job-tag,.ind-sm{font-size:.875rem;border:1px solid var(--border);box-shadow:none;}
+.compat-name{font-size:1rem;}.cm-badge,.ca-lbl,.co-job{font-size:.75rem;letter-spacing:0;}
+.ca{border:0;padding:12px;border-radius:10px;}.compat-angles{gap:8px;}
+.retry-btn{width:100%;margin-top:24px;margin-bottom:8px;}
+.ftr{background:var(--ink-field);background-image:none;border:0;padding:40px 24px;}
+.ftr-inner{max-width:1120px;}.ftr-logo{font-size:1.5rem;}.ftr-links a{font-size:.875rem;}.ftr-note,.ftr-copy{font-size:.75rem;line-height:1.8;}
+.page-in{animation:softPage .35s var(--ease) both;}
+@keyframes softPage{from{opacity:0;}to{opacity:1;}}
+@media(min-width:900px){
+  .hero{grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);align-items:center;padding:116px max(40px,calc((100vw - 1080px)/2)) 44px;gap:24px;}
+  .hero-inner{grid-column:1;grid-row:1;}.hero-title{font-size:2.8rem;}
+  .hero-cast{grid-column:2;grid-row:1;height:336px;margin:0;overflow:visible;}
+  .hero-cast::before{font-size:116px;bottom:20px;}
+  .hero-cast .hc{height:350px;width:234px;top:0;mask-image:none;-webkit-mask-image:none;}
+  .hero-cast .hc-1{left:0;}.hero-cast .hc-4{right:-8px;top:35px;}
+  .hero-cast .hc-2,.hero-cast .hc-3{display:none;}
+  .result-inner{display:grid;grid-template-columns:340px minmax(0,1fr);gap:0 60px;align-items:center;text-align:left;}
+  .res-announce{grid-column:1/-1;justify-content:flex-start;}
+  .result-art{grid-column:1;margin:0;}.result-summary{grid-column:2;}
+  .char-frame{width:290px;}.res-code{text-align:center;font-size:6rem;}
+  .res-kws,.rarity-row{justify-content:flex-start;}.result-hero{padding-bottom:64px;}
+}
+@media(max-width:380px){
+  .hero{padding-inline:20px;}.hero-title{font-size:1.65rem;}
+  .hero-cast .hc-1{left:6%;}.hero-cast .hc-4{right:2%;}
+  .q-top{padding:18px 16px 12px;gap:9px;}.q-body{padding:0 16px 18px;}
+  .q-text{font-size:1rem;}.opt-line{font-size:.875rem;padding:8px;}
+  .strength-label{font-size:.75rem;}.quiz-intro{gap:8px;}.quiz-intro h2{font-size:1.125rem;}
+  .quiz-intro .page-label{padding:6px 8px;}.r-pb,.reason-box,.r-ph{padding:18px;}
+  .compat-angles{grid-template-columns:1fr;}.ca{text-align:left;}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important;}
+  .l-phi-item{opacity:1;transform:none;}.l-bar{width:100%;}
+}
+@media(prefers-contrast:more){.hdr,.prog-area{background:#fff;}.q-card,.r-panel,.tc{border:2px solid var(--navy);}}
+.hero-extra-note{font-size:.75rem;color:#b9cafa;line-height:1.8;margin-top:12px;}
+body:not([data-screen="screen-title"]) .skip-link{display:none;}
+body[data-screen="screen-extra"] .ftr{display:none;}
+.extra-wrap{max-width:680px;margin:auto;padding:100px 20px 48px;}
+.extra-progress{display:flex;justify-content:space-between;gap:12px;color:#d2dbed;font-size:.875rem;margin-bottom:20px;}
+.extra-card{padding:24px;border:1px solid var(--border);background:#fff;border-radius:18px;}
+.extra-q-heading{margin-bottom:20px;}.extra-q-heading .quiz-eyebrow{color:var(--blue);font-size:.9375rem;}
+.extra-card h3{font-size:1.0625rem;line-height:1.8;color:var(--navy);}
+.extra-options{display:flex;flex-direction:column;gap:8px;}
+.extra-option{display:flex;align-items:center;gap:12px;min-height:48px;text-align:left;font-family:inherit;font-size:.9375rem;line-height:1.6;padding:12px 16px;border:1px solid #c9d3e5;border-radius:10px;background:#fff;color:var(--ink);cursor:pointer;transition:background .2s,border-color .2s;}
+.extra-dot{width:18px;height:18px;border:1.5px solid #8b9cb9;border-radius:50%;flex:none;}
+.extra-option:hover{background:#f4f7ff;}.extra-option.selected{background:#eaf0ff;border-color:var(--blue2);color:#2147b1;}
+.extra-option.selected .extra-dot{background:var(--blue2);border:4px solid #fff;box-shadow:0 0 0 1px var(--blue2);}
+#extra-warning{color:#ffc4b7;font-size:.875rem;line-height:1.8;margin-top:16px;}
+.extra-nav{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:16px;margin:24px 0;}.extra-nav .back-btn{margin:0;}
+.extra-skip,.param-retry{display:block;width:100%;border:0;background:none;font-family:inherit;font-size:.875rem;line-height:1.8;text-decoration:underline;text-underline-offset:4px;color:#d2dbed;padding:12px 0;cursor:pointer;}
+.extra-disclaimer{font-size:.8125rem;line-height:1.9;text-align:center;color:#b9cafa;margin-top:16px;}
+.param-panel{background:var(--ink-field);color:#fff;border-radius:20px;padding:28px;margin:8px 0 28px;overflow:hidden;}
+.param-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;}
+.param-panel h2{font-family:var(--jp-disp);font-size:1.4rem;line-height:1.6;letter-spacing:-.02em;}
+.param-count{font-family:var(--lat);font-size:.75rem;white-space:nowrap;color:#b9cafa;border:1px solid #526180;padding:6px 9px;border-radius:6px;}
+.param-note{font-size:.875rem;line-height:1.9;color:#d2dbed;margin:12px 0 24px;}
+.param-grid{display:grid;gap:24px;}
+.param-item{--meter-color:#b9cafa;background:#1a2947;padding:20px;border:1px solid #3d4c69;border-radius:14px;}
+.param-player{--meter-color:#f5d878;}.param-management{--meter-color:#9bdec5;}
+.param-title{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.param-index{font-family:var(--lat);font-size:.875rem;color:#b9cafa;}
+.param-title h3{font-size:1rem;font-weight:700;}.param-tag{font-size:.75rem;color:#d2dbed;margin-left:auto;}
+.param-value{font-family:var(--lat);font-size:3.5rem;font-weight:700;line-height:1.2;margin:12px 0;color:var(--meter-color);font-variant-numeric:tabular-nums;}
+.param-value>span{font-size:1.25rem;margin-left:4px;}
+.param-meter{height:14px;overflow:hidden;background:#0d172b;border:1px solid #61718e;border-radius:4px;}
+.param-fill{height:100%;background:var(--meter-color);transform-origin:left;animation:meterReveal 1s var(--ease) both;}
+.param-scale{display:flex;justify-content:space-between;font-family:var(--lat);color:#b9cafa;font-size:.75rem;margin-top:6px;}
+.param-item p,.param-summary{font-size:.875rem;line-height:1.9;color:#d2dbed;margin-top:12px;}
+.param-summary{padding:20px 0;border-bottom:1px solid #526180;}
+.param-method{font-size:.875rem;color:#d2dbed;line-height:1.9;margin-top:20px;}
+.param-method summary{cursor:pointer;min-height:44px;color:#fff;}.param-method p{margin:8px 0 16px;}
+.param-panel>.friend-btn{margin-top:8px;}
+.param-retry{text-align:left;margin-top:8px;}
+@keyframes meterReveal{from{transform:scaleX(0);}to{transform:scaleX(1);}}
+@media(max-width:480px){.param-panel{padding:22px 18px;}.param-head{display:block;}.param-count{display:inline-block;margin-top:12px;}.param-panel h2{font-size:1.25rem;}.param-item{padding:18px;}.extra-card{padding:20px;}}
+@media(prefers-reduced-motion:reduce){.param-fill{animation:none;}}
 </style>
 </head>
 <body data-screen="screen-title">
+<a class="skip-link" href="#lp-quiz">診断の質問へ移動</a>
 
 <header class="hdr" id="hdr">
-  <div class="hdr-logo" onclick="gotoTop()"><div class="hdr-dot"></div>Career<span>Type</span></div>
-  <button class="ham" id="ham" onclick="toggleDrawer()"><div class="ham-l"></div><div class="ham-l"></div><div class="ham-l"></div></button>
+  <button type="button" class="hdr-logo" aria-label="CareerType トップへ" onclick="gotoTop()"><span class="hdr-dot" aria-hidden="true"></span>Career<span>Type</span></button>
+  <button type="button" class="ham" id="ham" aria-label="メニューを開く" aria-controls="drawer" aria-expanded="false" onclick="toggleDrawer()"><div class="ham-l"></div><div class="ham-l"></div><div class="ham-l"></div></button>
 </header>
 
 <nav class="drawer" id="drawer">
@@ -1552,6 +1800,7 @@ body::before{
              「登録不要」「メールアドレス不要」は引き続き真だが、
              「一切取得しない」と読ませてはならない。 -->
       <p class="hero-trust">登録不要 <span aria-hidden="true">｜</span> メールアドレス不要 <span aria-hidden="true">｜</span> 無料</p>
+      <p class="hero-extra-note">＋9問で、ストレス対処・プレイヤー・マネジメントの傾向も。</p>
       <div class="cont-banner" id="cont-banner" style="display:none;" onclick="continueDiag()">
         <div class="cont-body"><span class="cont-title">前回の途中から続ける</span><span class="cont-sub" id="cont-sub">20問中?問に回答済み</span></div>
         <span class="cont-arrow">→</span>
@@ -1576,6 +1825,7 @@ body::before{
   <div id="lp-quiz-sec">
     <div class="wrap">
       <div id="lp-quiz">
+        <div class="quiz-intro"><div><span class="quiz-eyebrow">FIND YOUR WORK STYLE</span><h2>いつもの自分に、近いのは？</h2><p>A・Bのどちらに、どれくらい近いか選んでください。<br>回答はあとから選び直せます。</p></div><span class="page-label">01 / 04</span></div>
         <div class="q-list" id="lq-list"></div>
         <div class="lq-foot">
           <div class="prog-seg" id="lq-prog-seg" role="progressbar" aria-label="回答の進捗" aria-valuemin="0" aria-valuemax="20" aria-valuenow="0" aria-valuetext="20問中0問に回答済み"></div>
@@ -1634,6 +1884,7 @@ body::before{
       </div>
     </div>
     <div class="quiz-inner">
+      <div class="quiz-intro"><div><span class="quiz-eyebrow">YOUR OWN PACE</span><h2>理想より、いつもの自分で。</h2><p>迷ったら、普段の行動を思い浮かべてみてください。</p></div></div>
       <button class="back-btn" id="back-btn" onclick="goBack()" style="display:none;">← 前のページに戻る</button>
       <!-- 5問ぶんの .q-card は renderPage('quiz') が組み立てる（仕様 §A-1）。
            LP側（#lq-list）とまったく同じ組み立て関数・同じ class を使う。 -->
@@ -1647,8 +1898,20 @@ body::before{
 </div>
 
 <!-- LOADING -->
+<div id="screen-extra" class="screen">
+  <div class="extra-wrap">
+    <div class="quiz-intro"><div><span class="quiz-eyebrow">WORK STYLE +</span><h2>タイプの、その先も知ろう。</h2><p>追加9問・約1〜2分。元の4軸には影響しません。<br>直近1か月の学校・仕事・日常を思い浮かべてください。</p></div></div>
+    <div class="extra-progress"><span id="extra-page-label"></span><span id="extra-count" role="status" aria-live="polite"></span></div>
+    <div id="extra-list" class="q-list"></div>
+    <p id="extra-warning" role="status" aria-live="polite"></p>
+    <div class="extra-nav"><button type="button" class="back-btn" id="extra-back" onclick="extraBack()">← 戻る</button><button type="button" class="btn" id="extra-next" onclick="extraNext()">次へ →</button></div>
+    <button type="button" class="extra-skip" onclick="skipExtra()">追加指標なしで、16タイプの結果を見る</button>
+    <p class="extra-disclaimer">答えづらい場合はスキップできます。医療・心理検査や、仕事の能力を測る検査ではありません。</p>
+  </div>
+</div>
 <div id="screen-loading" class="screen">
   <div class="loading-wrap">
+    <div class="loading-cast" aria-hidden="true"><img src="images/chars/sm/a1.webp" width="400" height="600" alt="" decoding="async"></div>
     <div class="l-philosophy">
       <div class="l-phi-item" style="animation-delay:0s;">「向いている仕事」に正解はない。</div>
       <div class="l-phi-item" style="animation-delay:1s;">大切なのは、自分の傾向を知ること。</div>
@@ -2077,6 +2340,7 @@ window.addEventListener('DOMContentLoaded',()=>{
   checkSavedProgress();
   renderPage('lp');    /* LP埋め込み（Q1-5）。Q1-5 が置かれる唯一の場所 */
   renderPage('quiz');  /* 診断画面の先頭ページ（Q6-10）も先に描いておく */
+  enhanceControls();
   window.addEventListener('scroll',()=>document.getElementById('hdr').classList.toggle('sc',scrollY>10));
   document.addEventListener('click',e=>{
     const d=document.getElementById('drawer'),b=document.getElementById('ham');
@@ -2101,7 +2365,7 @@ function buildTypeOverview(){
     h+=`<div id="type-cat-${cat}" style="margin-bottom:20px;"><div class="type-cat-hd"><div class="tc-pill ${pill}">${cat}系 — ${lbl}</div><div class="tc-line"></div></div><div class="type-grid">`;
     codes.forEach(code=>{
       const t=TD[code];
-      h+=`<div class="tc" data-code="${code}" tabindex="-1" onclick="openTypePeek('${code}',this)"><div class="tc-sil" style="background-image:url('images/chars/sm/${codeImg(code)}.webp');"></div><img src="images/chars/${codeImg(code)}.webp" alt=""><div class="tc-code" style="color:${col};">${code}</div><div class="tc-name">${t.name}</div></div>`;
+      h+=`<div class="tc" data-code="${code}" role="button" aria-label="${esc(t.name)}の紹介を見る" tabindex="0" onclick="openTypePeek('${code}',this)"><div class="tc-sil" style="background-image:url('images/chars/sm/${codeImg(code)}.webp');"></div><img src="images/chars/${codeImg(code)}.webp" width="800" height="1200" loading="lazy" decoding="async" alt=""><div class="tc-code" style="color:${col};">${code}</div><div class="tc-name">${t.name}</div></div>`;
     });
     h+=`</div></div>`;
   });
@@ -2118,19 +2382,19 @@ function buildTypeOverview(){
    利用者に「前回の途中から続ける」を見せて、実は別の重みで足す方が害が大きい。 */
 const SAVE_KEY='cq_p3';
 const LEGACY_SAVE_KEYS=['cq_p','cq_p2'];
-function saveProgress(){try{localStorage.setItem(SAVE_KEY,JSON.stringify({curQ,scores,ans,selectedIndustries}));}catch(e){}}
+function saveProgress(){try{localStorage.setItem(SAVE_KEY,JSON.stringify({curQ,scores,ans,selectedIndustries,extraVersion:1,extraAnswers}));}catch(e){}}
 function clearSavedProgress(){try{localStorage.removeItem(SAVE_KEY);}catch(e){}}
 function dropLegacyProgress(){try{LEGACY_SAVE_KEYS.forEach(k=>localStorage.removeItem(k));}catch(e){}}
 function checkSavedProgress(){
   try{
     const s=localStorage.getItem(SAVE_KEY);if(!s)return;
     const d=JSON.parse(s);
-    if(d.curQ>0&&d.curQ<Qs.length){
+    if(d.curQ>0&&d.curQ<=Qs.length){
       const b=document.getElementById('cont-banner');
       /* curQ は「回答済みの問数」であって到達位置ではない。歯抜けに答えると
          「Q3まで回答済み」が事実と食い違う（wording-audit.md H-5）。
          .prog-seg の aria-valuetext と同じ文型に揃える。 */
-      if(b){b.style.display='flex';document.getElementById('cont-sub').textContent=`${Qs.length}問中${d.curQ}問に回答済み（残り${Qs.length-d.curQ}問）`;}
+      if(b){b.style.display='flex';document.getElementById('cont-sub').textContent=d.curQ===Qs.length?'基本20問は完了。追加の指標から続けられます。':`${Qs.length}問中${d.curQ}問に回答済み（残り${Qs.length-d.curQ}問）`;}
     }
   }catch(e){}
 }
@@ -2141,6 +2405,7 @@ function continueDiag(){
        二重加算の防止と同じ原理を復帰経路にも通す。旧データ（1問ずつ時代の
        連続した ans）はこれでそのまま正しく復元される。 */
     ans=Array.isArray(d.ans)?d.ans.slice(0,Qs.length):[];
+    extraAnswers=d.extraVersion===1&&Array.isArray(d.extraAnswers)?d.extraAnswers.slice(0,EXTRA_QS.length).map(v=>Number.isInteger(v)&&v>=1&&v<=5?v:null):[];
     selectedIndustries=d.selectedIndustries||[];
     recalcScores();
     quizStartedAt=Date.now();
@@ -2151,6 +2416,7 @@ function continueDiag(){
        その人を診断画面へ戻すと、穴を埋める手段が無くなる。 */
     renderPage('lp');
     if(unansweredIn(LP_PAGE)>0)goToLpQuiz();
+    else if(curQ===Qs.length)startExtra();
     else goToQuizPage(firstIncompletePage());
   }
   catch(e){startFresh();}
@@ -2165,13 +2431,15 @@ function addRipple(e,el){
 }
 
 function toScreen(id){
+  clearTimeout(_scrollQT);
+  clearTimeout(loadingTimer);
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   const sc=document.getElementById(id);
   sc.classList.add('active');
   sc.classList.add('page-in');
   document.body.dataset.screen=id;   /* 診断中/ローディング中にフッターを隠すためのフック */
   setTimeout(()=>sc.classList.remove('page-in'),400);
-  window.scrollTo({top:0,behavior:'smooth'});
+  window.scrollTo({top:0,behavior:'instant'});
 }
 function gotoTop(){toScreen('screen-title');}
 
@@ -2194,6 +2462,7 @@ function scrollToTypes(cat){
    いま呼ぶのは continueDiag() の復旧経路（保存データが壊れていたとき）だけ。 */
 function startFresh(entry){
   ans=[];selectedIndustries=[];curPage=QUIZ_FIRST_PAGE;
+  extraAnswers=[];extraPage=0;extraSkipped=false;
   recalcScores();
   quizStartedAt=Date.now();
   if(!quizStarted){quizStarted=true;track('quiz_start',{entry:entry||'lp_inline'});}
@@ -2216,6 +2485,7 @@ function startFresh(entry){
    これは共有リンク（entry==='shared'）で既に実装していた挙動を、
    全入口へ一般化したものである。入口ごとの分岐は無くなった。 */
 function continueOrStart(entry){
+  if(curQ===Qs.length){startExtra();return;}
   if(unansweredIn(LP_PAGE)>0){goToLpQuiz();return;}
   if(!quizStarted){quizStarted=true;quizStartedAt=Date.now();track('quiz_start',{entry:entry||'grid'});}
   goToQuizPage(firstIncompletePage());
@@ -2251,8 +2521,8 @@ function lqContinue(){
   goToQuizPage(firstIncompletePage());
 }
 
-function toggleDrawer(){document.getElementById('ham').classList.toggle('open');document.getElementById('drawer').classList.toggle('open');}
-function closeDrawer(){document.getElementById('ham').classList.remove('open');document.getElementById('drawer').classList.remove('open');}
+function toggleDrawer(){const b=document.getElementById('ham'),d=document.getElementById('drawer');const open=d.classList.toggle('open');b.classList.toggle('open',open);b.setAttribute('aria-expanded',String(open));b.setAttribute('aria-label',open?'メニューを閉じる':'メニューを開く');}
+function closeDrawer(){const b=document.getElementById('ham');b.classList.remove('open');document.getElementById('drawer').classList.remove('open');b.setAttribute('aria-expanded','false');b.setAttribute('aria-label','メニューを開く');}
 
 /* =========================================================================
    質問カードの組み立て — 1画面5問（仕様 quiz-five-per-page.md §A / §B）
@@ -2377,7 +2647,7 @@ function buildCard(f,pos){
   SCALE.forEach(([v,lb])=>{
     const sel=a===v;
     dots+=`<button type="button" class="sdw${sel?' sel':''}" data-v="${v}" data-pos="${pos}" data-face="${f.pre}"`
-        + ` role="radio" aria-checked="${sel?'true':'false'}" aria-label="${lb}" onclick="pick(this)"><span class="sd"></span></button>`;
+        + ` role="radio" aria-checked="${sel?'true':'false'}" aria-label="${lb}" onclick="pick(this)"><span class="sd"></span><span class="strength-label" aria-hidden="true">${Math.abs(v)===3?'かなり':Math.abs(v)===2?'近い':'やや'}</span></button>`;
   });
   /* 軸の手がかりは .q-badge の影の色だけに置く（面積の大きい背景では表現しない）。
      選択肢は枠付きボックスではなくテキスト行。選んだ側の行に .on が付く（§D-1 / §D-2）。 */
@@ -2418,7 +2688,7 @@ function renderPage(target){
        「前のページ」ではないので、ここから LP へ戻す導線は張らない。 */
     if(bk)bk.style.display=p>QUIZ_FIRST_PAGE?'flex':'none';
     const nx=document.getElementById('q-next');
-    if(nx)nx.textContent=p>=PAGE_COUNT-1?'結果を見る →':'次へ →';
+    if(nx)nx.textContent=p>=PAGE_COUNT-1?'追加の指標へ →':'次へ →';
   }else{
     updateLpDone();
   }
@@ -2449,7 +2719,7 @@ function syncPos(pos){
   });
 }
 
-function pick(el){
+function pick(el,autoScroll=true){
   const v=parseInt(el.dataset.v,10),pos=parseInt(el.dataset.pos,10);
   if(!isFinite(v)||!isFinite(pos))return;
   const tg=el.dataset.face==='lq'?'lp':'quiz';
@@ -2468,7 +2738,7 @@ function pick(el){
   updateCtas();
   /* 送り先（#lq-done）は updateLpDone() が出したあとでないと隠れているので、
      スクロールはこの順で最後に呼ぶ。 */
-  if(firstForPos)scrollToNextQ(el,tg);
+  if(firstForPos&&autoScroll)scrollToNextQ(el,tg);
 }
 
 /* 回答したら次の設問へスクロールする（オーナー要望）。
@@ -2524,7 +2794,7 @@ function nextPage(){
   if(curPage>=PAGE_COUNT-1){
     saveProgress();
     track('quiz_complete',{type_code:getCode(),duration_sec:quizStartedAt?Math.round((Date.now()-quizStartedAt)/1000):0});
-    showLoading();
+    startExtra();
     return;
   }
   curPage++;
@@ -2604,11 +2874,89 @@ function getSubCode(){
   return sub===getCode()?null:sub;
 }
 
+/* Optional self-report supplement v1. Never read by recalcScores/getCode/getSubCode.
+   Three items per scale, equally weighted; 1..5 maps linearly to 0..100.
+   These are not validated psychometric scales, percentiles or ability estimates. */
+const EXTRA_QS=[
+  {key:'stress',text:'予定外のことが起きても、落ち着いて次にすることを考えられる。'},
+  {key:'player',text:'自分で手を動かして、成果物や課題を仕上げることにやりがいを感じる。'},
+  {key:'management',text:'チームの目標を整理して、誰が何をするかを考える役割が好きだ。'},
+  {key:'stress',text:'失敗や指摘で落ち込んでも、休息や相談を使って気持ちを立て直せる。'},
+  {key:'player',text:'周りをまとめる役割とは別に、自分の専門性や技術を深める時間を持ちたい。'},
+  {key:'management',text:'自分で全部やるより、相手に任せて進め方を支えることにやりがいを感じる。'},
+  {key:'stress',text:'やることが重なったとき、無理を続ける前に優先順位や負担を調整できる。'},
+  {key:'player',text:'難しい課題にも、自分で試行錯誤しながら解決に取り組みたい。'},
+  {key:'management',text:'メンバーの成長を支えたり、意見の違いを調整したりする役割に関心がある。'}
+];
+const EXTRA_LABELS=['あてはまらない','あまりあてはまらない','どちらともいえない','ややあてはまる','あてはまる'];
+let extraAnswers=[],extraPage=0,extraSkipped=false,loadingTimer=null;
+function extraAnswered(v){return Number.isInteger(v)&&v>=1&&v<=5;}
+function startExtra(){
+  if(curQ!==Qs.length){continueOrStart('extra');return;}
+  extraSkipped=false;
+  const first=EXTRA_QS.findIndex((_,i)=>!extraAnswered(extraAnswers[i]));
+  extraPage=first<0?2:Math.floor(first/3);
+  renderExtra();toScreen('screen-extra');saveProgress();
+}
+function renderExtra(){
+  const start=extraPage*3;
+  document.getElementById('extra-page-label').textContent=`追加 ${start+1}–${start+3} / 9問`;
+  updateExtraCount();
+  document.getElementById('extra-list').innerHTML=EXTRA_QS.slice(start,start+3).map((q,j)=>{
+    const i=start+j;
+    return `<div class="extra-card"><div class="extra-q-heading"><span class="quiz-eyebrow">+${String(i+1).padStart(2,'0')}</span><h3 id="extra-q-${i}">${esc(q.text)}</h3></div><div class="extra-options" role="radiogroup" aria-labelledby="extra-q-${i}">${EXTRA_LABELS.map((label,n)=>`<button type="button" class="extra-option${extraAnswers[i]===n+1?' selected':''}" role="radio" aria-checked="${extraAnswers[i]===n+1}" data-extra-pos="${i}" data-extra-value="${n+1}" onclick="pickExtra(this)"><span class="extra-dot" aria-hidden="true"></span>${label}</button>`).join('')}</div></div>`;
+  }).join('');
+  document.getElementById('extra-next').textContent=extraPage===2?'すべての結果を見る →':'次の3問へ →';
+  document.getElementById('extra-warning').textContent='';
+}
+function updateExtraCount(){document.getElementById('extra-count').textContent=`${extraAnswers.filter(extraAnswered).length} / 9 回答済み`;}
+function pickExtra(el){
+  const i=Number(el.dataset.extraPos),v=Number(el.dataset.extraValue);
+  if(!Number.isInteger(i)||i<0||i>=EXTRA_QS.length||!extraAnswered(v))return;
+  extraAnswers[i]=v;
+  document.querySelectorAll(`[data-extra-pos="${i}"]`).forEach(b=>{const selected=Number(b.dataset.extraValue)===v;b.classList.toggle('selected',selected);b.setAttribute('aria-checked',String(selected));});
+  updateExtraCount();document.getElementById('extra-warning').textContent='';saveProgress();
+}
+function extraNext(){
+  const missing=EXTRA_QS.slice(extraPage*3,extraPage*3+3).findIndex((_,j)=>!extraAnswered(extraAnswers[extraPage*3+j]));
+  if(missing>=0){
+    document.getElementById('extra-warning').textContent='このページの3問に答えるか、下のスキップを選んでください。';
+    const el=document.querySelector(`[data-extra-pos="${extraPage*3+missing}"]`);if(el)el.focus();return;
+  }
+  if(extraPage<2){extraPage++;renderExtra();window.scrollTo({top:0,behavior:'instant'});document.getElementById('extra-page-label').setAttribute('tabindex','-1');document.getElementById('extra-page-label').focus();}
+  else if(getExtraMetrics())showLoading();
+  else startExtra();
+}
+function extraBack(){
+  if(extraPage>0){extraPage--;renderExtra();window.scrollTo({top:0,behavior:'instant'});}
+  else goToQuizPage(PAGE_COUNT-1);
+}
+function skipExtra(){extraSkipped=true;showLoading();}
+function getExtraMetrics(){
+  if(EXTRA_QS.some((_,i)=>!extraAnswered(extraAnswers[i])))return null;
+  const totals={stress:0,player:0,management:0};
+  EXTRA_QS.forEach((q,i)=>{totals[q.key]+=extraAnswers[i]-1;});
+  return Object.fromEntries(Object.entries(totals).map(([key,total])=>[key,Math.round(total/12*100)]));
+}
+function buildExtraMetrics(source){
+  if(source!=='quiz')return '';
+  const metrics=extraSkipped?null:getExtraMetrics();
+  if(!metrics)return '<section class="param-panel"><span class="quiz-eyebrow">WORK STYLE +</span><h2>追加のパラメーター</h2><p class="param-note">追加9問の回答がそろっていないため、数値は表示していません。16タイプの判定には影響しません。</p><button type="button" class="friend-btn" onclick="startExtra()">追加9問に答える →</button></section>';
+  const rows=[
+    ['stress','ストレス対処','自己評価','落ち着き・立て直し・負担調整についての、現在の自己評価。'],
+    ['player','プレイヤー志向','役割の好み','自ら手を動かし、専門性を深めて成果をつくりたい傾向。'],
+    ['management','マネジメント志向','役割の好み','目標や役割を整理し、人の成長や協働を支えたい傾向。']
+  ];
+  const gap=metrics.player-metrics.management;
+  const summary=Math.abs(gap)<17?'今回は、プレイヤーとマネジメントへの関心が近い結果です。':gap>0?'今回は、マネジメントよりプレイヤーへの関心が強く出ています。':'今回は、プレイヤーよりマネジメントへの関心が強く出ています。';
+  return `<section class="param-panel"><div class="param-head"><div><span class="quiz-eyebrow">WORK STYLE +</span><h2>あなたの、もうひとつの輪郭。</h2></div><span class="param-count">9 ANSWERS</span></div><p class="param-note">追加の回答を0〜100%に換算。4軸・16タイプとは独立した補足指標です。</p><div class="param-grid">${rows.map(([key,name,tag,desc],i)=>`<div class="param-item param-${key}"><div class="param-title"><span class="param-index">0${i+1}</span><h3>${name}</h3><span class="param-tag">${tag}</span></div><div class="param-value">${metrics[key]}<span>%</span></div><div class="param-meter" role="meter" aria-label="${name}：回答の換算値" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${metrics[key]}" aria-valuetext="${metrics[key]}パーセント。能力や順位を表す数値ではありません。"><div class="param-fill" style="width:${metrics[key]}%"></div></div><div class="param-scale" aria-hidden="true"><span>0</span><span>50</span><span>100</span></div><p>${desc}</p></div>`).join('')}</div><p class="param-summary">${summary}両方高い・両方低い場合もあり、合計100%にはなりません。</p><details class="param-method"><summary>数値の意味・計算方法</summary><p>各指標3問を5段階で回答し、「あてはまらない」=0点から「あてはまる」=4点として、合計÷12×100を四捨五入しています。50%は回答尺度の中間であり、他の人の平均ではありません。</p><p>この質問群は独自の自己振り返り用で、妥当性や信頼性は検証していません。ストレス対処は実際の耐性や心身の健康状態を、役割志向は適性・実力や将来の成果を示すものではありません。採用・配置の判断には使わないでください。</p><p>低い数値でも弱さや劣っていることを意味しません。その時期の負担や経験、環境によって変わります。回答と数値は共有リンクには含まれません。</p></details><button type="button" class="param-retry" onclick="startExtra()">追加の回答を見直す →</button></section>`;
+}
 function showLoading(){
   toScreen('screen-loading');
+  const reduce=typeof matchMedia==='function'&&matchMedia('(prefers-reduced-motion: reduce)').matches;
   const bar=document.getElementById('l-bar');
-  bar.style.animation='none';void bar.offsetWidth;bar.style.animation='lbA 3.2s cubic-bezier(.4,0,.6,1) forwards';
-  setTimeout(showResult,3600);
+  bar.style.animation='none';void bar.offsetWidth;bar.style.animation=reduce?'none':'lbA 2.4s cubic-bezier(.4,0,.6,1) forwards';
+  loadingTimer=setTimeout(()=>{loadingTimer=null;if(document.body.dataset.screen==='screen-loading')showResult();},reduce?0:2600);
 }
 
 /* launchConfetti() は削除した（仕様 §C-5・オーナー判断）。
@@ -2739,7 +3087,25 @@ function buildAxisViz(sc){
   return h;
 }
 
-function toggleAcc(head){head.classList.toggle('aopen');head.nextElementSibling.classList.toggle('aopen');}
+function toggleAcc(head){const open=head.classList.toggle('aopen');head.nextElementSibling.classList.toggle('aopen',open);head.setAttribute('aria-expanded',String(open));}
+function enhanceControls(){
+  document.querySelectorAll('.r-ph[onclick],.ind-sm,.cont-banner').forEach(el=>{
+    el.setAttribute('role','button');el.setAttribute('tabindex','0');
+    if(el.classList.contains('r-ph'))el.setAttribute('aria-expanded',String(el.classList.contains('aopen')));
+    if(el.classList.contains('ind-sm'))el.setAttribute('aria-pressed',String(el.classList.contains('sel')));
+  });
+}
+document.addEventListener('keydown',function(e){
+  const el=e.target;if(!el||!el.matches)return;
+  if(e.key==='Escape'&&document.getElementById('drawer').classList.contains('open')){closeDrawer();document.getElementById('ham').focus();return;}
+  if(el.matches('.sdw,.extra-option')&&['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Home','End'].includes(e.key)){
+    const group=el.closest('[role="radiogroup"]');if(!group)return;
+    const options=Array.from(group.querySelectorAll('[role="radio"]')),i=options.indexOf(el);
+    const next=e.key==='Home'?0:e.key==='End'?options.length-1:(i+(['ArrowRight','ArrowDown'].includes(e.key)?1:options.length-1))%options.length;
+    e.preventDefault();options[next].focus();if(el.matches('.sdw'))pick(options[next],false);else pickExtra(options[next]);return;
+  }
+  if(el.matches('.tc,.r-ph[onclick],.ind-sm,.cont-banner')&&(e.key==='Enter'||e.key===' ')){e.preventDefault();el.click();}
+});
 
 /* 結果画面の相性キャラは非対話にした。従来はここから scores を捏造して
    結果全文を出していた（C-6）。診断済みの人に「20問で確かめる →」を出すのは
@@ -2840,6 +3206,7 @@ function buildCoHTML(inds){
 }
 function toggleIndSm(el,ind){
   el.classList.toggle('sel');
+  el.setAttribute('aria-pressed',el.classList.contains('sel')?'true':'false');
   if(el.classList.contains('sel'))selectedIndustries.push(ind);
   else selectedIndustries=selectedIndustries.filter(i=>i!==ind);
   const cl=document.getElementById('company-list');
@@ -2847,6 +3214,7 @@ function toggleIndSm(el,ind){
 }
 
 function countUpCode(el,code){
+  if(typeof matchMedia==='function'&&matchMedia('(prefers-reduced-motion: reduce)').matches){el.textContent=code;return;}
   const pools=['HD','AB','LW','SG'];
   let ticks=0;const max=18;
   const t=setInterval(()=>{
@@ -2937,8 +3305,9 @@ function showResult(_unusedSkipIntro=false,source='quiz'){
       <img class="result-sil" src="images/chars/${codeImg(code)}.webp" alt="" aria-hidden="true">
       <div class="result-inner">
         <div class="res-announce">Career Type Result</div>
-        <div class="char-frame"><img class="res-char" src="images/chars/${codeImg(code)}.webp" alt=""></div>
+        <div class="result-art"><div class="char-frame"><img class="res-char" src="images/chars/${codeImg(code)}.webp" width="800" height="1200" alt="${esc(t.name)}のキャラクター"></div>
         <div class="res-code" id="res-code-el">----</div>
+        </div><div class="result-summary">
         <div class="res-type-name">${t.name}</div>
         <div class="res-tagline">${t.tag}</div>
         <div class="rarity-row"><span class="rar-badge">20問・4軸による傾向の分類です</span></div>
@@ -2950,10 +3319,12 @@ function showResult(_unusedSkipIntro=false,source='quiz'){
           <button class="sh sh-cp rpl" onclick="addRipple(event,this);copyResult('hero')">コピー</button>
         </div>
         <div class="friend-card"><div class="friend-text">友達のタイプも診断してみよう！</div><button class="friend-btn" onclick="copyLink('hero')">診断リンクをコピー</button></div>
+        </div>
       </div>
     </div>
     <div class="wrap" style="padding-top:20px;">
       <div class="narration fade-in">${t.desc}</div>
+      ${buildExtraMetrics(source)}
       <div class="reason-box fade-in"><div class="rb-title">判定理由</div><div class="rb-text">${r.h} ${r.a} ${rl}</div><div class="rb-tags"><span class="rbt rbt1">${h?AX[1].l:AX[1].r} ${s1}%</span><span class="rbt rbt2">${a?AX[2].l:AX[2].r} ${s2}%</span><span class="rbt rbt3">${l?AX[3].l:AX[3].r} ${s3}%</span><span class="rbt rbt4">${s?AX[4].l:AX[4].r} ${s4}%</span></div></div>
       <div class="r-panel fade-in"><div class="r-ph aopen" onclick="toggleAcc(this)"><div class="r-pt">診断スコア</div><span class="r-tog" style="transform:rotate(180deg);">▼</span></div><div class="r-pb aopen">${buildAxisViz(scores)}</div></div>
       ${subH}
@@ -2974,6 +3345,7 @@ function showResult(_unusedSkipIntro=false,source='quiz'){
   </div>`;
 
   toScreen('screen-result');
+  enhanceControls();
   track('result_view',{type_code:code,source:source});
   observeAgentImpressions();
   setTimeout(()=>{const el=document.getElementById('res-code-el');if(el)countUpCode(el,code);},600);
@@ -3183,26 +3555,20 @@ function renderSharedBanner(code){
   showResult(true,'shared');
 })();
 
-/* ヒーローの浮遊キャラ（装飾）。docs/design/hero-floating-characters.md §6-1
-   ★ ?type= / ?ref=share の IIFE より後に置くこと（.shared-banner の判定のため）。
-   静的HTMLではなく JS で作る理由: (1) スマホでは2枚しか使わないので4枚ぶんの
-   タグを配らない (2) プリロードスキャナに拾わせない（書体・見出しより後でよい）
-   (3) 失敗しても何も壊れない。 */
+/* ヒーローの装飾。共有リンクの判定後に、表示する2枚だけを読み込む。 */
 (function heroCast(){
   const hero=document.querySelector('#screen-title .hero');
   const inner=hero&&hero.querySelector('.hero-inner');
   if(!inner||hero.querySelector('.hero-cast'))return;
   if(hero.querySelector('.shared-banner'))return;          /* 共有リンク着地時は出さない */
-  /* 左→右。.hero::after の4色（a=青 / b=緑 / c=朱 / d=紫）と同じ並び */
-  const CAST=[['a1',1],['b3',2],['c1',3],['d1',4]];
-  const pick=matchMedia('(min-width:768px)').matches?CAST:[CAST[0],CAST[3]];
+  const pick=[['a1',1],['d1',4]];
   const box=document.createElement('div');
   box.className='hero-cast'; box.setAttribute('aria-hidden','true');
   for(const [code,slot] of pick){
     const im=new Image(400,600);
     im.className='hc hc-'+slot;
-    im.src='images/chars/sm/'+code+'.webp';
-    im.alt=''; im.loading='lazy'; im.decoding='async';
+    im.src='images/chars/'+code+'.webp';
+    im.alt=''; im.loading='eager'; im.decoding='async';
     box.appendChild(im);
   }
   hero.insertBefore(box,inner);                            /* 装飾円の後・.hero-inner の前 */
