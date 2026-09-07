@@ -641,6 +641,23 @@ try{
       chk(!!floatCS&&/conic-gradient/.test(floatCS.bg),'20目盛が環（conic-gradient）になっている');
       chk(lg.dataset.done!==undefined&&lg.dataset.total==='20','残数を持つ: '+lg.dataset.done+'/'+lg.dataset.total);
       chk(!!floatCS&&floatCS.grp==='none','帯の目盛は円のとき隠れる: '+(floatCS?floatCS.grp:'-'));
+
+      /* ★12時から時計回りに貯まること。
+         conic-gradient は from を省くと 12時（0deg）から時計回り。
+         from -90deg と書くと開始点が9時へ回り、左上から貯まって見える
+         （実際にそう出ていて、オーナー指摘で気づいた）。
+         生成した --ring を解いて、回答済みの色が12時に来ることを見る。 */
+      {
+        const ring=lg.style.getPropertyValue('--ring');
+        const from=(ring.match(/from ([-\d.]+)deg/)||[])[1];
+        const stops=[...ring.matchAll(/(#[0-9a-f]{6}|rgba?\([^)]*\)|transparent) ([\d.]+)deg ([\d.]+)deg/gi)]
+          .map(m=>({c:m[1],a:+m[2],b:+m[3]}));
+        const at=deg=>{const t=((deg-(+from))%360+360)%360;
+          const st=stops.find(x=>t>=x.a&&t<x.b);return st?st.c:'なし';};
+        chk(from==='0','環は12時から始まる: from='+from+'deg');
+        chk(at(0)==='#123c9b','12時が回答済みの色（群1）: '+at(0));
+        chk(at(270)!=='#123c9b','9時はまだ埋まっていない（時計回り）: '+at(270));
+      }
       await settle(0);
 
       /* 最後の1問（Q5）が「初回の回答」になる順序で試す。上の続きでは Q5 を

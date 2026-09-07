@@ -2310,7 +2310,13 @@ function renderProgSeg(id,curGroup){
 
 /* 20目盛を円環にする。帯と同じ「4群 × 5目盛」を保つ ── 群のあいだを広く空け、
    色も .ps-group と同じ --cat-ink 系4色を使う。円にした瞬間に別の意味の
-   図形になってしまわないようにするため。12時から時計回り。 */
+   図形になってしまわないようにするため。
+
+   ★12時から時計回りに貯める。conic-gradient は from を省くと既定で
+     12時（0deg）から時計回りなので、from 0deg のままでよい。
+     from -90deg と書くと開始点が9時へ回り、左上から貯まって見える
+     （実際にそう出ていた）。「-90deg で真上」は SVG や canvas の作法で、
+     conic-gradient には要らない。 */
 function ringGrad(){
   const GAP_G=7,GAP_C=2.2;                                   /* 群間 / 目盛間（度） */
   const per=(360-GAP_G*PAGE_COUNT)/PAGE_COUNT;               /* 1群ぶん */
@@ -2326,7 +2332,7 @@ function ringGrad(){
     }
     put('transparent',GAP_G);
   }
-  return `conic-gradient(from -90deg,${st.join(',')})`;
+  return `conic-gradient(from 0deg,${st.join(',')})`;
 }
 
 /* 1問以上答えていたら、CTAの文言を実際の遷移先に合わせる。
