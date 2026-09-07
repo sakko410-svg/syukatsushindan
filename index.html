@@ -123,7 +123,6 @@ a{color:var(--blue2);text-decoration:none;}a:hover{color:var(--verm);}
 .cont-banner{background:var(--paper);border:1.5px solid var(--navy);border-radius:6px;padding:14px 16px;margin-bottom:18px;display:flex;align-items:center;gap:12px;max-width:340px;margin-left:auto;margin-right:auto;cursor:pointer;transition:transform .15s,box-shadow .15s;box-shadow:3px 3px 0 var(--forest);position:relative;}
 .cont-banner:hover{transform:translate(-1px,-1px);box-shadow:4px 4px 0 var(--forest);}
 .cont-banner:active{transform:translate(3px,3px);box-shadow:0 0 0 var(--forest);}
-.cont-icon{font-size:1.35rem;flex-shrink:0;}
 .cont-body{flex:1;text-align:left;}
 .cont-title{font-size:.82rem;font-weight:900;color:var(--navy);display:block;}
 .cont-sub{font-size:.7rem;color:var(--mid);margin-top:2px;display:block;}
@@ -244,7 +243,6 @@ a{color:var(--blue2);text-decoration:none;}a:hover{color:var(--verm);}
 .res-kw{font-size:.68rem;font-weight:900;padding:5px 13px;background:var(--w);border:1.5px solid var(--navy);color:var(--navy);border-radius:100px;}
 .famous-box{background:var(--paper);border:1.5px solid var(--navy);border-radius:6px;padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:10px;box-shadow:3px 3px 0 rgba(15,23,42,.14);position:relative;}
 .famous-box::before{content:'';position:absolute;top:-1.5px;left:16px;width:40px;height:4px;background:var(--forest);}
-.famous-icon{font-size:1.35rem;flex-shrink:0;}
 .famous-text{font-size:.78rem;font-weight:700;color:var(--navy);line-height:1.55;text-align:left;}
 .famous-text span{color:var(--navy);}
 .share-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
@@ -259,7 +257,6 @@ a{color:var(--blue2);text-decoration:none;}a:hover{color:var(--verm);}
 .friend-btn:active{transform:translate(3px,3px);box-shadow:0 0 0 var(--navy);}
 .r-panel{background:var(--w);border:1.5px solid var(--navy);border-radius:8px;margin-bottom:14px;overflow:hidden;box-shadow:3px 3px 0 rgba(15,23,42,.12);}
 .r-ph{padding:15px 18px;border-bottom:1.5px solid var(--navy);display:flex;align-items:center;gap:9px;cursor:pointer;user-select:none;background:var(--paper);}
-.r-pi{width:32px;height:32px;border-radius:5px;background:var(--blue-l);border:1.5px solid var(--navy);display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0;}
 .r-pt{font-size:.82rem;font-weight:900;color:var(--navy);letter-spacing:1px;flex:1;}
 .r-tog{font-size:.75rem;color:var(--mid);transition:transform .3s;flex-shrink:0;}
 .r-ph.aopen .r-tog{transform:rotate(180deg);}
@@ -323,7 +320,6 @@ a{color:var(--blue2);text-decoration:none;}a:hover{color:var(--verm);}
 .compat-tag{font-size:.7rem;color:var(--light);}
 .compat-angles{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:8px;}
 .ca{background:var(--off);border:1.5px solid var(--navy);border-radius:6px;padding:9px 8px;text-align:center;}
-.ca-icon{font-size:.9rem;margin-bottom:3px;}
 .ca-lbl{font-family:var(--disp);font-size:10px;font-weight:700;color:var(--blue2);letter-spacing:1px;margin-bottom:4px;text-transform:uppercase;display:block;}
 .ca-txt{font-size:.68rem;color:var(--mid);line-height:1.5;}
 .co-item{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--border);}
@@ -1295,6 +1291,53 @@ body[data-screen="screen-loading"] .ftr{display:none;}
    S-9 が PC だけ --paper2 にしていたぶんもここに集約する（S-9 の狙いは
    「448pxの柱が白地に浮いて見える状態をやめる」で、白でなくなれば足りる）。 */
 html,body{background:var(--ink-field);}
+
+/* ============================================================================
+   EMOJI — 絵文字を1つも置かない
+   ----------------------------------------------------------------------------
+   このファイルから絵文字（Emoji_Presentation ＋ 異体字セレクタ U+FE0F 付き）を
+   外した。tools/lint.mjs が0件を守っている。
+
+   なぜ
+     絵文字はOSが描く。iOS・Android・Windows で形も色も光沢も違ううえ、
+     どれもこのサイトの語彙ではない。ここは紺・クリーム・赤・からしの
+     平面で、影は硬い矩形、記号は■と▼だけで組んである。そこに光沢のある
+     立体アイコンが載ると、別のデザインシステムを切り貼りしたように見える。
+     オーナー指摘の出発点は .cont-icon のフロッピーディスクだった。
+
+   外した装飾アイコン（すべて aria-hidden="true" ＝ 読み上げ対象外・情報量ゼロ）
+     .d-icon       家・鍵・ビル   隣の「トップ」「プライバシーポリシー」
+                                  「運営者情報」が同じことを言っていた
+     .cont-icon    フロッピー     ラベルが「前回の途中から続ける」
+     .rar-badge    グラフ         20問・4軸という但し書きに絵文字は要らない
+     .famous-icon  星
+     .r-pi         6種＋相性2種   パネル見出しの32pxの箱ごと
+     .ca-icon      3種
+     .friend-card  2種
+
+     ★.r-pi は箱ごと落とした。中身が無い箱を残すと、意味を持たない図形が
+       見出しの前に並ぶ。パネルは枠・太字の見出し・▼で十分に区別がつく。
+     ★.d-icon は残っている。「HA系」「HB系」など中身が意味を持つ4つだけ。
+       中身が情報なら箱は正しい、という線引き。
+
+   TD[].icon（16個）も落とした
+     name の前に1つずつ絵文字を出していた。結果画面の名札・16タイプ一覧・
+     相性・サブタイプ・シェア着地バナーの5箇所に出ていたうえ、対応が
+     恣意的（「オンオフのエース」に稲妻）で、読み手に何も伝えていなかった。
+     シェア本文（X／LINE／コピー）からも外した。面によって出したり消したり
+     すると、どこかで必ず食い違うため。
+     ★og:image（images/ogp/*.png）と t/*.html は元から icon を使って
+       いないので、make gen での再生成は要らない。
+
+   残した記号（絵文字ではない）
+     → ← ▼ ▶ ★ ✓ ✕ ⇔ ↗ § ※ (C) X
+     いずれも文字として単色で描かれ、フラットな見た目に馴染む。
+     Emoji_Presentation ではないので lint にも掛からない。
+
+   ★ characters.html には絵文字が残っている。現役でない旧ページ
+     （noindex・どこからも参照なし）なので触っていない。現役に戻すなら
+     ここと同じ方針で外すこと。
+   ========================================================================== */
 </style>
 </head>
 <body data-screen="screen-title">
@@ -1306,7 +1349,11 @@ html,body{background:var(--ink-field);}
 
 <nav class="drawer" id="drawer">
   <div class="d-title">Navigation</div>
-  <button class="d-link" onclick="gotoTop();closeDrawer()"><div class="d-icon" aria-hidden="true">🏠</div>トップ</button>
+  <!-- .d-icon は「HA系」のように中身が意味を持つときだけ置く。
+       トップ／プライバシーポリシー／運営者情報 に付けていた絵文字は外した。
+       aria-hidden で読み上げからも外れており、隣の文字列が同じことを言って
+       いたので情報量はゼロだった。詳しくは末尾の EMOJI ブロック。 -->
+  <button class="d-link" onclick="gotoTop();closeDrawer()">トップ</button>
   <div class="d-div"></div>
   <div class="d-title" style="margin-top:4px;">16Types</div>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:0 4px;">
@@ -1318,8 +1365,8 @@ html,body{background:var(--ink-field);}
   <button class="d-cta" id="cta-drawer" onclick="continueOrStart('drawer');closeDrawer()">▶ 診断をはじめる</button>
   <div class="d-div"></div>
   <div class="d-title" style="margin-top:4px;">Site Info</div>
-  <a class="d-link" href="privacy.html"><div class="d-icon" aria-hidden="true">🔒</div>プライバシーポリシー</a>
-  <a class="d-link" href="privacy.html#operator"><div class="d-icon" aria-hidden="true">🏢</div>運営者情報</a>
+  <a class="d-link" href="privacy.html">プライバシーポリシー</a>
+  <a class="d-link" href="privacy.html#operator">運営者情報</a>
 </nav>
 
 <!-- TITLE -->
@@ -1344,7 +1391,6 @@ html,body{background:var(--ink-field);}
              「一切取得しない」と読ませてはならない。 -->
       <p class="hero-trust">登録不要 <span aria-hidden="true">｜</span> メールアドレス不要 <span aria-hidden="true">｜</span> 無料</p>
       <div class="cont-banner" id="cont-banner" style="display:none;" onclick="continueDiag()">
-        <div class="cont-icon" aria-hidden="true">💾</div>
         <div class="cont-body"><span class="cont-title">前回の途中から続ける</span><span class="cont-sub" id="cont-sub">20問中?問に回答済み</span></div>
         <span class="cont-arrow">→</span>
       </div>
@@ -1619,7 +1665,7 @@ const PAGE_MSGS=["残りは3ページです","残りは2ページです","最後
 
 /* ===== TYPE DATA (from ORIGINAL, field names adapted for new UI) ===== */
 const TD={
-  HALS:{name:"オンオフのエース",icon:"⚡",tag:"人を巻き込み、自分のペースで成果を出す",kw:["切り替え上手","巻き込み力","メリハリ"],jobs:["営業","広告営業","SNSマーケ"],
+  HALS:{name:"オンオフのエース",tag:"人を巻き込み、自分のペースで成果を出す",kw:["切り替え上手","巻き込み力","メリハリ"],jobs:["営業","広告営業","SNSマーケ"],
     per:"人と関わることにエネルギーを感じ、自分から周りに働きかけるのが自然にできるタイプ。同時に、プライベートの時間も大事にしたいという軸を持っていて、メリハリのある働き方を好みます。指示を待つより自分で判断して動く方が力を発揮します。",
     str:"切り替えの速さと、人を惹きつけるコミュニケーション力。短時間で成果を出す集中力も強み。",
     com:"初対面でも自然に会話をリードできる。ただし、プライベートの境界線はしっかり引くタイプ。",
@@ -1629,7 +1675,7 @@ const TD={
     desc:"人との関わりで成果を出しつつ、プライベートも大事に。自分のペースで裁量を持って働くスタイル。",
     good:["HALG","HBLS","DALS"],gR:{team:"HALGがまとめ役、HBLSが気配り役として補完し合う最強布陣。",senpai:"HBLSの温かさで安心して動きやすい環境に。",friend:"DALSの発想力と合わさると、互いに刺激し合える就活仲間に。"},
     bad:["DBWG","HBWG"],bR:{team:"DBWGのコツコツ型とはペースが合わず、連携にストレスが出やすい。",senpai:"HBWGの真面目さが、メリハリ型には少し窮屈に映ることも。",friend:"方向性の違いを認識した上で付き合うと学びになる。"}},
-  HALG:{name:"あったかリーダー",icon:"🌟",tag:"人望で自然とチームをまとめる安定リーダー",kw:["安心感","傾聴力","育成型リーダー"],jobs:["営業","人材紹介","広告営業"],
+  HALG:{name:"あったかリーダー",tag:"人望で自然とチームをまとめる安定リーダー",kw:["安心感","傾聴力","育成型リーダー"],jobs:["営業","人材紹介","広告営業"],
     per:"周囲の人への関心が高く、チームの雰囲気を良くするのが上手なタイプ。前に出ることにも抵抗がなく、人望で自然とリーダーに推されることも。しっかりした研修やサポートがある環境だと安心して力を出せます。",
     str:"人の気持ちを汲み取る力と、安心感のあるリーダーシップ。「この人についていきたい」と思わせる温かさ。",
     com:"相手の話をしっかり聞いてから自分の意見を伝える。対立を避けつつ、全員が納得する着地点を見つける。",
@@ -1639,7 +1685,7 @@ const TD={
     desc:"人との関わりが好きで、充実した研修のもとでスキルを磨きたい。WLBも確保したい安定志向。",
     good:["HALS","HBLG","HAWG"],gR:{team:"HALSのスピード感を温かく包み、HBLGの穏やかさと心地よいハーモニー。",senpai:"HBLGの穏やかさに包まれると安心して実力が出せる。",friend:"HAWGの熱量をうまく方向づけられる、刺激的な就活仲間に。"},
     bad:["DAWS","DBWS"],bR:{team:"DAWSの突き進むスタイルに振り回されがち。",senpai:"DBWSの冷徹さは温かさ重視のHALGにはストレスに。",friend:"真逆タイプなので距離を置きつつ刺激をもらう関係が良い。"}},
-  HAWS:{name:"全力キャプテン",icon:"🔥",tag:"圧倒的な熱量でチームを引っ張る",kw:["巻き込み力","粘り強さ","フルコミット"],jobs:["営業","プロデューサー","SNSマーケ"],
+  HAWS:{name:"全力キャプテン",tag:"圧倒的な熱量でチームを引っ張る",kw:["巻き込み力","粘り強さ","フルコミット"],jobs:["営業","プロデューサー","SNSマーケ"],
     per:"人と関わることが好きで、しかも先頭に立ってチームを引っ張るエネルギーがあるタイプ。仕事にのめり込むことに充実感を覚え、成果が出るまでやり切る粘り強さがあります。自分の裁量で動ける環境で最も輝きます。",
     str:"圧倒的な巻き込み力と、成果が出るまでやり切る粘り強さ。チームの士気を上げる天性の力。",
     com:"エネルギッシュに場を引っ張る。熱量が高いため、周りを自然と動かしてしまう。",
@@ -1649,7 +1695,7 @@ const TD={
     desc:"人との関わりの中で全力で働きたい。裁量を持ってチームを引っ張るリーダーシップ型。",
     good:["HAWG","DAWS","HBWS"],gR:{team:"HAWGの素直さと熱量が噛み合い最強タッグに。DAWSの突破力と組めば大きな成果。",senpai:"HBWSの裏方力が全力型を支えてくれる最高の組み合わせ。",friend:"DAWSとの就活仲間関係は互いに火花散らす最高の刺激に。"},
     bad:["DBLS","DBLG"],bR:{team:"DBLSの冷静さとは温度差が大きい。",senpai:"DBLGの慎重さがスピード感を重視するHAWSにはもどかしく映る。",friend:"焦りや温度差が出やすいため割り切ったつき合い方が良い。"}},
-  HAWG:{name:"熱血プレイヤー",icon:"💪",tag:"仲間のために全力を尽くすひたむきさ",kw:["素直さ","情の深さ","努力家"],jobs:["営業","人材紹介","広告営業"],
+  HAWG:{name:"熱血プレイヤー",tag:"仲間のために全力を尽くすひたむきさ",kw:["素直さ","情の深さ","努力家"],jobs:["営業","人材紹介","広告営業"],
     per:"仲間のために全力を尽くせる、熱量の高いタイプ。人と深く関わる仕事にやりがいを感じ、仕事に没頭することをいとわない姿勢があります。先輩や上司からしっかり学びたいという素直さも武器。",
     str:"ひたむきな努力と素直さ。「この人のために頑張りたい」と思える情の深さ。",
     com:"感情がストレートに出る。熱意が伝わりやすく、クライアントとの信頼関係を築きやすい。",
@@ -1659,7 +1705,7 @@ const TD={
     desc:"人のために全力で働き、組織的なサポートの中でスキルを磨きたい。丁寧にキャリアを積み上げるタイプ。",
     good:["HAWS","HALG","HBWG"],gR:{team:"HAWSのリーダーシップの下で力を発揮する最高の組み合わせ。",senpai:"HALGの温かさに安心して成長できる環境に。",friend:"HBWGの真面目さと通じ合える就活仲間に。"},
     bad:["DALS","DBLS"],bR:{team:"DALSの自由奔放さとはペースが合わない。",senpai:"DBLSのクールさが感情重視のHAWGには物足りなく感じる。",friend:"方向性が違うため、お互いの軸を尊重した関係が大切。"}},
-  HBLS:{name:"ナチュラルケアリスト",icon:"🌿",tag:"さりげなく場を整える自然体の気配り",kw:["空気を読む","自然体","オンオフ上手"],jobs:["人事","広報・PR","CS"],
+  HBLS:{name:"ナチュラルケアリスト",tag:"さりげなく場を整える自然体の気配り",kw:["空気を読む","自然体","オンオフ上手"],jobs:["人事","広報・PR","CS"],
     per:"押し付けがましくなく、自然体で人を支えられるタイプ。場の空気を読んで「ちょうどいい距離感」で関わるのが得意です。自分の時間も大切にしていて、オンオフの切り替えが上手。",
     str:"空気を読む力と、さりげないフォロー力。周囲が気づかないところで場を整えている。",
     com:"聞き上手で、相手が話しやすい雰囲気を自然に作れる。押しが強くないからこそ信頼される。",
@@ -1669,7 +1715,7 @@ const TD={
     desc:"自然体で人を支え、プライベートも大事に。自分の裁量で動くスタイル。",
     good:["HALS","HBLG","DBLS"],gR:{team:"HALSのエネルギーをそっと支える最高のコンビ。",senpai:"DBLSの冷静さに安心感をプラスし、チームを整える。",friend:"HBLGの温かさと心地よく共鳴できる就活仲間に。"},
     bad:["HAWS","DAWS"],bR:{team:"HAWSの圧倒的熱量に巻き込まれて消耗しがち。",senpai:"DAWSのスピード感についていけないことも。",friend:"エネルギーの違いを認識して距離感を大事にしよう。"}},
-  HBLG:{name:"ほっこりサポーター",icon:"☕",tag:"温かい雰囲気でチームを支える安定の存在",kw:["安心感","穏やか","着実"],jobs:["人事","総務","CS"],
+  HBLG:{name:"ほっこりサポーター",tag:"温かい雰囲気でチームを支える安定の存在",kw:["安心感","穏やか","着実"],jobs:["人事","総務","CS"],
     per:"人の役に立つことに喜びを感じ、温かい雰囲気でチームを支えるタイプ。自分が前に出るよりも、誰かが困っているときにそっと手を差し伸べる方が性に合っています。安定した環境で着実に成長したい堅実な面も。",
     str:"安心感を与える存在感。「この人がいるとチームの雰囲気が良くなる」と言われるタイプ。",
     com:"穏やかで丁寧。相手のペースに合わせた会話ができる。急かされるのは苦手。",
@@ -1679,7 +1725,7 @@ const TD={
     desc:"人のサポートが好きで、研修が充実した環境で着実に成長したい。WLBも重視する安定志向。",
     good:["HALG","HBLS","DBLG"],gR:{team:"HALGの温かいリーダーシップの下で安心して力を発揮。",senpai:"HBLSとは穏やかな共鳴で居心地の良い環境に。",friend:"DBLGの丁寧さと相性抜群の就活仲間に。"},
     bad:["DAWS","HAWS"],bR:{team:"DAWSの突き進むスタイルに戸惑いがち。",senpai:"HAWSの圧倒的熱量はプレッシャーに感じることも。",friend:"テンポが違いすぎるので、刺激をもらう程度の距離感が良い。"}},
-  HBWS:{name:"黒子のプロデューサー",icon:"🎭",tag:"裏から全体を動かす影の実力者",kw:["構想力","没入力","縁の下の力持ち"],jobs:["広報・PR","キャリアアドバイザー","CS"],
+  HBWS:{name:"黒子のプロデューサー",tag:"裏から全体を動かす影の実力者",kw:["構想力","没入力","縁の下の力持ち"],jobs:["広報・PR","キャリアアドバイザー","CS"],
     per:"表に出るよりも裏から人を動かすのが好きなタイプ。仕事にのめり込む集中力があり、チーム全体の成果に貢献することに充実感を覚えます。自分なりの方法論を持っていて、それを黙々と磨き続ける職人気質の一面も。",
     str:"舞台裏から全体を見渡す構想力と、仕事への深い没入力。「気づいたら全部この人が回していた」という存在。",
     com:"必要なことを的確に、でも控えめに伝える。目立つことは避けるが、影響力は大きい。",
@@ -1689,7 +1735,7 @@ const TD={
     desc:"仕事にのめり込みつつ、チーム全体の成果に貢献したい。裏から組織を動かす力がある。",
     good:["HAWS","DBWS","DAWG"],gR:{team:"HAWSの表舞台を裏で支える最高のコンビ。",senpai:"DBWSの冷静さと方向性が一致する理想の関係。",friend:"DAWGの探究心と深いレベルで協業可能な就活仲間に。"},
     bad:["HALS","DALS"],bR:{team:"HALSのメリハリ型とは仕事への没入度に差が出やすい。",senpai:"DALSの自由な発想が計画的なHBWSには散漫に映ることも。",friend:"就活のペース感が違うので、割り切った関係が良い。"}},
-  HBWG:{name:"まっすぐガーディアン",icon:"🛡️",tag:"誠実さで絶対的な信頼を勝ち取る",kw:["誠実","責任感","約束を守る"],jobs:["人事","総務","キャリアアドバイザー"],
+  HBWG:{name:"まっすぐガーディアン",tag:"誠実さで絶対的な信頼を勝ち取る",kw:["誠実","責任感","約束を守る"],jobs:["人事","総務","キャリアアドバイザー"],
     per:"真面目で誠実、チームのためにコツコツ努力できるタイプ。人を支えることに強いやりがいを感じ、仕事に全力で向き合います。先輩や上司のもとでしっかり学びたいという向上心があり、言われたことを丁寧にやり切る信頼感が武器。",
     str:"誠実さと責任感。「この人に任せれば間違いない」という絶対的な信頼を勝ち取る力。",
     com:"言葉よりも行動で示すタイプ。約束したことは必ず守る。嘘やごまかしが苦手。",
@@ -1699,7 +1745,7 @@ const TD={
     desc:"仕事に全力で向き合い、先輩のもとで丁寧にスキルを磨きながら組織に貢献するタイプ。",
     good:["HAWG","DBWG","DBLG"],gR:{team:"HAWGの素直さと信頼で結ばれる最高の組み合わせ。",senpai:"DBWGのコツコツ型と最高の相性で安心して学べる。",friend:"DBLGの丁寧さとも通じ合える就活仲間に。"},
     bad:["HALS","DALS"],bR:{team:"HALSのメリハリ型は真面目なHBWGには軽く映ることも。",senpai:"DALSの自由奔放さがルール重視のHBWGにはストレス。",friend:"就活観が違うため、刺激として割り切ると良い関係に。"}},
-  DALS:{name:"ひらめきクリエイター",icon:"💡",tag:"自由な発想でゼロから形にする",kw:["発想力","自由","オリジナリティ"],jobs:["企画","エンジニア","デザイナー"],
+  DALS:{name:"ひらめきクリエイター",tag:"自由な発想でゼロから形にする",kw:["発想力","自由","オリジナリティ"],jobs:["企画","エンジニア","デザイナー"],
     per:"アイデアを形にすることが好きで、一人で集中してモノづくりに没頭できるタイプ。人と関わることより、課題や作品そのものに向き合う方がエネルギーが湧きます。自由な環境で創造性を発揮します。",
     str:"発想力と、ゼロから何かを生み出す力。「普通はこうでしょ」に縛られない自由な思考。",
     com:"アイデアベースの会話が得意。雑談からでもインスピレーションを得る。ただし長い会議は苦手。",
@@ -1709,7 +1755,7 @@ const TD={
     desc:"自分のペースでモノづくりに没頭したい。プライベートも大事にしつつ、裁量のある環境で創造性を発揮。",
     good:["HALS","DALG","DBLS"],gR:{team:"HALSの巻き込み力がアイデアを広めてくれる。",senpai:"DALGの丁寧さが発想を形にする力を補強。",friend:"DBLSの分析力が方向性を補強してくれる就活仲間に。"},
     bad:["HBWG","HAWG"],bR:{team:"HBWGのルール重視は自由なDALSには窮屈に感じる。",senpai:"HAWGの感情ベースの関わりとはリズムが合いにくい。",friend:"就活ペースが違うので、割り切って情報交換する程度が良い。"}},
-  DALG:{name:"じっくりクラフター",icon:"🔧",tag:"専門性をコツコツ磨く品質の職人",kw:["継続力","品質","専門性"],jobs:["エンジニア","デザイナー","データマーケ"],
+  DALG:{name:"じっくりクラフター",tag:"専門性をコツコツ磨く品質の職人",kw:["継続力","品質","専門性"],jobs:["エンジニア","デザイナー","データマーケ"],
     per:"専門スキルを腰を据えて磨きたいタイプ。課題に対して丁寧にアプローチし、着実に質を高めていく粘り強さがあります。無理なペースよりも、自分のリズムで確実に成長したい。しっかりした教育環境があると安心して力を出せます。",
     str:"継続する力と、品質へのこだわり。「急がば回れ」を体現するタイプ。",
     com:"必要なことを端的に、正確に伝える。無駄な会話は少ないが、技術的な話になると熱くなる。",
@@ -1719,7 +1765,7 @@ const TD={
     desc:"専門性をじっくり磨きたい。研修のもとで確実にスキルを積み上げ、安定した働き方をしたい。",
     good:["DALS","DBLG","DAWG"],gR:{team:"DALSの発想を形に落とし込める最高の組み合わせ。",senpai:"DBLGの正確さと高め合える理想の関係。",friend:"DAWGの探究心と深い技術トークが可能な就活仲間に。"},
     bad:["HAWS","HALS"],bR:{team:"HAWSのスピード感がじっくり派のDALGにはプレッシャー。",senpai:"HALSのメリハリ型とは仕事のテンポが合いにくい。",friend:"価値観の違いを理解した上でつき合うと刺激になる。"}},
-  DAWS:{name:"突き抜けパイオニア",icon:"🚀",tag:"前例のない課題に立ち向かう突破者",kw:["突破力","行動力","前例なし上等"],jobs:["コンサル","事業企画","PM"],
+  DAWS:{name:"突き抜けパイオニア",tag:"前例のない課題に立ち向かう突破者",kw:["突破力","行動力","前例なし上等"],jobs:["コンサル","事業企画","PM"],
     per:"未知の課題に立ち向かうことにワクワクするタイプ。仕事に全力でのめり込み、自分の力で道を切り拓く推進力があります。課題やプロダクトに集中する方が力を発揮。スピード感のある環境で最も輝きます。",
     str:"突破力と行動力。「前例がない」が最大のモチベーションになる稀有なタイプ。",
     com:"結論ファーストで端的。議論より行動を重視する。スピード感のない会話にはイライラしがち。",
@@ -1729,7 +1775,7 @@ const TD={
     desc:"技術やプロダクトに全力で向き合う。スタートアップ的なスピード感と裁量で事業を推進するタイプ。",
     good:["HAWS","DBWS","DAWG"],gR:{team:"HAWSの巻き込み力と合わされば最強。",senpai:"DBWSの冷静な制御が暴走を防ぐ良いブレーキに。",friend:"DAWGの深掘り力が品質を担保してくれる最高の就活仲間に。"},
     bad:["HBLG","HBLS"],bR:{team:"HBLGの穏やかさとはスピード感が合わない。",senpai:"HBLSの慎重さがDAWSにはブレーキに感じる。",friend:"テンポが違いすぎるので、刺激をもらう程度の距離感が良い。"}},
-  DAWG:{name:"のめり込みビルダー",icon:"🏗️",tag:"技術を極める情熱の職人",kw:["集中力","探究心","師弟関係"],jobs:["エンジニア","コンサル","データマーケ・CRM"],
+  DAWG:{name:"のめり込みビルダー",tag:"技術を極める情熱の職人",kw:["集中力","探究心","師弟関係"],jobs:["エンジニア","コンサル","データマーケ・CRM"],
     per:"ものづくりや課題解決に深くのめり込む職人気質。仕事に情熱を注ぎ、技術やスキルをとことん追求したいタイプです。師匠や先輩から技を学ぶことに抵抗がなく、体系的に教わることで成長が加速します。",
     str:"集中力と技術への探究心。一度ハマると誰よりも深く掘り下げる。",
     com:"技術的な話題では饒舌になるが、雑談は苦手な面も。信頼した相手には深く心を開く。",
@@ -1739,7 +1785,7 @@ const TD={
     desc:"ものづくりに情熱を注ぎつつ、組織的なサポートの中で成長。大手の技術職や研究職にも向く。",
     good:["DAWS","HBWS","DALG"],gR:{team:"DAWSの推進力の下で技術を極められる。",senpai:"HBWSの裏方力と深いレベルで協業できる。",friend:"DALGの品質志向と切磋琢磨できる就活仲間に。"},
     bad:["HALS","HAWS"],bR:{team:"HALSのメリハリ型は深掘り派のDAWGには表面的に映る。",senpai:"HAWSの熱量は対人ベースでDAWGとは方向が違う。",friend:"就活スタイルが違うので、刺激として割り切った関係が良い。"}},
-  DBLS:{name:"冷静なブレイン",icon:"🧊",tag:"データとロジックで組織を支える頭脳",kw:["論理的思考","俯瞰","冷静"],jobs:["経営企画","データアナリスト","社内SE"],
+  DBLS:{name:"冷静なブレイン",tag:"データとロジックで組織を支える頭脳",kw:["論理的思考","俯瞰","冷静"],jobs:["経営企画","データアナリスト","社内SE"],
     per:"データとロジックで物事を考えるのが得意なタイプ。派手に前に出るより、分析と戦略で組織を支えることに充実感を覚えます。冷静に全体を俯瞰する視点が強み。自分のペースで思考を深められる環境を好みます。",
     str:"論理的思考力と、感情に流されない冷静さ。複雑な問題を構造的に整理する力。",
     com:"事実ベースで話す。感情論が飛び交う場では一歩引いて「で、ファクトは？」と問いかけるタイプ。",
@@ -1749,7 +1795,7 @@ const TD={
     desc:"データやロジックで組織を支える。プライベートも大事にしつつ、自分のペースで分析・改善を回す。",
     good:["HBLS","DALS","DBLG"],gR:{team:"HBLSの気配りが冷静さを和らげ、チームに温かみをプラス。",senpai:"DALSの発想力に分析で道筋をつける最高の組み合わせ。",friend:"DBLGの正確さとは最強の分析タッグを組める就活仲間に。"},
     bad:["HAWG","HAWS"],bR:{team:"HAWGの感情重視とは価値観が違いすぎる。",senpai:"HAWSの熱量ベースの判断はDBLSにはノイズに感じる。",friend:"感情と論理の違いを理解した関係が大切。"}},
-  DBLG:{name:"きっちり参謀",icon:"📐",tag:"正確さとルールで組織の最後の砦に",kw:["精緻","正確性","堅実"],jobs:["経理・財務","データアナリスト","法務"],
+  DBLG:{name:"きっちり参謀",tag:"正確さとルールで組織の最後の砦に",kw:["精緻","正確性","堅実"],jobs:["経理・財務","データアナリスト","法務"],
     per:"正確さと丁寧さが武器のタイプ。数字やルールに強く、曖昧なことをきちんと整理するのが得意です。安定した環境でしっかり教わりながらスキルを高めたいという堅実さがあり、細部へのこだわりが周囲の信頼につながります。",
     str:"ミスを見逃さない精緻さと、ルール・手順を守り切る確実性。「最後の砦」のような存在。",
     com:"正確で丁寧な報告が得意。口頭より文書の方が強みが出る。曖昧な指示が苦手。",
@@ -1759,7 +1805,7 @@ const TD={
     desc:"数字やデータに強く、充実した研修のもとで着実に専門性を高めたい。安定した環境を好む。",
     good:["DBLS","HBLG","HBWG"],gR:{team:"DBLSとは最強の分析タッグを組める。",senpai:"HBLGの温かさに安心して力を発揮できる。",friend:"HBWGの誠実さと深く通じ合える就活仲間に。"},
     bad:["HAWS","DAWS"],bR:{team:"HAWSのスピード感はDBLGにはストレスになりやすい。",senpai:"DAWSの「前例なし」が慎重派のDBLGには不安要素。",friend:"就活スタイルが違うので、情報交換程度の距離感が良い。"}},
-  DBWS:{name:"鉄壁コントローラー",icon:"🏰",tag:"冷静な判断でプレッシャーに立ち向かう",kw:["冷静","胆力","制御力"],jobs:["経営企画","コンサル","社内SE"],
+  DBWS:{name:"鉄壁コントローラー",tag:"冷静な判断でプレッシャーに立ち向かう",kw:["冷静","胆力","制御力"],jobs:["経営企画","コンサル","社内SE"],
     per:"仕事にのめり込み、データとロジックで組織の基盤を固めるタイプ。感情より事実で判断し、冷静に全体を制御する力があります。自分の裁量で意思決定したい志向が強く、責任の大きな仕事ほど燃えます。",
     str:"冷静な判断力と、プレッシャー下でもブレない胆力。組織の根幹を担える器の大きさ。",
     com:"端的で論理的。無駄を嫌い、要点だけを伝える。部下には厳しいが、信頼は厚い。",
@@ -1769,7 +1815,7 @@ const TD={
     desc:"仕事にのめり込み、データとロジックで組織の土台を固める。裁量を持って経営を支えるタイプ。",
     good:["DAWS","HBWS","DBLS"],gR:{team:"DAWSの突破力を冷静に制御する最強コンビ。",senpai:"HBWSの裏方力と戦略が噛み合う理想の関係。",friend:"DBLSとは論理で通じ合える最高の就活仲間に。"},
     bad:["HALG","HBLG"],bR:{team:"HALGの感情ベースの判断はDBWSには非効率に映る。",senpai:"HBLGの穏やかさがスピード感を求めるDBWSにはもどかしい。",friend:"価値観の違いを認識した上でつき合うと良い。"}},
-  DBWG:{name:"コツコツマイスター",icon:"⚙️",tag:"品質に妥協しない職人の矜持",kw:["忍耐力","品質","職人魂"],jobs:["経理・財務","法務","品質管理"],
+  DBWG:{name:"コツコツマイスター",tag:"品質に妥協しない職人の矜持",kw:["忍耐力","品質","職人魂"],jobs:["経理・財務","法務","品質管理"],
     per:"地道な作業を丁寧にやり抜く粘り強さがあるタイプ。仕事に全力で向き合い、先輩から技を吸収して確実にスキルを高めていきます。派手さよりも正確さ、スピードよりも品質を重視する姿勢が周囲からの信頼を集めます。",
     str:"忍耐力と、品質に妥協しない職人魂。「この人が最終チェックしたなら大丈夫」という信頼。",
     com:"寡黙だが、専門分野の話になると頼れるアドバイザーに。言葉少なだが重みがある。",
@@ -2423,7 +2469,7 @@ function openTypePeek(code,el){
   box.innerHTML='<button type="button" class="tp-close" aria-label="閉じる" onclick="closeTypePeek()">✕</button>'
     +'<div class="tp-inner">'
     +`<img class="tp-img" src="images/chars/${codeImg(code)}.webp" alt="">`
-    +`<div class="tp-txt"><div class="tp-code">${esc(code)}</div><div class="tp-name">${esc(t.icon)} ${esc(t.name)}</div><div class="tp-tag">${esc(t.tag)}</div></div>`
+    +`<div class="tp-txt"><div class="tp-code">${esc(code)}</div><div class="tp-name">${esc(t.name)}</div><div class="tp-tag">${esc(t.tag)}</div></div>`
     +'</div>'
     +`<div class="tp-str"><span class="tp-str-lbl">強み</span><div class="tp-str-txt">${esc(firstSentence(t.str))}</div></div>`
     /* 共有バナーの .sb-cta と同じ文字列だったが、指している状況が違う
@@ -2517,12 +2563,12 @@ function showResult(_unusedSkipIntro=false,source='quiz'){
   /* バッジは「相性◎ / 要注意」だった。◎ は根拠のない格付けの記号で、
      「要注意」は他人の人格への警告として強すぎる（bR の中身はペースの違いの話）。
      docs/design/wording-audit.md R-7。パネル自体を置くかは未決（オーナー判断3）。 */
-  function compatSec(codes,cls,title,icon){
+  function compatSec(codes,cls,title){
     if(!codes?.length)return'';
-    let h=`<div class="r-panel fade-in"><div class="r-ph" onclick="toggleAcc(this)"><div class="r-pi" aria-hidden="true">${icon}</div><div class="r-pt">${title}</div><span class="r-tog">▼</span></div><div class="r-pb">`;
+    let h=`<div class="r-panel fade-in"><div class="r-ph" onclick="toggleAcc(this)"><div class="r-pt">${title}</div><span class="r-tog">▼</span></div><div class="r-pb">`;
     codes.forEach(c=>{
       const ct=TD[c],gr=cls==='good'?t.gR:t.bR;
-      h+=`<div class="compat-item"><div class="compat-chars"><div class="compat-cbox">${cImg(code,54)}<span class="code" style="color:var(--blue2);">${code}</span></div><span class="compat-vs">⇔</span><div class="compat-cbox">${cImg(c,54)}<span class="code" style="color:var(--blue2);">${c}</span></div><div class="compat-info"><span class="cm-badge cm-${cls}">${cls==='good'?'相性が良い':'すれ違いやすい'}</span><div class="compat-name">${ct.icon} ${ct.name}</div><div class="compat-tag">${ct.tag}</div></div></div><div class="compat-angles"><div class="ca"><div class="ca-icon" aria-hidden="true">👥</div><span class="ca-lbl">チームで</span><div class="ca-txt">${gr.team}</div></div><div class="ca"><div class="ca-icon" aria-hidden="true">👆</div><span class="ca-lbl">先輩なら</span><div class="ca-txt">${gr.senpai}</div></div><div class="ca"><div class="ca-icon" aria-hidden="true">🎓</div><span class="ca-lbl">就活仲間なら</span><div class="ca-txt">${gr.friend}</div></div></div></div>`;
+      h+=`<div class="compat-item"><div class="compat-chars"><div class="compat-cbox">${cImg(code,54)}<span class="code" style="color:var(--blue2);">${code}</span></div><span class="compat-vs">⇔</span><div class="compat-cbox">${cImg(c,54)}<span class="code" style="color:var(--blue2);">${c}</span></div><div class="compat-info"><span class="cm-badge cm-${cls}">${cls==='good'?'相性が良い':'すれ違いやすい'}</span><div class="compat-name">${ct.name}</div><div class="compat-tag">${ct.tag}</div></div></div><div class="compat-angles"><div class="ca"><span class="ca-lbl">チームで</span><div class="ca-txt">${gr.team}</div></div><div class="ca"><span class="ca-lbl">先輩なら</span><div class="ca-txt">${gr.senpai}</div></div><div class="ca"><span class="ca-lbl">就活仲間なら</span><div class="ca-txt">${gr.friend}</div></div></div></div>`;
     });
     return h+`</div></div>`;
   }
@@ -2533,7 +2579,7 @@ function showResult(_unusedSkipIntro=false,source='quiz'){
     /* .sub-head「あなたのサブタイプ」は、3行上のパネル見出し「サブタイプ」の
        言い直しだったので削除した（wording-audit.md R-14）。
        .sub-note は主語のねじれを直した（R-15）。 */
-    subH=`<div class="r-panel fade-in"><div class="r-ph" onclick="toggleAcc(this)"><div class="r-pi" aria-hidden="true">🔮</div><div class="r-pt">サブタイプ</div><span class="r-tog">▼</span></div><div class="r-pb"><div class="subtype-card"><div class="sub-note">4つの軸のうち、いちばん差が小さかった1つが逆に出ていれば、こちらのタイプでした。それだけ僅差だったということなので、こちらの傾向も併せて見ると、自分の振れ幅がつかめます。</div><div class="sub-inner"><img class="sub-img" src="images/chars/sm/${codeImg(subCode)}.webp" alt=""><div><div class="sub-code">${subCode}</div><div class="sub-name">${st.icon} ${st.name}</div><div class="sub-tag">${st.tag}</div><span class="sub-pct">2番目に近いタイプ</span></div></div></div></div></div>`;
+    subH=`<div class="r-panel fade-in"><div class="r-ph" onclick="toggleAcc(this)"><div class="r-pt">サブタイプ</div><span class="r-tog">▼</span></div><div class="r-pb"><div class="subtype-card"><div class="sub-note">4つの軸のうち、いちばん差が小さかった1つが逆に出ていれば、こちらのタイプでした。それだけ僅差だったということなので、こちらの傾向も併せて見ると、自分の振れ幅がつかめます。</div><div class="sub-inner"><img class="sub-img" src="images/chars/sm/${codeImg(subCode)}.webp" alt=""><div><div class="sub-code">${subCode}</div><div class="sub-name">${st.name}</div><div class="sub-tag">${st.tag}</div><span class="sub-pct">2番目に近いタイプ</span></div></div></div></div></div>`;
   }
 
   const indChips=Object.keys(CD).map(ind=>`<div class="ind-sm${selectedIndustries.includes(ind)?' sel':''}" onclick="toggleIndSm(this,'${ind}')">${ind}</div>`).join('');
@@ -2570,32 +2616,32 @@ function showResult(_unusedSkipIntro=false,source='quiz'){
         <div class="res-announce">Career Type Result</div>
         <div class="char-frame"><img class="res-char" src="images/chars/${codeImg(code)}.webp" alt=""></div>
         <div class="res-code" id="res-code-el">----</div>
-        <div class="res-type-name">${t.icon} ${t.name}</div>
+        <div class="res-type-name">${t.name}</div>
         <div class="res-tagline">${t.tag}</div>
-        <div class="rarity-row"><span class="rar-badge"><span aria-hidden="true">📊</span> 20問・4軸による傾向の分類です</span></div>
+        <div class="rarity-row"><span class="rar-badge">20問・4軸による傾向の分類です</span></div>
         <div class="res-kws">${t.kw.map(k=>`<span class="res-kw">${k}</span>`).join('')}</div>
-        <div class="famous-box"><div class="famous-icon" aria-hidden="true">🌟</div><div class="famous-text"><span>${TYPE_ARCHETYPE[code]}</span></div></div>
+        <div class="famous-box"><div class="famous-text"><span>${TYPE_ARCHETYPE[code]}</span></div></div>
         <div class="share-grid" style="margin-bottom:8px;">
           <button class="sh sh-x rpl" onclick="addRipple(event,this);shareX('hero')">𝕏 シェア</button>
           <button class="sh sh-ln rpl" onclick="addRipple(event,this);shareLINE('hero')">LINE 送信</button>
           <button class="sh sh-cp rpl" onclick="addRipple(event,this);copyResult('hero')">コピー</button>
         </div>
-        <div class="friend-card"><div class="friend-text">👥 友達のタイプも診断してみよう！</div><button class="friend-btn" onclick="copyLink('hero')">🔗 診断リンクをコピー</button></div>
+        <div class="friend-card"><div class="friend-text">友達のタイプも診断してみよう！</div><button class="friend-btn" onclick="copyLink('hero')">診断リンクをコピー</button></div>
       </div>
     </div>
     <div class="wrap" style="padding-top:20px;">
       <div class="narration fade-in">${t.desc}</div>
       <div class="reason-box fade-in"><div class="rb-title">判定理由</div><div class="rb-text">${r.h} ${r.a} ${rl}</div><div class="rb-tags"><span class="rbt rbt1">${h?AX[1].l:AX[1].r} ${s1}%</span><span class="rbt rbt2">${a?AX[2].l:AX[2].r} ${s2}%</span><span class="rbt rbt3">${l?AX[3].l:AX[3].r} ${s3}%</span><span class="rbt rbt4">${s?AX[4].l:AX[4].r} ${s4}%</span></div></div>
-      <div class="r-panel fade-in"><div class="r-ph aopen" onclick="toggleAcc(this)"><div class="r-pi" aria-hidden="true">📊</div><div class="r-pt">診断スコア</div><span class="r-tog" style="transform:rotate(180deg);">▼</span></div><div class="r-pb aopen">${buildAxisViz(scores)}</div></div>
+      <div class="r-panel fade-in"><div class="r-ph aopen" onclick="toggleAcc(this)"><div class="r-pt">診断スコア</div><span class="r-tog" style="transform:rotate(180deg);">▼</span></div><div class="r-pb aopen">${buildAxisViz(scores)}</div></div>
       ${subH}
-      <div class="r-panel fade-in"><div class="r-ph aopen" onclick="toggleAcc(this)"><div class="r-pi" aria-hidden="true">🧠</div><div class="r-pt">性格タイプ詳細</div><span class="r-tog" style="transform:rotate(180deg);">▼</span></div><div class="r-pb aopen"><div class="body-txt" style="margin-bottom:16px;">${t.per}</div><div class="d-sec"><div class="d-lbl ls">強み</div><div class="body-txt">${t.str}</div></div><div class="d-sec"><div class="d-lbl lc">コミュニケーション</div><div class="body-txt">${t.com}</div></div><div class="d-sec"><div class="d-lbl lt">ストレスを感じやすい場面</div><div class="body-txt">${t.sts}</div></div><div class="d-sec"><div class="d-lbl lg">成長のヒント</div><div class="body-txt">${t.grw}</div></div></div></div>
-      <div class="r-panel fade-in"><div class="r-ph aopen" onclick="toggleAcc(this)"><div class="r-pi" aria-hidden="true">💼</div><div class="r-pt">向いている職種</div><span class="r-tog" style="transform:rotate(180deg);">▼</span></div><div class="r-pb aopen"><div class="job-tags">${t.jobs.map(j=>`<div class="job-tag">${j}</div>`).join('')}</div><div class="body-txt">${t.why}</div></div></div>
-      <div class="r-panel fade-in"><div class="r-ph" onclick="toggleAcc(this)"><div class="r-pi" aria-hidden="true">🏢</div><div class="r-pt">業界別の職種例</div><span class="r-tog">▼</span></div><div class="r-pb"><p class="ind-lbl">気になる業界を選ぶと絞り込めます</p><div class="ind-grid-sm">${indChips}</div><p class="co-note">※タイプの傾向に近い職種の例です。掲載順に優劣はなく、特定の企業の採用基準や選考とは関係ありません。</p><div id="company-list">${buildCoHTML(inds)}</div></div></div>
+      <div class="r-panel fade-in"><div class="r-ph aopen" onclick="toggleAcc(this)"><div class="r-pt">性格タイプ詳細</div><span class="r-tog" style="transform:rotate(180deg);">▼</span></div><div class="r-pb aopen"><div class="body-txt" style="margin-bottom:16px;">${t.per}</div><div class="d-sec"><div class="d-lbl ls">強み</div><div class="body-txt">${t.str}</div></div><div class="d-sec"><div class="d-lbl lc">コミュニケーション</div><div class="body-txt">${t.com}</div></div><div class="d-sec"><div class="d-lbl lt">ストレスを感じやすい場面</div><div class="body-txt">${t.sts}</div></div><div class="d-sec"><div class="d-lbl lg">成長のヒント</div><div class="body-txt">${t.grw}</div></div></div></div>
+      <div class="r-panel fade-in"><div class="r-ph aopen" onclick="toggleAcc(this)"><div class="r-pt">向いている職種</div><span class="r-tog" style="transform:rotate(180deg);">▼</span></div><div class="r-pb aopen"><div class="job-tags">${t.jobs.map(j=>`<div class="job-tag">${j}</div>`).join('')}</div><div class="body-txt">${t.why}</div></div></div>
+      <div class="r-panel fade-in"><div class="r-ph" onclick="toggleAcc(this)"><div class="r-pt">業界別の職種例</div><span class="r-tog">▼</span></div><div class="r-pb"><p class="ind-lbl">気になる業界を選ぶと絞り込めます</p><div class="ind-grid-sm">${indChips}</div><p class="co-note">※タイプの傾向に近い職種の例です。掲載順に優劣はなく、特定の企業の採用基準や選考とは関係ありません。</p><div id="company-list">${buildCoHTML(inds)}</div></div></div>
 
       ${buildAgentBlock('primary',cat,code,source)}
-      ${compatSec(t.good,'good','相性の良いタイプ','🤝')}
-      ${compatSec(t.bad,'bad','注意が必要なタイプ','⚠️')}
-      <div class="r-panel fade-in"><div class="r-ph always" style="cursor:default;"><div class="r-pi" aria-hidden="true">📤</div><div class="r-pt">結果をシェア</div></div><div class="r-pb always"><div class="share-grid"><button class="sh sh-x rpl" onclick="addRipple(event,this);shareX('panel')">𝕏 シェア</button><button class="sh sh-ln rpl" onclick="addRipple(event,this);shareLINE('panel')">LINE 送信</button><button class="sh sh-cp rpl" onclick="addRipple(event,this);copyResult('panel')">コピー</button></div></div></div>
+      ${compatSec(t.good,'good','相性の良いタイプ')}
+      ${compatSec(t.bad,'bad','注意が必要なタイプ')}
+      <div class="r-panel fade-in"><div class="r-ph always" style="cursor:default;"><div class="r-pt">結果をシェア</div></div><div class="r-pb always"><div class="share-grid"><button class="sh sh-x rpl" onclick="addRipple(event,this);shareX('panel')">𝕏 シェア</button><button class="sh sh-ln rpl" onclick="addRipple(event,this);shareLINE('panel')">LINE 送信</button><button class="sh sh-cp rpl" onclick="addRipple(event,this);copyResult('panel')">コピー</button></div></div></div>
       ${buildAgentBlock('secondary',cat,code,source)}
       <button class="retry-btn rpl" onclick="addRipple(event,this);clearSavedProgress();location.reload()">もう一度診断する →</button>
       <div style="height:50px;"></div>
@@ -2660,13 +2706,13 @@ function sharePos(pos){return pos==='panel'?'panel':'hero';}
 
 function shareX(pos){
   const c=getCode(),t=TD[c];
-  const text=`私のキャリアタイプは【${c}：${t.icon} ${t.name}】でした！\n${t.tag}\n向いている職種：${t.jobs.join('、')}\n\n#就活キャリアタイプ診断 #16Types`;
+  const text=`私のキャリアタイプは【${c}：${t.name}】でした！\n${t.tag}\n向いている職種：${t.jobs.join('、')}\n\n#就活キャリアタイプ診断 #16Types`;
   track('share_click',{channel:'x',type_code:c,position:sharePos(pos)});
   window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(shareUrl(c))}`,'_blank','noopener');
 }
 function shareLINE(pos){
   const c=getCode(),t=TD[c];
-  const text=`私のキャリアタイプは【${c}：${t.icon} ${t.name}】でした！\n${t.tag}\n向いている職種：${t.jobs.join('、')}\nあなたも診断してみて！\n${shareUrl(c)}`;
+  const text=`私のキャリアタイプは【${c}：${t.name}】でした！\n${t.tag}\n向いている職種：${t.jobs.join('、')}\nあなたも診断してみて！\n${shareUrl(c)}`;
   track('share_click',{channel:'line',type_code:c,position:sharePos(pos)});
   window.open(`https://line.me/R/msg/text/?${encodeURIComponent(text)}`,'_blank','noopener');
 }
@@ -2675,7 +2721,7 @@ function copyResult(pos){
   track('share_click',{channel:'copy',type_code:c,position:sharePos(pos)});
   /* 3つの出口（X / LINE / コピー）は同じものを配る。コピーだけ t.desc が
      1行多かった（wording-audit.md S-6）。完了の知らせは祝わない（S-5）。 */
-  copyText(`私のキャリアタイプは【${c}：${t.icon} ${t.name}】でした！\n${t.tag}\n向いている職種：${t.jobs.join('、')}\n${shareUrl(c)}`,'結果をコピーしました。');
+  copyText(`私のキャリアタイプは【${c}：${t.name}】でした！\n${t.tag}\n向いている職種：${t.jobs.join('、')}\n${shareUrl(c)}`,'結果をコピーしました。');
 }
 function copyLink(pos){
   /* location.href だと、?type= 付きURLで来た人が「他人の結果URL」を配ってしまう。
@@ -2787,7 +2833,7 @@ function renderSharedBanner(code){
   el.innerHTML='<div class="sb-lbl">友達から届いた診断結果</div>'
     +'<div class="sb-body">'
     +`<img class="sb-img" src="images/chars/${codeImg(code)}.webp" alt="">`
-    +`<div class="sb-txt"><span class="sb-code">${esc(code)}</span><span class="sb-name">${esc(t.icon)} ${esc(t.name)}</span><span class="sb-tag">${esc(t.tag)}</span></div>`
+    +`<div class="sb-txt"><span class="sb-code">${esc(code)}</span><span class="sb-name">${esc(t.name)}</span><span class="sb-tag">${esc(t.tag)}</span></div>`
     +'</div>'
     +'<button class="sb-cta" onclick="continueOrStart(&quot;shared&quot;)">自分のタイプを診断する →</button>';
   host.insertBefore(el,host.firstChild);

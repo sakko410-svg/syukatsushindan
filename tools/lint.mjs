@@ -671,6 +671,33 @@ console.log('[lint] タイプページと og:image');
         `shareUrl() が t/<CODE>.html を返す（16枚の og:image が使われる経路）`);
 }
 
+// --- 絵文字を1つも置かない -------------------------------------------------
+// 絵文字はOSが描くので、iOS・Android・Windows で形も色も光沢も変わる。
+// このサイトは紺・クリーム・赤・からしの平面で組んであり、光沢のある
+// 立体アイコンが載ると別のデザインシステムを貼ったように見える。
+// オーナー判断（index.html 末尾の EMOJI ブロックに全文）。
+//
+// 判定は Emoji_Presentation（既定で絵文字として描かれる字）と、
+// 異体字セレクタ U+FE0F（テキスト既定の字を絵文字にする指定）の2つ。
+// この2つなら → ← ▼ ▶ ★ ✓ ✕ ⇔ ↗ © 𝕏 は掛からない。単色の文字として
+// 描かれ、フラットな見た目に馴染むので、これらは意図的に残している。
+console.log('[lint] 絵文字');
+{
+  const EMOJI = /\p{Emoji_Presentation}|️/gu;
+  const targets = [...PAGES, ...fs.readdirSync(path.join(ROOT, 't')).filter(f => f.endsWith('.html')).map(f => `t/${f}`)];
+  const hits = [];
+  for (const f of targets) {
+    const m = read(f).match(EMOJI);
+    if (m) hits.push(`${f}(${[...new Set(m)].join('')})`);
+  }
+  check(hits.length === 0, `公開ページに絵文字が0件（${targets.length}ファイル）${hits.length ? ` → ${hits.join(', ')}` : ''}`);
+
+  // 中身が空の .d-icon（絵文字を消したときに箱だけ残った状態）を拒む。
+  // .d-icon は「HA系」のように中身が意味を持つときだけ置く箱である。
+  const emptyBox = [...read('index.html').matchAll(/<div class="d-icon"[^>]*>\s*<\/div>/g)];
+  check(emptyBox.length === 0, `中身の無い .d-icon が無い（箱だけ残っていない）`);
+}
+
 // --- sitemap.xml / robots.txt -------------------------------------------
 // 索引対象が1ページから18ページに増えたため、存在を検索エンジンに知らせる
 // 手段が要る。t/*.html は index.html から <a> で辿れない（結果画面のシェア
@@ -750,7 +777,10 @@ console.log('[lint] 現役でない公開ページ');
     check(/<meta\s+name=["']robots["'][^>]*noindex/i.test(s),
           `${orphan} に noindex がある（現役に戻すときは外し、PAGES に足すこと）`);
     // 現行の一覧は index.html の #type-section。二重管理に戻っていないこと。
-    check(!html.includes(orphan),
+    // コメントでの言及は「参照」ではない（末尾の EMOJI ブロックが申し送りとして
+    // この名前を書いている）。コメントを除いたうえで探す。
+    const code = html.replace(/<!--[\s\S]*?-->/g, '').replace(/\/\*[\s\S]*?\*\//g, '');
+    check(!code.includes(orphan),
           `index.html が ${orphan} を参照していない（参照するなら noindex を外し PAGES に足す）`);
   }
 }
