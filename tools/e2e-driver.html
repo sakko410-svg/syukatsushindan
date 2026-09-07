@@ -134,6 +134,27 @@ try{
   chk(d.querySelectorAll('form,input[type=email]').length===0,'フォーム要素0件');
   chk(!/SPI|診断者数|希少度|しかいない|12,847/.test(d.body.innerText),'LP本文に SPI/診断者数/希少度 が無い');
   chk(/あなたが働きやすい職場と、その見分け方まで。/.test(d.body.innerText),'hero-sub が職場を約束している（workplace-fit U-2）');
+
+  /* --- 面の質感（TEXTURE ブロック）---
+     装飾だが、body::after は画面全面を覆う。pointer-events が効かなくなると
+     サイト全体が押せなくなるので、そこは必ず機械で見る。 */
+  {
+    const gr=w.getComputedStyle(d.body,'::after'), vi=w.getComputedStyle(d.body,'::before');
+    chk(/data:image\/svg\+xml/.test(gr.backgroundImage),'紙の目（body::after）が載っている');
+    chk(gr.pointerEvents==='none','紙の目が操作を塞がない: pointer-events='+gr.pointerEvents);
+    chk(vi.pointerEvents==='none','版面の沈み（body::before）が操作を塞がない: pointer-events='+vi.pointerEvents);
+    const op=parseFloat(gr.opacity);
+    chk(op>0&&op<=.12,'紙の目の濃さが 0 < opacity <= .12 の範囲: '+gr.opacity);
+    const ht=w.getComputedStyle(d.getElementById('lp-quiz-sec'),'::before');
+    chk(/radial-gradient/.test(ht.backgroundImage),'網点が紺の面に載っている');
+    chk(ht.zIndex==='-1','網点は本文の下に敷かれている: z-index='+ht.zIndex);
+    /* 実際に押せること。全面オーバーレイの事故はここでしか出ない。 */
+    const dot=d.querySelector('#lq-list .sdw');
+    dot.scrollIntoView({block:'center'}); await sleep(120);
+    const r0=dot.getBoundingClientRect();
+    const hit=d.elementFromPoint(r0.left+r0.width/2,r0.top+r0.height/2);
+    chk(hit===dot||dot.contains(hit),'目盛の座標で拾えるのは目盛自身（質感の層が手前に出ていない）: '+(hit?(hit.className||hit.tagName):'なし'));
+  }
   const head=d.head.innerHTML;
   ['og:title','og:description','og:image','og:url','twitter:card'].forEach(k=>chk(head.indexOf(k)>=0,'head に '+k));
   chk(head.indexOf('summary_large_image')>=0,'twitter:card=summary_large_image');

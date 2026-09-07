@@ -1307,6 +1307,77 @@ html,body{background:var(--ink-field);}
 .q-card,#lq-done,#q-next{scroll-margin-top:74px;}
 
 /* ============================================================================
+   TEXTURE — 面に質感を足す
+   ----------------------------------------------------------------------------
+   オーナー指摘「なんかまだAIっぽさが拭えない」に対する処置のひとつ。
+   参考は夜キャラ診断（~/dev/nighttype_draft）の nighttype-shell.css。
+   ★トンマナは真似していない。あちらは Cinema Noir（暗色＋グラス＋星雲）、
+     こちらはレトロアニメ（紺・クリーム・赤・からし／硬い矩形の影）である。
+     取ったのは「面に質感の層を重ねる」という技術だけで、色もトークンも
+     1つも変えていない。
+
+   なぜ質感なのか（実測）
+     結果画面のパネル   9個 → 見た目の種類 1種
+     LPの設問カード     5個 → 1種
+     16タイプのカード  16個 → 1種
+     結果画面の背景色  23種
+     テクスチャを持つ要素  0件
+   色は23種も使っているのに、面の作り方は1つだけで、紙の目も網点も無かった。
+   同じ部品を9回・16回並べた完全に平らな面は、生成物の見え方そのものである。
+   構造の反復（9枚・16枚）は別途あつかう。ここで潰すのは「平らすぎる」ほう。
+
+   夜キャラ側との対応
+     .grain（フィルム粒子）    → 紙の目（body::after）
+     .vignette（周辺減光）      → 版面の四隅の沈み（body::before）
+     .nebula（星雲の多層グラデ）→ 採らない。多層グラデはこちらの平面と矛盾する
+                                  代わりに網点（昭和の印刷）を紺の面へ
+
+   ★.hero と .result-hero には入れない。あの2面は既に集中線
+     （repeating-conic-gradient・408行/414行）を持っており、::before も
+     埋まっている。網点を足す先は「集中線を持たない紺の面」だけでよい。
+   ========================================================================== */
+
+/* --- 紙の目。全面に1枚だけ重ねる ---
+   overlay なので明暗の両方向に散る。暗い面ほど見え、明るい面では紙の
+   ざらつきに見える（フィルム粒子が影に強く出るのと同じ理屈）。
+   タイルは160pxの1枚だけ。pointer-events:none で操作を一切妨げない。
+   url() の中の # は %23 に書かないと CSS のパーサに切られる。 */
+body::after{
+  content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
+  opacity:.05;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+}
+
+/* --- 版面の四隅を沈める ---
+   紙を平らに置いたときの周辺の落ち。中央55%までは完全に透明なので、
+   本文が載る中央の帯は1%も暗くならない。 */
+body::before{
+  content:'';position:fixed;inset:0;z-index:9998;pointer-events:none;
+  background:radial-gradient(ellipse 88% 72% at 50% 48%,transparent 55%,rgba(15,23,42,.07) 100%);
+}
+
+/* --- 網点。集中線を持たない紺の面だけ ---
+   5px ピッチの点を半ピッチずらして2枚重ね、45度の網に見せる（昭和の印刷）。
+   z-index:-1 と isolation:isolate の組みは、この file の .res-type-name::before
+   （506行）と同じ手。親の地の上・本文の下に敷く。 */
+#lp-quiz-sec,.quiz-bg,.ftr{position:relative;isolation:isolate;}
+#lp-quiz-sec::before,.quiz-bg::before,.ftr::before{
+  content:'';position:absolute;inset:0;z-index:-1;pointer-events:none;
+  background-image:
+    radial-gradient(rgba(255,255,255,.055) .7px,transparent .8px),
+    radial-gradient(rgba(255,255,255,.04) .7px,transparent .8px);
+  background-size:5px 5px,5px 5px;
+  background-position:0 0,2.5px 2.5px;
+}
+
+/* コントラストを上げる設定を選んでいる人には、質感の層を出さない。
+   いずれも装飾であって情報を持たないため、消しても失うものが無い。 */
+@media (prefers-contrast:more){
+  body::before,body::after,
+  #lp-quiz-sec::before,.quiz-bg::before,.ftr::before{display:none;}
+}
+
+/* ============================================================================
    EMOJI — 絵文字を1つも置かない
    ----------------------------------------------------------------------------
    このファイルから絵文字（Emoji_Presentation ＋ 異体字セレクタ U+FE0F 付き）を
