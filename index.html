@@ -1298,6 +1298,14 @@ html,body{background:var(--ink-field);}
    下の余白は、続く「消耗しやすいところ」の .d-lbl と分けるためのもの。 */
 .env-lines{display:flex;flex-direction:column;gap:10px;margin-bottom:18px;}
 
+/* --- 回答したら次の設問へ送る（scrollToNextQ）------------------------------
+   .hdr は position:fixed の 60px。block:'start' で送ると設問文の上端が
+   ヘッダの下に潜るので、その高さぶんを逃がす。14px は設問カードとヘッダの
+   あいだに残す余白。
+   ★#lq-done と #q-next にも同じ値を入れる。最後の設問に答えたあとの
+     送り先であり、同じくヘッダに潜るため。 */
+.q-card,#lq-done,#q-next{scroll-margin-top:74px;}
+
 /* ============================================================================
    EMOJI — 絵文字を1つも置かない
    ----------------------------------------------------------------------------
@@ -2116,9 +2124,11 @@ function closeDrawer(){document.getElementById('ham').classList.remove('open');d
    面をまたいだ相互反映（syncPos）は、同じ出題位置が2箇所に描かれることが
    無くなったため、実質的には結果画面など他の描画との整合だけを担う。
    ========================================================================= */
+/* foot … そのページの最後の設問に答えたあとの送り先。
+   quiz は「次へ →」、LP は5問そろったときだけ出る #lq-done。 */
 const FACES={
-  quiz:{list:'q-list',seg:'prog-seg',pre:'q', remain:'q-remain'},
-  lp:  {list:'lq-list',seg:'lq-prog-seg',pre:'lq',remain:'lq-remain'}
+  quiz:{list:'q-list',seg:'prog-seg',pre:'q', remain:'q-remain',foot:'q-next'},
+  lp:  {list:'lq-list',seg:'lq-prog-seg',pre:'lq',remain:'lq-remain',foot:'lq-done'}
 };
 /* 6段階（+3/+2/+1/-1/-2/-3・中央値なし）。読み上げ用のラベルを値と一緒に持つ。 */
 const SCALE=[[3,'Aにとても近い'],[2,'Aに近い'],[1,'どちらかといえばA'],
@@ -2275,6 +2285,37 @@ function pick(el){
   updateRemain('lp');updateRemain('quiz');
   updateLpDone();
   updateCtas();
+  /* 送り先（#lq-done）は updateLpDone() が出したあとでないと隠れているので、
+     スクロールはこの順で最後に呼ぶ。 */
+  if(firstForPos)scrollToNextQ(el,tg);
+}
+
+/* 回答したら次の設問へスクロールする（オーナー要望）。
+   ★ページは送らない。§B-1 が禁じているのは「目盛を選んだら次のページへ
+     自動遷移する」ことで、次のページへ進むには「次へ」を押す必要がある。
+     ここでやるのは同じページの中の移動だけなので、§B-1 と両立する。
+   ★選び直しのときは動かさない（pick() が firstForPos のときだけ呼ぶ）。
+     上に戻って答えを変えた人を下へ引きずり下ろすと、いま何を直したのかが
+     見えなくなる。
+   ★最後の設問では次の設問が無いので、そのページの送り先（FACES[].foot）へ。
+     LP では #lq-done が5問そろうまで display:none なので、見えていない
+     ときは動かさない（Q5 だけ先に答えた人を空欄へ送らないため）。 */
+let _scrollQT=null;
+function scrollToNextQ(el,tg){
+  const card=el.closest?el.closest('.q-card'):null;
+  if(!card)return;
+  const nx=card.nextElementSibling;
+  const target=(nx&&nx.classList&&nx.classList.contains('q-card'))
+    ? nx : document.getElementById((FACES[tg]||{}).foot);
+  if(!target||typeof target.scrollIntoView!=='function')return;
+  if(target.offsetParent===null)return;      /* display:none は送り先にしない */
+  /* 目盛が塗られるのを見せてから動かす。即座に動かすと、自分が何を選んだかを
+     確認する前に画面が流れる。連打されたら最後の1回だけ効かせる。 */
+  clearTimeout(_scrollQT);
+  _scrollQT=setTimeout(()=>{
+    const reduce=typeof matchMedia==='function'&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+    target.scrollIntoView({block:'start',behavior:reduce?'auto':'smooth'});
+  },220);
 }
 
 /* そのページの5問がそろっているか。そろっていなければ進まず、

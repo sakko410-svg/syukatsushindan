@@ -510,6 +510,59 @@ try{
     chk(d.querySelectorAll('#lq-list .spec-track[role="radiogroup"]').length===5,'5問ぶんが独立したラジオグループ');
     chk(!d.getElementById('lq-back'),'LPの「1つ前の質問に戻る」は廃止された');
 
+    /* --- 回答したら次の設問へ送る（scrollToNextQ）---
+       仕様 §B-1 が禁じているのは「目盛を選んだら次のページへ自動遷移する」こと。
+       ここでやるのは同じページの中の移動だけなので両立する。ページが送られて
+       いないことも同時に見る。 */
+    {
+      /* iframe 内では scrollIntoView のアニメーションが走らず、そもそも
+         iframe の高さ（844px）ぶんしかスクロールできない。上の 406 行と
+         同じ方針で「どこへ送ろうとしたか」を捕まえて検証する。
+         ヘッダの下に収まること（scroll-margin-top:74px）は実ページで
+         CDP により確認済み: 5問とも送り先の上端 top=74px。 */
+      const cards=()=>[...d.querySelectorAll('#lq-list .q-card')];
+      let sTo=null;
+      const realSIV=w.Element.prototype.scrollIntoView;
+      w.Element.prototype.scrollIntoView=function(o){sTo=this;return realSIV.call(this,o);};
+      const id=e=>e?(e.id||e.dataset.pos!==undefined?'q-card#'+e.dataset.pos:e.className):'なし';
+
+      sTo=null; cards()[0].querySelector('.sdw').click(); await sleep(600);
+      chk(sTo===cards()[1],'Q1に答えると Q2 へ送る: '+id(sTo));
+      chk(d.body.dataset.screen==='screen-title','送っても画面は切り替わらない（§B-1 自動ページ送りをしない）');
+
+      /* 選び直しでは動かさない。上に戻って直した人を引きずり下ろすと、
+         いま何を直したのかが見えなくなる。 */
+      sTo=null; cards()[0].querySelectorAll('.sdw')[5].click(); await sleep(600);
+      chk(sTo===null,'選び直しでは送らない: '+id(sTo));
+
+      /* 最後の設問に答えても、#lq-done が隠れているうちは送り先にしない。
+         Q5 だけ先に答えた人を、まだ空の場所へ送らないため。 */
+      sTo=null; cards()[4].querySelector('.sdw').click(); await sleep(600);
+      chk(w.getComputedStyle(d.getElementById('lq-done')).display==='none','5問そろうまで #lq-done は隠れている');
+      chk(sTo===null,'#lq-done が隠れているうちは送らない: '+id(sTo));
+
+      w.Element.prototype.scrollIntoView=realSIV;
+
+      /* 最後の1問（Q5）が「初回の回答」になる順序で試す。上の続きでは Q5 を
+         先に答えてしまっているので、保存を消して読み直す。 */
+      w.localStorage.clear();
+      await load('index.html'); w=f.contentWindow; d=f.contentDocument; await sleep(80);
+      const c2=()=>[...d.querySelectorAll('#lq-list .q-card')];
+      const rs=w.Element.prototype.scrollIntoView;
+      let sTo2=null;
+      w.Element.prototype.scrollIntoView=function(o){sTo2=this;return rs.call(this,o);};
+      for(let i=0;i<4;i++){c2()[i].querySelector('.sdw').click();await sleep(120);}
+      await sleep(500);
+      sTo2=null; c2()[4].querySelector('.sdw').click(); await sleep(600);
+      chk(w.getComputedStyle(d.getElementById('lq-done')).display!=='none','5問そろうと #lq-done が出る');
+      chk(sTo2===d.getElementById('lq-done'),'最後の1問に答えると #lq-done へ送る: '+(sTo2?(sTo2.id||sTo2.className):'なし'));
+      chk(d.body.dataset.screen==='screen-title','最後まで答えても画面は切り替わらない（§B-1）');
+      w.Element.prototype.scrollIntoView=rs;
+      w.localStorage.clear();
+    }
+    // 以降の検査のために回答を消して開き直す
+    await load('index.html'); w=f.contentWindow; d=f.contentDocument; await sleep(80);
+
     // 1問ぶんの目盛：6段階・全部押せる・幅に収まる
     {
       const tk=d.querySelector('#lq-list .q-card[data-pos="0"] .spec-track');
