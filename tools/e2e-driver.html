@@ -212,33 +212,26 @@ try{
       await sleep(80);
     }
     const prevRc=d.querySelector('.res-code');   // 前の回のノード（初回は null）
-    /* .res-code は countUpCode() が18回×60msかけて1文字ずつ確定させる
-       （showResult の 600ms 後に開始・合計およそ1.7秒）。固定の待ち時間で
-       読むと、その途中のフレーム（"HAWS" のような別の正しい形のコード）を
-       拾って落ちることがあった。実際に1度、DBWG の回で HAWS を読んでいる。
-       止まるまで待つ。2回続けて同じ文字列になったら確定とみなす。 */
-    await sleep(2500);                       // ローディング（1.8s）ぶん
-    let got='(なし)',prev=null,same=0;
-    for(let i=0;i<60;i++){
-      const rcEl=d.querySelector('.res-code');
-      /* ★前の回の結果画面をそのまま読まないこと。showResult() は
-         #screen-result を innerHTML ごと差し替えるので、.res-code は
-         毎回新しいノードになる。同じノードのままなら、まだこの回の
-         結果は描かれていない（実際に DBLG の回で1つ前の DBLS を読んだ）。 */
-      if(rcEl&&rcEl===prevRc){await sleep(200);continue;}
-      /* 要素がまだ無い（ローディング中）／初期値 "----" のあいだは数えない。
-         countUpCode は 60ms ごとに書き換わるので、200ms 間隔で3回続けて
-         同じ文字列なら止まったとみなす（途中で偶然2回一致することはある）。 */
-      if(rcEl){
-        const now=rcEl.textContent.trim();
-        if(now&&now!=='----'){
-          same=(now===prev)?same+1:0;
-          prev=now;got=now;
-          if(same>=2)break;
-        }
-      }
-      await sleep(200);
+    /* ★.res-code は2段階で決まるので、待ち方を2段階にする。
+       (1) showResult() が #screen-result を innerHTML ごと差し替える
+           → .res-code は毎回「新しいノード」になる。同じノードのままなら
+             まだこの回の結果は描かれていない（実際に DBLG の回で1つ前の
+             DBLS を読んだ）。ノードが替わるまで待つ。
+       (2) そのあと countUpCode() が 600ms 後から 18回×60ms かけて
+           1文字ずつ確定させる。★途中フレームも「正しい形のコード」になる。
+             pools=['HD','AB','LW','SG'] は各桁2文字しかないので、
+             未確定の桁も50%の確率で正解と一致し、フレームが偶然
+             何度も一致する（HBLS の回で HBWS を3回続けて読んだ）。
+           「変化が止まったら確定」では判定できない。所要は
+           600+18×60=1,680ms と決まっているので、余裕をみて待つ。 */
+    let rcEl=null;
+    for(let i=0;i<80;i++){
+      rcEl=d.querySelector('.res-code');
+      if(rcEl&&rcEl!==prevRc)break;
+      await sleep(150);
     }
+    await sleep(2200);                       // countUpCode（1,680ms）ぶん
+    const got=rcEl?rcEl.textContent.trim():'(なし)';
     const rc=d.querySelector('.res-code');
     const gotJs=w.getCode();
     const nm=d.querySelector('.res-type-name');
@@ -599,29 +592,34 @@ try{
          .lq-foot は設問リストの末尾にあるので position:sticky では足りず
          （自然位置を過ぎると流れる）、#lq-list がヘッダ直下の線を跨いで
          いるあいだだけ position:fixed にしている。 */
-      const lf=d.querySelector('.lq-foot'),lg=d.getElementById('lq-prog-seg');
-      const seen={hero:null,mid:null,past:null};
+      const lf=d.querySelector('.lq-foot'),lg=d.getElementById('lq-prog-seg'),lst=d.getElementById('lq-list');
       /* iframe 上では programmatic scroll の scroll イベントが届かないことが
          あるため、位置を変えたあと明示的に発火させてから読む。
-         本番の挙動（実ブラウザ）は CDP で別途確認済み。 */
-      const settle=async y=>{w.scrollTo({top:y,behavior:'instant'});
+         本番の実挙動は CDP（実ブラウザ）で別途確認済み。 */
+      const settle=async y=>{w.scrollTo({top:Math.max(0,Math.round(y)),behavior:'instant'});
         w.dispatchEvent(new w.Event('scroll')); await sleep(250);};
-      await settle(0);
-      seen.hero=lf.classList.contains('fab');
-      await settle(900);
-      seen.mid=lf.classList.contains('fab');
-      {const rr=d.getElementById('lq-list').getBoundingClientRect();
-       seen.midY=w.scrollY; seen.midTop=rr.top; seen.midBot=rr.bottom;
-}
-      const mb=lg.getBoundingClientRect(), vh=w.innerHeight;
-      await settle(d.getElementById('lq-list').getBoundingClientRect().bottom+w.scrollY+200);
-      seen.past=lf.classList.contains('fab');
-      chk(seen.hero===false,'ヒーローを読んでいるあいだは浮かせない: fab='+seen.hero);
-      chk(seen.mid===true,'設問を答えているあいだは浮く: fab='+seen.mid+' / scrollY='+Math.round(seen.midY)
-        +' / #lq-list '+Math.round(seen.midTop)+'..'+Math.round(seen.midBot));
-      chk(seen.past===false,'設問を過ぎたら消える: fab='+seen.past);
-      chk(Math.abs(mb.bottom-(vh-14))<3,'浮いているとき画面下端から14px: bottom='+Math.round(mb.bottom)+' / 画面高 '+vh);
-      chk(mb.width<=448+1,'幅が本文の柱を超えない: '+Math.round(mb.width));
+      /* ★スクロール量を決め打ちしない。CI には Web フォントが無く版面が縮むため、
+         「y=0 ならヒーローの途中」という前提が成り立たない（実際に CI で
+         y=0 の時点で Q1 が画面上部に来て落ちた）。
+         毎回その場の座標から期待値を出し、規則どおりかを見る。 */
+      const HDR=74;
+      const absTop=lst.getBoundingClientRect().top+w.scrollY;
+      const absBot=lst.getBoundingClientRect().bottom+w.scrollY;
+      let mismatch=[],sawOn=false,sawOff=false,floatRect=null;
+      for(const y of [absTop-300,absTop-HDR+20,(absTop+absBot)/2-300,absBot-HDR-20,absBot+300]){
+        await settle(y);
+        const r=lst.getBoundingClientRect();
+        const want=r.top<HDR&&r.bottom>HDR;
+        const got=lf.classList.contains('fab');
+        if(got!==want)mismatch.push('y='+Math.round(w.scrollY)+' 期待'+want+' 実際'+got);
+        if(want){sawOn=true;if(!floatRect)floatRect=lg.getBoundingClientRect();}else sawOff=true;
+      }
+      chk(mismatch.length===0,'浮かせる条件（設問リストがヘッダ直下を跨ぐ）と実際が全点で一致'
+        +(mismatch.length?' → '+mismatch.join(' / '):''));
+      chk(sawOn&&sawOff,'浮く場面と浮かない場面の両方を通った');
+      chk(!!floatRect&&Math.abs(floatRect.bottom-(w.innerHeight-14))<3,
+        '浮いているとき画面下端から14px: bottom='+(floatRect?Math.round(floatRect.bottom):'-')+' / 画面高 '+w.innerHeight);
+      chk(!!floatRect&&floatRect.width<=449,'幅が本文の柱を超えない: '+(floatRect?Math.round(floatRect.width):'-'));
       await settle(0);
 
       /* 最後の1問（Q5）が「初回の回答」になる順序で試す。上の続きでは Q5 を
