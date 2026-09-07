@@ -23,6 +23,15 @@
 //   ・就活あるある（§E の TD[].aru 48行）… まだ書かれていない
 //   ・4軸解説 axes/*.html へのリンク    … まだ作られていない
 //   どちらも後から足す。生成器はテンプレートを直して make types で足りる。
+//
+// 見出しから「の例」を外した理由（workplace-fit.md §5-3 / I-5）
+// -----------------------------------------------------------------------
+//   旧「力を発揮しやすい仕事の例」は、「〜しやすい」で既に断定を避けている
+//   のに、名詞側にも「例」を足していた。ヘッジが二重になっている。
+//   弱めるのは動詞側だけで行う。直下の .note「職種は例示です。〜」は残す
+//   （断定していない文への注記であり、二重になっていない）。
+//   ★この説明を HTML コメントで書くと16ページに出荷されてしまう。
+//     生成器の判断は生成器側（ここ）に書くこと。
 import fs from 'node:fs';
 import path from 'node:path';
 import { loadTypes, esc } from './type-data.mjs';
@@ -223,7 +232,7 @@ main{background:var(--paper2);padding:28px 0 40px;}
     </section>
 
     <section class="card">
-      <h2>力を発揮しやすい仕事の例</h2>
+      <h2>力を発揮しやすい仕事</h2>
       <div class="jobs">${t.jobs.map(j => `<span>${esc(j)}</span>`).join('')}</div>
       <p style="margin-top:11px;">${esc(t.why)}</p>
       <p class="note">職種は例示です。特定の企業の採用基準や、選考の結果とは関係ありません。</p>

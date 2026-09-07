@@ -511,8 +511,15 @@ console.log('[lint] ヒーロー：マーキー廃止 / 3ステップ削除 / �
   const sub = (html.match(/<p class="hero-sub">([\s\S]*?)<\/p>/) || [])[1] || '';
   check(!!sub && !/本格/.test(sub),
     `.hero-sub から「本格」（検証できない自称）が落ちている: ${sub.replace(/<br>/g, ' / ')}`);
-  check(/職種の例/.test(sub), '.hero-sub に「職種の例」が入っている（3ステップの3項目めの受け皿）');
-  check(/探し方のヒント/.test(sub), '.hero-sub の「探し方のヒント」は残っている');
+  // 「3ステップで完了」を削ったとき、その3項目（20問・約3分／タイプ判定／
+  // 3つめ）の受け皿を .hero-sub にした。受け皿である要件は変わらないが、
+  // 3つめは「職種の例」から「働きやすい職場」に変わった
+  // （workplace-fit.md U-2。入口の約束を結果画面の主役と揃えるため）。
+  check(/働きやすい職場/.test(sub), '.hero-sub が職場を約束している（3ステップの3項目めの受け皿）');
+  check(/見分け方/.test(sub), '.hero-sub に「その先で何が手に入るか」がある');
+  // 旧文言に戻っていないこと。「向いている」で断定しつつ名詞に「例」を足すのは
+  // ヘッジの二重（workplace-fit.md §5-3）。
+  check(!/職種の例/.test(sub), '.hero-sub に「職種の例」が戻っていない（ヘッジの二重）');
 }
 
 // --- 回答UI：A / B が画面に出ていること（参考実装 quiz-vertical.js の構成）---
@@ -729,6 +736,53 @@ console.log('[lint] 絵文字');
   // .d-icon は「HA系」のように中身が意味を持つときだけ置く箱である。
   const emptyBox = [...read('index.html').matchAll(/<div class="d-icon"[^>]*>\s*<\/div>/g)];
   check(emptyBox.length === 0, `中身の無い .d-icon が無い（箱だけ残っていない）`);
+}
+
+// --- あなたが働きやすい職場（docs/specs/workplace-fit.md）------------------
+console.log('[lint] あなたが働きやすい職場');
+{
+  // ヘッジの二重（§5-3）。「向いている」「〜しやすい」で既に断定を避けている
+  // 文に、さらに名詞側の「例」を足さない。弱めるのは動詞側だけで行う。
+  // ★「職種は例示です」型の注記は対象外。断定していない文への注記であり、
+  //   二重になっていない。ここが見ているのは「〜しやすい◯◯の例」の形だけ。
+  // ★コメントは除いて見る。旧文言を「なぜ変えたか」の記録として残す必要が
+  //   あり、それは画面に出ない（banned 検査と同じ方針）。
+  const noComment = s => s
+    .replace(/<!--[\s\S]*?-->/g, '')
+    .replace(/\/\*[\s\S]*?\*\//g, '')
+    .replace(/^\s*\/\/.*$/gm, '');
+  const dbl = [];
+  for (const f of ['index.html', ...fs.readdirSync(path.join(ROOT, 't')).filter(f => f.endsWith('.html')).map(f => `t/${f}`)]) {
+    const m = noComment(read(f)).match(/(?:向いている|しやすい)[^。<>「」]{0,12}の例/g);
+    if (m) dbl.push(`${f}(${[...new Set(m)].join('/')})`);
+  }
+  check(dbl.length === 0, `ヘッジの二重（「〜しやすい◯◯の例」）が0件${dbl.length ? ` → ${dbl.join(', ')}` : ''}`);
+
+  // 新セクションが在ること。見出しはオーナー決定（U-1）。
+  check(html.includes('<div class="r-pt">あなたが働きやすい職場</div>'),
+        `結果画面に「あなたが働きやすい職場」がある`);
+
+  // 送客ブロックより前に出ていること（§7-2。価値提供の直後に送客を置く）。
+  const iEnv = html.indexOf('あなたが働きやすい職場</div>');
+  const iAg = html.indexOf("buildAgentBlock('primary'");
+  check(iEnv > 0 && iAg > 0 && iEnv < iAg, `「あなたが働きやすい職場」が送客ブロックより前にある`);
+
+  // ENV の文に % を入れない（§6-2）。軸の百分率は本人側の目盛りであり、
+  // 会社側に対応する数字が無いのに突き合わせを示唆してしまう。
+  const envBlock = noComment(html.slice(html.indexOf('const ENV=['), html.indexOf('function buildEnvHTML')));
+  check(!/[%％]/.test(envBlock), `ENV の文に % が入っていない（突き合わせを示唆しない）`);
+
+  // 優先順位（買い物リスト）に戻っていないこと（§6-4）。
+  const rank = ['譲れない', 'ゆずれない', 'こだわらなくて'].filter(w => envBlock.includes(w));
+  check(rank.length === 0, `ENV に優先順位の語が無い${rank.length ? ` → ${rank.join('/')}` : ''}`);
+
+  // sts は1箇所だけ（P-6 同じことを2回言わない）。新セクションへ移した。
+  const stsN = (html.match(/\$\{t\.sts\}/g) || []).length;
+  check(stsN === 1, `t.sts の出力が1箇所（実際: ${stsN}）`);
+
+  // 入口の約束が結果画面の主役と揃っていること（U-2）。
+  check(html.includes('あなたが働きやすい職場と、その見分け方まで。'),
+        `.hero-sub が職場を約束している（職種ではない）`);
 }
 
 // --- sitemap.xml / robots.txt -------------------------------------------

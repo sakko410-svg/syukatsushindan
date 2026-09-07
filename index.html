@@ -1292,6 +1292,12 @@ body[data-screen="screen-loading"] .ftr{display:none;}
    「448pxの柱が白地に浮いて見える状態をやめる」で、白でなくなれば足りる）。 */
 html,body{background:var(--ink-field);}
 
+/* --- あなたが働きやすい職場（workplace-fit.md §6）---------------------------
+   buildEnvHTML() が出すのは独立した文が最大4つ。.body-txt は行間しか持たない
+   ので、そのまま並べると1つの段落に見える。文の切れ目を出す。
+   下の余白は、続く「消耗しやすいところ」の .d-lbl と分けるためのもの。 */
+.env-lines{display:flex;flex-direction:column;gap:10px;margin-bottom:18px;}
+
 /* ============================================================================
    EMOJI — 絵文字を1つも置かない
    ----------------------------------------------------------------------------
@@ -1380,7 +1386,13 @@ html,body{background:var(--ink-field);}
            「キャリアタ／イプ、」と語の途中で割れるので、語だけ折り返させない。
            390px 以上では1行のままなので見え方は変わらない。 -->
       <h1 class="hero-title">あなたの<span style="white-space:nowrap;">キャリアタイプ</span>、<em>16Typesから見つける。</em></h1>
-      <p class="hero-sub">20問・約3分でわかるキャリアタイプ診断。<br>あなたに向いている職種の例と、探し方のヒントまで。</p>
+      <!-- 入口の約束と結果画面の主役を揃える（workplace-fit.md U-2）。
+           旧「あなたに向いている職種の例と、探し方のヒントまで。」は
+           (a) 職種を約束していたが思想の主題は職場であり（同 §1 / §3）、
+           (b) 「向いている」で断定しながら名詞に「例」を足すヘッジの二重だった
+               （同 §5-3。弱めるのは動詞側で行い、名詞に「例」を足さない）。
+           51字 → 50字。390px で3行のまま。 -->
+      <p class="hero-sub">20問・約3分でわかるキャリアタイプ診断。<br>あなたが働きやすい職場と、その見分け方まで。</p>
       <!-- 着地3秒で就活生が最も知りたいこと（「登録させられるのか。電話は来るのか」）に
            答える1行（design/conversion-structure-and-pc-grid.md S-6 / §4-1）。
            3つとも今日の実装で事実である（入力欄が1つも無いことを tools/lint.mjs が
@@ -1424,10 +1436,16 @@ html,body{background:var(--ink-field);}
           <div class="lq-done-txt">ここまで5問。残りは15問、形式はまったく同じです。</div>
           <div class="lq-next">
             <span class="lq-next-lbl">20問すべてに答えると</span>
+            <!-- 3つめは「向いている職種の例」だった（workplace-fit.md U-2 / §5-3）。
+                 (a) 結果画面の主役が「あなたが働きやすい職場」に移り、
+                     .hero-sub の約束もそう変えたので、ここだけ職種のままだと
+                     同じものを2つの言葉で呼ぶことになる（wording-audit P-5）。
+                 (b) 「向いている」で断定しながら名詞に「例」を足すヘッジの二重。
+                 職種は結果画面に引き続き出る。ここで約束しないだけ。 -->
             <ul class="lq-next-list">
               <li>16タイプのうち、あなたに近い1つ</li>
               <li>4つの軸それぞれの傾き</li>
-              <li>向いている職種の例</li>
+              <li>あなたが働きやすい職場</li>
             </ul>
           </div>
           <!-- 「残り15問」は同じパネル内に .lq-done-txt と #lq-continue で2回出ている。
@@ -2379,6 +2397,89 @@ function showLoading(){
    マーカー位置・棒の幅・強度%（AX_MAX で割る）をすべて追従させている。
    ここを ±10 のままにすると、棒が中央に寄って実際より弱い結果に見える。 */
 const AX_MAX=15;
+
+/* ===== 「あなたが働きやすい職場」（docs/specs/workplace-fit.md §6）==========
+   このサイトは会社を1社も知らない。知っているのは20問に答えた本人だけである
+   （同 §2-3 / §3）。したがってここに書けるのは「あなたは〜だと力が出る」までで、
+   「〜な会社が合う」「この会社は〜だ」は書けない。
+
+   ★軸の百分率をこの面に出さない（同 §6-2）。
+     あの数字は本人の側の目盛りであり、会社側に対応する数字は存在しない。
+     隣に条件を並べると、突き合わせができるように見せてしまう。
+     「診断スコア」パネルには従来どおり出す（あちらは「あなたの傾向」として
+     提示しており、突き合わせを示唆しないため）。
+
+   ★優先順位（譲れない／こだわらなくていい）を出さない（同 §6-4）。
+     条件に順位を付けるのは、比較できる相手がいることを前提にした
+     「買い物リスト」であり、会社側の情報が無い以上そこは埋まらない。
+
+   スコアの正しい使い道は「その一文をどれだけ言い切ってよいか」の制御:
+     ENV_STRONG 以上 … 言い切る（.s）
+     ENV_TIE 以上    … 傾向として言う（.m）
+     ENV_TIE 未満    … 言い切らない。軸の名前（.n）だけを最後の1行にまとめる
+
+   しきい値は |合計|/AX_MAX の百分率。6段階×5問を20万回試行して決めた置き値で、
+   「やや一貫して答える人」で 強24% / 中38% / 拮抗38% と3帯がほぼ均等になる。
+   ★実データが取れたら見直すこと（specs/diagnosis-experience-revamp.md 未決3
+     「拮抗しきい値」と同じ論点。GA4 で各軸の |score| を送れば分布が取れる）。
+
+   ★文言だけを差し替えたいときは、この ENV テーブルだけを書き換えればよい。
+     buildEnvHTML() は文の中身を一切知らない。
+
+   置き場所: 送客ブロックの直前。agent-referral-funnel.md A-4 は「主送客は
+   向いている職種の直後」としていたが、A-4 の理屈（価値提供の直後に置く）を
+   維持したまま、文脈の頂点がこの面に移ったため位置を更新した。
+
+   TD[].sts（消耗しやすいところ）は「性格タイプ詳細」の4番目の小見出しから
+   ここへ移した。同じ文を2箇所に出すと wording-audit.md P-6 に反する。
+
+   ★この説明を結果テンプレート側の HTML コメントで書かないこと。
+     #screen-result は innerHTML で差し込まれるため、コメントも出荷される。
+     実際に「agent-referral-funnel.md」の文字列が
+     「掲載0件なら枠ごと描画しない」（agent- を含まない検査）に当たった。 */
+const ENV_STRONG=50, ENV_TIE=25;
+const ENV=[null,
+  {n:'人と関わる量',
+   l:{s:'人と話す時間が多い場所で、力が出ます。',
+      m:'人と話す時間が多いほうが、力が出やすいようです。'},
+   r:{s:'一人で集中できる時間があると、力が出ます。',
+      m:'一人で集中できる時間があるほうが、力が出やすいようです。'}},
+  {n:'評価のされ方',
+   l:{s:'目標がはっきりしていて、前に出られる場所で伸びます。',
+      m:'目標がはっきりしているほうが、動きやすいようです。'},
+   r:{s:'個人の数字より、チームの成果で見られる場所で力が出ます。',
+      m:'個人の数字より、チームの成果で見られるほうが動きやすいようです。'}},
+  {n:'仕事にかける時間',
+   l:{s:'勤務時間が読める場所のほうが、力が続きます。',
+      m:'勤務時間が読めるほうが、力が続きやすいようです。'},
+   r:{s:'打ち込める仕事があると、力が出ます。',
+      m:'打ち込める仕事があるほうが、力が出やすいようです。'}},
+  {n:'任され方',
+   l:{s:'早くから任せてもらえる場所で伸びます。',
+      m:'早くから任せてもらえるほうが、伸びやすいようです。'},
+   r:{s:'最初に教われる時間があると、立ち上がりが速いです。',
+      m:'最初に教われる時間があるほうが、立ち上がりが速いようです。'}}
+];
+
+/* 言い切れる軸を強い順に並べ、拮抗した軸は最後に1行でまとめる。
+   4軸すべてが拮抗することもある（試行では約2%）。そのときは1行だけになるが、
+   それが事実なので水増ししない。 */
+function buildEnvHTML(){
+  const v=axisVotes(), said=[], ties=[];
+  for(let ax=1;ax<=4;ax++){
+    const pct=Math.min(100,Math.round(Math.abs(scores[ax]/AX_MAX)*100));
+    if(pct<ENV_TIE){ties.push(ENV[ax].n);continue;}
+    const side=axisIsPos(ax,v)?ENV[ax].l:ENV[ax].r;
+    said.push({pct,txt:pct>=ENV_STRONG?side.s:side.m});
+  }
+  said.sort((a,b)=>b.pct-a.pct);
+  let h=said.map(x=>`<div class="body-txt">${x.txt}</div>`).join('');
+  if(ties.length)h+=`<div class="body-txt">${ties.join('、')}については、今回の回答からはどちらとも言えませんでした。</div>`;
+  /* 独立した文が4つ続く。.body-txt には行間しか無いので、そのまま並べると
+     1つの段落に見えて「どこまでが1つの話か」が読めない。 */
+  return `<div class="env-lines">${h}</div>`;
+}
+
 function buildAxisViz(sc){
   const axes=[
     {ax:1,l:AX[1].l,r:AX[1].r,s:sc[1],ca:AX[1].ca,cb:AX[1].cb},
@@ -2634,9 +2735,11 @@ function showResult(_unusedSkipIntro=false,source='quiz'){
       <div class="reason-box fade-in"><div class="rb-title">判定理由</div><div class="rb-text">${r.h} ${r.a} ${rl}</div><div class="rb-tags"><span class="rbt rbt1">${h?AX[1].l:AX[1].r} ${s1}%</span><span class="rbt rbt2">${a?AX[2].l:AX[2].r} ${s2}%</span><span class="rbt rbt3">${l?AX[3].l:AX[3].r} ${s3}%</span><span class="rbt rbt4">${s?AX[4].l:AX[4].r} ${s4}%</span></div></div>
       <div class="r-panel fade-in"><div class="r-ph aopen" onclick="toggleAcc(this)"><div class="r-pt">診断スコア</div><span class="r-tog" style="transform:rotate(180deg);">▼</span></div><div class="r-pb aopen">${buildAxisViz(scores)}</div></div>
       ${subH}
-      <div class="r-panel fade-in"><div class="r-ph aopen" onclick="toggleAcc(this)"><div class="r-pt">性格タイプ詳細</div><span class="r-tog" style="transform:rotate(180deg);">▼</span></div><div class="r-pb aopen"><div class="body-txt" style="margin-bottom:16px;">${t.per}</div><div class="d-sec"><div class="d-lbl ls">強み</div><div class="body-txt">${t.str}</div></div><div class="d-sec"><div class="d-lbl lc">コミュニケーション</div><div class="body-txt">${t.com}</div></div><div class="d-sec"><div class="d-lbl lt">ストレスを感じやすい場面</div><div class="body-txt">${t.sts}</div></div><div class="d-sec"><div class="d-lbl lg">成長のヒント</div><div class="body-txt">${t.grw}</div></div></div></div>
+      <div class="r-panel fade-in"><div class="r-ph aopen" onclick="toggleAcc(this)"><div class="r-pt">性格タイプ詳細</div><span class="r-tog" style="transform:rotate(180deg);">▼</span></div><div class="r-pb aopen"><div class="body-txt" style="margin-bottom:16px;">${t.per}</div><div class="d-sec"><div class="d-lbl ls">強み</div><div class="body-txt">${t.str}</div></div><div class="d-sec"><div class="d-lbl lc">コミュニケーション</div><div class="body-txt">${t.com}</div></div><div class="d-sec"><div class="d-lbl lg">成長のヒント</div><div class="body-txt">${t.grw}</div></div></div></div>
       <div class="r-panel fade-in"><div class="r-ph aopen" onclick="toggleAcc(this)"><div class="r-pt">向いている職種</div><span class="r-tog" style="transform:rotate(180deg);">▼</span></div><div class="r-pb aopen"><div class="job-tags">${t.jobs.map(j=>`<div class="job-tag">${j}</div>`).join('')}</div><div class="body-txt">${t.why}</div></div></div>
       <div class="r-panel fade-in"><div class="r-ph" onclick="toggleAcc(this)"><div class="r-pt">業界別の職種例</div><span class="r-tog">▼</span></div><div class="r-pb"><p class="ind-lbl">気になる業界を選ぶと絞り込めます</p><div class="ind-grid-sm">${indChips}</div><p class="co-note">※タイプの傾向に近い職種の例です。掲載順に優劣はなく、特定の企業の採用基準や選考とは関係ありません。</p><div id="company-list">${buildCoHTML(inds)}</div></div></div>
+
+      <div class="r-panel fade-in"><div class="r-ph aopen" onclick="toggleAcc(this)"><div class="r-pt">あなたが働きやすい職場</div><span class="r-tog" style="transform:rotate(180deg);">▼</span></div><div class="r-pb aopen">${buildEnvHTML()}<div class="d-sec"><div class="d-lbl lt">消耗しやすいところ</div><div class="body-txt">${t.sts}</div></div></div></div>
 
       ${buildAgentBlock('primary',cat,code,source)}
       ${compatSec(t.good,'good','相性の良いタイプ')}

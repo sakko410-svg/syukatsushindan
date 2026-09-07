@@ -133,7 +133,7 @@ try{
   chk(d.querySelectorAll('.drawer a[href^="privacy.html"]').length===2,'ドロワーに運営情報リンク2件');
   chk(d.querySelectorAll('form,input[type=email]').length===0,'フォーム要素0件');
   chk(!/SPI|診断者数|希少度|しかいない|12,847/.test(d.body.innerText),'LP本文に SPI/診断者数/希少度 が無い');
-  chk(/探し方のヒント/.test(d.body.innerText),'hero-sub が是正済み');
+  chk(/あなたが働きやすい職場と、その見分け方まで。/.test(d.body.innerText),'hero-sub が職場を約束している（workplace-fit U-2）');
   const head=d.head.innerHTML;
   ['og:title','og:description','og:image','og:url','twitter:card'].forEach(k=>chk(head.indexOf(k)>=0,'head に '+k));
   chk(head.indexOf('summary_large_image')>=0,'twitter:card=summary_large_image');
@@ -204,6 +204,28 @@ try{
       const rh=d.getElementById('screen-result').innerHTML;
       chk(rh.indexOf('最適な')<0 && rh.indexOf('あなた専用')<0 && rh.indexOf('内定率')<0,'禁止語（最適な/あなた専用/内定率）0件');
       chk(getComputedStyle(d.querySelector('.ftr')).display!=='none','結果画面ではフッター表示');
+
+      /* --- あなたが働きやすい職場（workplace-fit.md §6 / §10 A-4・A-5）--- */
+      const envPh=[...d.querySelectorAll('.r-ph')].find(x=>x.textContent.includes('あなたが働きやすい職場'));
+      chk(!!envPh,'結果画面に「あなたが働きやすい職場」がある');
+      if(envPh){
+        const panel=envPh.closest('.r-panel'), body=panel.querySelector('.r-pb');
+        chk(panel.classList.contains('fade-in')&&envPh.classList.contains('aopen'),'既定で開いている（畳まない）');
+        /* 軸の百分率をこの面に出さない。本人側の目盛りで、会社側に対応する
+           数字が存在しないため（§6-2）。「診断スコア」パネルには出てよい。 */
+        chk(!/[%％]/.test(body.innerText),'この面に % が出ていない: '+body.innerText.replace(/\n/g,' / ').slice(0,90));
+        /* 会社について断定していないこと（§2-3 / §3）。 */
+        chk(!/合う会社|合う企業|向いている会社|風土|社風|カルチャー|体育会系|ノルマ/.test(body.innerText),'会社を断定する語が0件');
+        /* 送客ブロックより前にあること（§7-2）。AGENTS が0件でも
+           マーカーの位置は DOM 順で確かめられる。 */
+        const secs=[...d.getElementById('screen-result').querySelectorAll('.r-panel,.agent-block')];
+        const iEnv=secs.indexOf(panel), iShare=secs.findIndex(x=>x.textContent.includes('結果をシェア'));
+        chk(iEnv>=0&&iShare>iEnv,'「あなたが働きやすい職場」が結果をシェアより前にある');
+        /* sts は1箇所だけ（P-6）。「性格タイプ詳細」から移してきた。 */
+        const detail=[...d.querySelectorAll('.r-ph')].find(x=>x.textContent.includes('性格タイプ詳細'));
+        chk(!detail.closest('.r-panel').textContent.includes('ストレスを感じやすい場面'),'sts は性格タイプ詳細から外してある（二重に出さない）');
+        chk(body.innerText.includes('消耗しやすいところ'),'消耗しやすいところが新セクション側にある');
+      }
     }
   }
 
@@ -326,7 +348,14 @@ try{
   chk(!!jobPanel&&!!jobPanel.querySelector('.r-ph.aopen')&&!!jobPanel.querySelector('.r-pb.aopen'),
       '「向いている職種」が既定で開いている（S-4）');
   chk(jobPanel && jobPanel.nextElementSibling===indPanel,'「業界別の職種例」が「向いている職種」の直後（S-5）');
-  chk(indPanel && indPanel.nextElementSibling===ap,'#agent-primary が職種の2パネルの直後');
+  /* workplace-fit.md §7-2 で置き場所を更新した。A-4 の理屈（価値提供の直後に
+     置く）は維持したまま、文脈の頂点が「あなたが働きやすい職場」へ移ったため。
+     順序は 向いている職種 → 業界別の職種例 → あなたが働きやすい職場 → 送客。 */
+  const envPanel=panels.find(x=>/あなたが働きやすい職場/.test(x.textContent));
+  chk(indPanel && indPanel.nextElementSibling===envPanel,'「あなたが働きやすい職場」が職種の2パネルの直後');
+  chk(envPanel && envPanel.nextElementSibling===ap,'#agent-primary が「あなたが働きやすい職場」の直後');
+  chk(!!envPanel&&!!envPanel.querySelector('.r-ph.aopen')&&!!envPanel.querySelector('.r-pb.aopen'),
+      '「あなたが働きやすい職場」が既定で開いている（閉じていると送客の置き場所の根拠が消える）');
   chk(!!indPanel && !indPanel.querySelector('.r-ph.aopen'),'「業界別の職種例」は閉じたまま（移動しただけ）');
   /* 移動によって .co-note（掲載順に優劣はなく…）と .ab-lead（わかるのは傾向まで…）が
      隣り合う。この2文が送客ブロックの信頼性を支えている（wording-audit.md §8）。 */
@@ -467,8 +496,8 @@ try{
     chk(!/3ステップで完了|How it works/.test(d.body.innerText),
         '「3ステップで完了」「How it works」の文字列が画面に出ない');
     // 削除した3項目は文章として残っている（情報を落としていない）
-    chk(/20問・約3分/.test(d.querySelector('.hero-sub').textContent)&&/職種の例/.test(d.querySelector('.hero-sub').textContent),
-        '3ステップが伝えていた内容は .hero-sub に残っている: '+d.querySelector('.hero-sub').textContent);
+    chk(/20問・約3分/.test(d.querySelector('.hero-sub').textContent)&&/働きやすい職場/.test(d.querySelector('.hero-sub').textContent),
+        '3ステップが伝えていた内容は .hero-sub に残っている（3つめは職種→職場に変更・U-2）: '+d.querySelector('.hero-sub').textContent);
 
     chk(d.querySelectorAll('#lq-list .q-card').length===5,'LPにも5問並ぶ: '+d.querySelectorAll('#lq-list .q-card').length);
     chk(posOf(d,'lq').join(',')==='0,1,2,3,4','LPは出題位置 0-4（Q1-5）: '+posOf(d,'lq').join(','));
