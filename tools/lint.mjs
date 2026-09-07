@@ -671,6 +671,73 @@ console.log('[lint] タイプページと og:image');
         `shareUrl() が t/<CODE>.html を返す（16枚の og:image が使われる経路）`);
 }
 
+// --- sitemap.xml / robots.txt -------------------------------------------
+// 索引対象が1ページから18ページに増えたため、存在を検索エンジンに知らせる
+// 手段が要る。t/*.html は index.html から <a> で辿れない（結果画面のシェア
+// からしか到達しない）ので、いまは sitemap が唯一の発見経路になっている。
+// 生成物なので、タイプを増減して作り直し忘れた状態を機械で見つける。
+console.log('[lint] sitemap.xml と robots.txt');
+{
+  const { renderAll: renderSitemap, DISALLOW } = await import('./gen-sitemap.mjs');
+  const { files, urls, SITE_BASE } = await renderSitemap();
+
+  let missing = [], stale = [];
+  for (const f of files) {
+    if (!fs.existsSync(path.join(ROOT, f.file))) { missing.push(f.file); continue; }
+    if (read(f.file) !== f.text) stale.push(f.file);
+  }
+  check(missing.length === 0, `sitemap.xml と robots.txt がある${missing.length ? ` → 無い: ${missing.join(', ')}` : ''}`);
+  check(stale.length === 0,
+        `sitemap/robots が最新（make sitemap を忘れていない）${stale.length ? ` → 古い: ${stale.join(', ')}` : ''}`);
+
+  // sitemap のURL → リポジトリ内のファイル。'' は index.html を指す。
+  const toFile = u => {
+    if (!u.startsWith(SITE_BASE)) return null;
+    const rel = u.slice(SITE_BASE.length);
+    return rel === '' ? 'index.html' : rel;
+  };
+
+  // 仕様上 <loc> は絶対URL。SITE_BASE の外や相対が混ざると sitemap ごと無効になる。
+  const foreign = urls.filter(u => toFile(u) === null);
+  check(foreign.length === 0, `<loc> が全部 SITE_BASE 配下の絶対URL${foreign.length ? ` → ${foreign.join(', ')}` : ''}`);
+
+  // 404 を送りつけていないこと（sitemap 内の 404 はサイトの評価を下げる）。
+  const dead = urls.map(toFile).filter(f => f && !fs.existsSync(path.join(ROOT, f)));
+  check(dead.length === 0, `sitemap の全URLが実ファイルに対応する${dead.length ? ` → 無い: ${dead.join(', ')}` : ''}`);
+
+  check(new Set(urls).size === urls.length, `sitemap にURLの重複が無い（${urls.length}件）`);
+
+  // 載せ忘れの検出。現役の公開ページ = PAGES + t/*.html。
+  const live = [...PAGES, ...fs.readdirSync(path.join(ROOT, 't')).filter(f => f.endsWith('.html')).map(f => `t/${f}`)];
+  const listed = new Set(urls.map(toFile));
+  const unlisted = live.filter(f => !listed.has(f));
+  check(unlisted.length === 0, `現役の公開ページが全部 sitemap にある${unlisted.length ? ` → 抜け: ${unlisted.join(', ')}` : ''}`);
+
+  // 現役でないページを索引に送らないこと。
+  check(!listed.has('characters.html'), `sitemap に characters.html が入っていない（noindex の旧ページ）`);
+
+  const robots = read('robots.txt');
+
+  // ここが肝。characters.html を Disallow するとクロールが止まり、
+  // ページ内の noindex が読まれず「URLだけ検索結果に残る」状態になる。
+  check(!/^Disallow:.*characters\.html/mi.test(robots),
+        `robots.txt が characters.html を遮断していない（noindex を読ませるため）`);
+
+  // 遮断したパスを sitemap で送るのは自己矛盾。
+  const contradict = urls.filter(u => {
+    const rel = toFile(u);
+    return rel && DISALLOW.some(d => `/${rel}`.startsWith(d));
+  });
+  check(contradict.length === 0, `sitemap と robots.txt が矛盾しない${contradict.length ? ` → ${contradict.join(', ')}` : ''}`);
+
+  check(robots.includes(`Sitemap: ${SITE_BASE}sitemap.xml`),
+        `robots.txt の Sitemap 行が SITE_BASE と一致する`);
+
+  // 画像が遮断されると SNS カードも Google 画像検索も出なくなる。
+  check(!/^Disallow:\s*\/images\//mi.test(robots),
+        `robots.txt が /images/ を遮断していない（og:image のため）`);
+}
+
 // --- 公開ディレクトリに置いてあるが、現役ではないページ ---
 // characters.html は index.html からも privacy.html からも参照されていない旧版。
 // オーナー判断で削除せず残しているが、検索から着地されると診断へ進めないまま

@@ -14,7 +14,8 @@
 #   make heads   … キャラ画像の頭頂位置を実測し、object-position 用のCSSを出力
 #   make ogp     … og:image（1200x630）の再生成 — タイプ別16枚
 #   make types   … t/<CODE>.html 16枚の再生成
-#   make gen     … ogp + types（TD の文言を直したら両方作り直す）
+#   make sitemap … sitemap.xml と robots.txt の再生成
+#   make gen     … ogp + types + sitemap（TD を直したら全部作り直す）
 #
 # 必要なもの: node（18以上）/ Google Chrome / python3（serve のみ）
 #
@@ -25,7 +26,7 @@
 SHELL := /bin/bash
 NODE  := node
 
-.PHONY: check lint type typecheck test e2e serve shot heads ogp types gen golden help
+.PHONY: check lint type typecheck test e2e serve shot heads ogp types sitemap gen golden help
 
 check: lint typecheck test e2e
 	@echo ""
@@ -87,7 +88,12 @@ types:
 	@echo "── types（t/<CODE>.html 16枚）─────────"
 	@$(NODE) tools/gen-type-pages.mjs
 
-gen: ogp types
+# 索引対象の一覧。タイプが増減したら必ず作り直す（載せ忘れ／404 を防ぐ）。
+sitemap:
+	@echo "── sitemap（sitemap.xml / robots.txt）─"
+	@$(NODE) tools/gen-sitemap.mjs
+
+gen: ogp types sitemap
 
 help:
 	@grep -E '^#   make' Makefile | sed 's/^#   //'

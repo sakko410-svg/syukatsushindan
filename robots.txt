@@ -1,0 +1,11 @@
+# tools/gen-sitemap.mjs が生成する。直接編集しない（make sitemap）
+#
+# characters.html は意図的に遮断していない。遮断するとクロールが止まり、
+# ページ内の <meta name="robots" content="noindex"> が読まれなくなる。
+User-agent: *
+Allow: /
+Disallow: /tools/
+Disallow: /Makefile
+Disallow: /README.md
+
+Sitemap: https://w-t-n-b.github.io/syukatsushindan/sitemap.xml
