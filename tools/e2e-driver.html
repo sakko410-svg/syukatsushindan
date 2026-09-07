@@ -1275,6 +1275,30 @@ try{
     chk(on[3]!==off[3]&&on[-3]!==off[-3],'選択すると色が変わる: A '+off[3]+'→'+on[3]+' / B '+off[-3]+'→'+on[-3]);
     chk(on[3]!==on[-3],'選択時もA側とB側で色が違う: '+on[3]+' vs '+on[-3]);
     chk(on[3]===on[1]&&on[-3]===on[-1],'選択時の同じ側は同色（強さは大きさで示す）: A '+on[3]+' / B '+on[-3]);
+
+    /* --- 選択マーク（✓）が丸に追従すること ---
+       ✓ は font-size 固定だった（実測 12.48px）。丸は 36/30/25px と変わるので、
+       小さい丸では縁に届きそうなほど詰まり、大きい丸では中央に浮いて見えた
+       （オーナー指摘）。直径に対する比率を一定にした。
+       丸の寸法は3箇所（既定・≤360px・RETRO）にあるので、比率で見る。 */
+    {
+      [3,2,1].forEach(v=>dot(d,'q',6,v).classList.add('sel'));
+      const rat=[3,2,1].map(v=>{
+        const sd=dot(d,'q',6,v).querySelector('.sd');
+        const dia=sd.getBoundingClientRect().width;   /* w は iframe の window */
+        const cs=w.getComputedStyle(sd);
+        /* cqw はコンテナの「コンテンツ幅」の1%。.sd には2pxの枠があるので、
+           外径ではなく枠の内側で割らないと比が揃わない。 */
+        const inner=dia-parseFloat(cs.borderLeftWidth)-parseFloat(cs.borderRightWidth);
+        const f=parseFloat(w.getComputedStyle(sd,'::after').fontSize);
+        return {v,w:Math.round(dia),f:+f.toFixed(2),r:+(f/inner).toFixed(3)};
+      });
+      [3,2,1].forEach(v=>dot(d,'q',6,v).classList.remove('sel'));
+      const rs=[...new Set(rat.map(x=>x.r))];
+      chk(rs.length===1,'✓ の大きさが丸に比例する（枠の内側基準）: '
+        +rat.map(x=>'±'+x.v+' 丸'+x.w+'px→✓'+x.f+'px(×'+x.r+')').join(' / '));
+      chk(rat[0].f!==rat[2].f,'固定サイズに戻っていない（丸ごとに変わる）: '+rat[0].f+' vs '+rat[2].f);
+    }
     // aria-label も A / B に対応する（読み上げと画面表示が食い違わない）
     const labs=[...d.querySelectorAll('#q-list .q-card[data-pos="6"] .sdw')].map(x=>x.getAttribute('aria-label'));
     chk(labs.slice(0,3).every(x=>x.indexOf('A')>=0&&x.indexOf('B')<0)
