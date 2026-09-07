@@ -1336,18 +1336,16 @@ html,body{background:var(--ink-field);}
 html{overflow-x:hidden;}
 body{overflow-x:clip;}
 
-/* position:sticky では足りない。sticky の bottom は「自然位置より上にいる
-   あいだ」しか固定できず、.lq-foot は設問リストの末尾にあるため、実測で
-   y=841 を過ぎると流れてしまう（設問はまだ2問残っている）。
-   #lp-quiz が画面に入っているあいだだけ fixed にする（JS 側 lpFabWatch）。
-   .lq-foot は高さを保ったまま残るので、外れても版面が跳ねない。 */
-.lq-foot{min-height:32px;}
+/* LPの進捗ゲージは円だけにする（オーナー指定「FABの常時表示だけで良いよ」）。
+   帯は出さない。円は position:fixed で版面から抜けるので、.lq-foot は
+   高さ0に畳んで跡地を残さない。
 
-/* 浮くときは円で右下に出す（オーナー指定）。
-   帯のままだと本文の幅を丸ごと塞ぐが、円なら62pxで済む。
-   中身は renderProgSeg() が作った --ring（20目盛を4群に分けた円環）と
-   data-done / data-total。帯と同じ状態から作っているので割れない。 */
-.lq-foot.fab .prog-seg{
+   ★出し分けの条件式は要らない。この要素は #screen-title の中にあり、
+     .screen{display:none} で画面ごと消えるため、診断画面や結果画面へ
+     移った時点で固定要素ごと消える。以前はスクロール量を見て
+     .fab を付け外ししていたが、その仕組みは丸ごと削除した。 */
+.lq-foot{min-height:0;margin:0;}
+.lq-foot .prog-seg{
   position:fixed;right:16px;bottom:16px;left:auto;transform:none;z-index:40;
   width:62px;height:62px;padding:0;border-radius:50%;
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;
@@ -1361,12 +1359,12 @@ body{overflow-x:clip;}
      （--sh-2 / 既存トークン）が、円でもレトロの語法のまま効く。 */
   box-shadow:var(--sh-2);
 }
-.lq-foot.fab .ps-group{display:none;}   /* 帯の目盛は円環が引き継ぐ */
-.lq-foot.fab .prog-seg::before{
+.lq-foot .ps-group{display:none;}       /* 帯の目盛は円環が引き継ぐ */
+.lq-foot .prog-seg::before{
   content:attr(data-done);
   font-family:var(--disp);font-size:1.2rem;font-weight:700;line-height:1;color:var(--navy);
 }
-.lq-foot.fab .prog-seg::after{
+.lq-foot .prog-seg::after{
   /* 総数は data-total から取る。CSS に 20 を書くと Qs.length と二重管理になる。 */
   content:'/' attr(data-total);
   font-family:var(--disp);font-size:.58rem;font-weight:700;line-height:1;
@@ -2079,7 +2077,6 @@ window.addEventListener('DOMContentLoaded',()=>{
   checkSavedProgress();
   renderPage('lp');    /* LP埋め込み（Q1-5）。Q1-5 が置かれる唯一の場所 */
   renderPage('quiz');  /* 診断画面の先頭ページ（Q6-10）も先に描いておく */
-  lpFabWatch();        /* LPの進捗ゲージを、診断セクションにいるあいだ浮かせる */
   window.addEventListener('scroll',()=>document.getElementById('hdr').classList.toggle('sc',scrollY>10));
   document.addEventListener('click',e=>{
     const d=document.getElementById('drawer'),b=document.getElementById('ham');
@@ -2302,7 +2299,7 @@ function renderProgSeg(id,curGroup){
   el.setAttribute('aria-valuenow',String(curQ));
   el.setAttribute('aria-valuetext',`${Qs.length}問中${curQ}問に回答済み`);
   /* 円形（FAB）で出すときの材料。帯と同じ状態から作るので、
-     見た目が2つに割れることがない。使う側は末尾CSSの .lq-foot.fab。 */
+     見た目が2つに割れることがない。使う側は末尾CSSの .lq-foot .prog-seg。 */
   el.style.setProperty('--ring',ringGrad());
   el.dataset.done=String(curQ);
   el.dataset.total=String(Qs.length);
@@ -2472,44 +2469,6 @@ function pick(el){
   /* 送り先（#lq-done）は updateLpDone() が出したあとでないと隠れているので、
      スクロールはこの順で最後に呼ぶ。 */
   if(firstForPos)scrollToNextQ(el,tg);
-}
-
-/* LPの進捗ゲージを FAB のように浮かせる（オーナー要望）。
-   #lp-quiz が画面にかかっているあいだだけ .lq-foot に .fab を付ける。
-   CSS の position:sticky では足りない理由は末尾の CSS コメントに書いた。
-   ★診断画面の .prog-area は CSS の sticky（170行）のままでよい。
-     あちらは画面全体が診断なので、ヘッダ直下に貼れば常に見える。
-   IntersectionObserver が無い環境では何もしない（ゲージは版面の中に残る）。 */
-function lpFabWatch(){
-  const q=document.getElementById('lq-list'),f=document.querySelector('.lq-foot');
-  if(!q||!f)return;
-  /* 条件は「設問リストがヘッダのすぐ下の線を跨いでいる」。
-     ・ヒーローを読んでいるあいだは出ない（リストがまだ線より下）
-     ・5問を過ぎると消える（リストが線より上へ抜ける）
-     ★IntersectionObserver の rootMargin では書けない。
-       '-74px 0px -100% 0px' と書くと root の高さが 844-74-844 = 負になり、
-       環境によって一度も交差しなくなる（実際に iframe 上で再現した）。
-       毎フレームの計算ではなくスクロールごとの2値なので、素直に測る。 */
-  const HDR=74;
-  /* 譲る相手は #lq-continue（「次へ →」）。#lq-done ではない ──
-     あちらは5問そろうまで隠れているパネルで、ボタンはその外側の .q-nav に
-     あり常に出ている。円は右下に出るので、放っておくとボタンに重なる。
-
-     ★「見えたら消す」にはしない。LPの診断部は5問で約1,330pxしかなく、
-       ボタンが見えた時点で消すと、円が出るのは500pxぶんだけになる（実測）。
-       実際に重なっているあいだだけ譲る。重なりが解けたらまた出る。
-     ★16/62 は下の CSS（.lq-foot.fab .prog-seg の bottom / 幅）と同じ値。
-       ずれると重なり判定が効かなくなるので、e2e が実寸で見ている。 */
-  const cta=document.getElementById('lq-continue'),FAB_B=16,FAB_S=62;
-  const upd=()=>{
-    const r=q.getBoundingClientRect();
-    const c=cta&&cta.getBoundingClientRect();
-    const hit=c&&c.bottom>innerHeight-FAB_B-FAB_S&&c.top<innerHeight-FAB_B;
-    f.classList.toggle('fab',r.top<HDR&&r.bottom>HDR&&!hit);
-  };
-  addEventListener('scroll',upd,{passive:true});
-  addEventListener('resize',upd);
-  upd();
 }
 
 /* 回答したら次の設問へスクロールする（オーナー要望）。

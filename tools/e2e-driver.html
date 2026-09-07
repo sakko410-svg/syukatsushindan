@@ -588,65 +588,34 @@ try{
 
       w.Element.prototype.scrollIntoView=realSIV;
 
-      /* --- 進捗ゲージが FAB として浮くこと ---
-         .lq-foot は設問リストの末尾にあるので position:sticky では足りず
-         （自然位置を過ぎると流れる）、#lq-list がヘッダ直下の線を跨いで
-         いるあいだだけ position:fixed にしている。 */
-      const lf=d.querySelector('.lq-foot'),lg=d.getElementById('lq-prog-seg'),lst=d.getElementById('lq-list');
-      const cta=d.getElementById('lq-continue');
-      /* iframe 上では programmatic scroll の scroll イベントが届かないことが
-         あるため、位置を変えたあと明示的に発火させてから読む。
-         本番の実挙動は CDP（実ブラウザ）で別途確認済み。 */
-      const settle=async y=>{w.scrollTo({top:Math.max(0,Math.round(y)),behavior:'instant'});
-        w.dispatchEvent(new w.Event('scroll')); await sleep(220);};
-      /* ★スクロール量を決め打ちしない。CI には Web フォントが無く版面が縮むため、
-         「y=0 ならヒーローの途中」という前提が成り立たない（実際に CI で落ちた）。
-         見るのは位置ではなく性質:
-           ・答えているあいだに一度は浮く
-           ・「次へ →」に重なった状態では浮かない（円は右下・全幅ボタンの上）
-           ・設問を過ぎたら消える
-           ・浮いているときは右下の62px円で、環と残数を持つ */
+      /* --- 進捗ゲージ（右下の円）---
+         オーナー指定「FABの常時表示だけで良いよ」。帯は出さず、円だけを
+         LPのあいだ常に出す。出し分けの条件式は持たない ── この要素は
+         #screen-title の中にあり、.screen{display:none} で画面ごと消える。 */
+      const lg=d.getElementById('lq-prog-seg'),lst=d.getElementById('lq-list');
+      const jump=async y=>{w.scrollTo({top:Math.max(0,Math.round(y)),behavior:'instant'});await sleep(200);};
       const absTop=lst.getBoundingClientRect().top+w.scrollY;
       const absBot=lst.getBoundingClientRect().bottom+w.scrollY;
-      let sawOn=false,overlap=[],floatRect=null,floatCS=null,pastOn=null;
-      const steps=12;
-      for(let i=0;i<=steps;i++){
-        await settle(absTop-300+(absBot+300-(absTop-300))*i/steps);
-        const on=lf.classList.contains('fab');
-        if(on){
-          sawOn=true;
-          const g=lg.getBoundingClientRect(),c=cta.getBoundingClientRect();
-          if(!floatRect){floatRect=g;
-            /* ★浮いている「その瞬間」に測る。ループを抜けたあとに
-               getComputedStyle しても、そのときは既に帯へ戻っている。 */
-            const cs=w.getComputedStyle(lg);
-            floatCS={r:cs.borderRadius,bg:cs.backgroundImage,
-                     grp:w.getComputedStyle(d.querySelector('.lq-foot .ps-group')).display};}
-          if(c.bottom>g.top&&c.top<g.bottom&&c.right>g.left&&c.left<g.right)
-            overlap.push('y='+Math.round(w.scrollY));
-        }
+      let gone=[],pos=[];
+      for(const y of [0,absTop,(absTop+absBot)/2,absBot,absBot+800,1e6]){
+        await jump(y);
+        const r=lg.getBoundingClientRect();
+        if(!(r.width>0))gone.push('y='+Math.round(w.scrollY));
+        else pos.push(Math.round(w.innerHeight-r.bottom)+'/'+Math.round(w.innerWidth-r.right));
       }
-      await settle(absBot+400);
-      pastOn=lf.classList.contains('fab');
-      chk(sawOn,'答えているあいだに進捗ゲージが浮く');
-      chk(overlap.length===0,'「次へ →」に重なった状態では浮かない'+(overlap.length?' → '+overlap.join(','):''));
-      chk(pastOn===false,'設問を過ぎたら消える: fab='+pastOn);
-      /* 円であること・右下にいること。JS 側の重なり判定（FAB_B=16 / FAB_S=62）は
-         この寸法を前提にしているので、ずれたら必ずここで落ちる。 */
-      chk(!!floatRect&&Math.round(floatRect.width)===62&&Math.round(floatRect.height)===62,
-        '62pxの円: '+(floatRect?Math.round(floatRect.width)+'x'+Math.round(floatRect.height):'-'));
-      chk(!!floatRect&&Math.abs(floatRect.bottom-(w.innerHeight-16))<3&&Math.abs(floatRect.right-(w.innerWidth-16))<3,
-        '画面の右下から16px: '+(floatRect?'下'+Math.round(w.innerHeight-floatRect.bottom)+' 右'+Math.round(w.innerWidth-floatRect.right):'-'));
-      chk(!!floatCS&&floatCS.r==='50%','角丸50%（円）: '+(floatCS?floatCS.r:'-'));
-      chk(!!floatCS&&/conic-gradient/.test(floatCS.bg),'20目盛が環（conic-gradient）になっている');
+      chk(gone.length===0,'LPのどこにいても円が出ている'+(gone.length?' → 消えた: '+gone.join(','):''));
+      chk([...new Set(pos)].length===1&&pos[0]==='16/16','いつも画面の右下から16px: '+[...new Set(pos)].join(' , '));
+      const gr=lg.getBoundingClientRect(),cs=w.getComputedStyle(lg);
+      chk(Math.round(gr.width)===62&&Math.round(gr.height)===62,'62pxの円: '+Math.round(gr.width)+'x'+Math.round(gr.height));
+      chk(cs.borderRadius==='50%','角丸50%（円）: '+cs.borderRadius);
+      chk(/conic-gradient/.test(cs.backgroundImage),'20目盛が環（conic-gradient）になっている');
       chk(lg.dataset.done!==undefined&&lg.dataset.total==='20','残数を持つ: '+lg.dataset.done+'/'+lg.dataset.total);
-      chk(!!floatCS&&floatCS.grp==='none','帯の目盛は円のとき隠れる: '+(floatCS?floatCS.grp:'-'));
+      /* 帯は出さない。以前は版面の末尾に帯が残っていて、円と二重に見えた。 */
+      chk(w.getComputedStyle(d.querySelector('.lq-foot .ps-group')).display==='none','帯の目盛は出ない');
+      chk(Math.round(d.querySelector('.lq-foot').getBoundingClientRect().height)===0,
+        '帯の跡地が版面に残らない: .lq-foot の高さ='+Math.round(d.querySelector('.lq-foot').getBoundingClientRect().height)+'px');
 
-      /* ★12時から時計回りに貯まること。
-         conic-gradient は from を省くと 12時（0deg）から時計回り。
-         from -90deg と書くと開始点が9時へ回り、左上から貯まって見える
-         （実際にそう出ていて、オーナー指摘で気づいた）。
-         生成した --ring を解いて、回答済みの色が12時に来ることを見る。 */
+      /* --- 環の向きと詰め方 --- */
       {
         const ring=lg.style.getPropertyValue('--ring');
         const from=(ring.match(/from ([-\d.]+)deg/)||[])[1];
@@ -654,14 +623,14 @@ try{
           .map(m=>({c:m[1],a:+m[2],b:+m[3]}));
         const at=deg=>{const t=((deg-(+from))%360+360)%360;
           const st=stops.find(x=>t>=x.a&&t<x.b);return st?st.c:'なし';};
+        /* ★12時から時計回り。conic-gradient は from を省くと12時から時計回りで、
+           from -90deg と書くと開始点が9時へ回る（実際にそう出ていた）。 */
         chk(from==='0','環は12時から始まる: from='+from+'deg');
         chk(at(0)==='#123c9b','12時が回答済みの色（群1）: '+at(0));
         chk(at(270)!=='#123c9b','9時はまだ埋まっていない（時計回り）: '+at(270));
         /* ★環は「何問答えたか」で詰める。「どの設問に答えたか」で塗ると、
            Q2 から答えた人のてっぺんが空いて「まだ始まっていない」ように
-           見える（オーナー指摘で判明）。位置を担当するのは帯のほう。
-           ここでは Q1 を飛ばして Q3 に答え、それでもてっぺんが埋まることを見る。 */
-        const n0=+lg.dataset.done;
+           見える（オーナー指摘で判明）。位置を担当するのは診断画面の帯。 */
         w.eval('ans={};curQ=0');
         d.querySelectorAll('#lq-list .q-card')[2].querySelector('.sdw').click();
         await sleep(300);
@@ -669,10 +638,10 @@ try{
         const s2=[...r2.matchAll(/(#[0-9a-f]{6}|rgba?\([^)]*\)|transparent) ([\d.]+)deg ([\d.]+)deg/gi)]
           .map(m=>({c:m[1],a:+m[2],b:+m[3]}));
         const a2=(s2.find(x=>0>=x.a&&0<x.b)||{}).c;
-        chk(lg.dataset.done==='1','Q3 だけ答えたら 1 と数える: '+lg.dataset.done+'（直前は '+n0+'）');
+        chk(lg.dataset.done==='1','Q3 だけ答えたら 1 と数える: '+lg.dataset.done);
         chk(a2==='#123c9b','Q1 を飛ばしてもてっぺんから埋まる: 12時='+a2);
       }
-      await settle(0);
+      await jump(0);
 
       /* 最後の1問（Q5）が「初回の回答」になる順序で試す。上の続きでは Q5 を
          先に答えてしまっているので、保存を消して読み直す。 */
