@@ -657,6 +657,20 @@ try{
         chk(from==='0','環は12時から始まる: from='+from+'deg');
         chk(at(0)==='#123c9b','12時が回答済みの色（群1）: '+at(0));
         chk(at(270)!=='#123c9b','9時はまだ埋まっていない（時計回り）: '+at(270));
+        /* ★環は「何問答えたか」で詰める。「どの設問に答えたか」で塗ると、
+           Q2 から答えた人のてっぺんが空いて「まだ始まっていない」ように
+           見える（オーナー指摘で判明）。位置を担当するのは帯のほう。
+           ここでは Q1 を飛ばして Q3 に答え、それでもてっぺんが埋まることを見る。 */
+        const n0=+lg.dataset.done;
+        w.eval('ans={};curQ=0');
+        d.querySelectorAll('#lq-list .q-card')[2].querySelector('.sdw').click();
+        await sleep(300);
+        const r2=lg.style.getPropertyValue('--ring');
+        const s2=[...r2.matchAll(/(#[0-9a-f]{6}|rgba?\([^)]*\)|transparent) ([\d.]+)deg ([\d.]+)deg/gi)]
+          .map(m=>({c:m[1],a:+m[2],b:+m[3]}));
+        const a2=(s2.find(x=>0>=x.a&&0<x.b)||{}).c;
+        chk(lg.dataset.done==='1','Q3 だけ答えたら 1 と数える: '+lg.dataset.done+'（直前は '+n0+'）');
+        chk(a2==='#123c9b','Q1 を飛ばしてもてっぺんから埋まる: 12時='+a2);
       }
       await settle(0);
 

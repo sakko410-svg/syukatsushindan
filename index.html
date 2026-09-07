@@ -2316,7 +2316,14 @@ function renderProgSeg(id,curGroup){
      12時（0deg）から時計回りなので、from 0deg のままでよい。
      from -90deg と書くと開始点が9時へ回り、左上から貯まって見える
      （実際にそう出ていた）。「-90deg で真上」は SVG や canvas の作法で、
-     conic-gradient には要らない。 */
+     conic-gradient には要らない。
+
+   ★塗るのは「何問答えたか（curQ）」であって「どの設問に答えたか」ではない。
+     帯（.ps-cell）は ans[i] を見て位置どおりに塗る ── あちらは設問の並びと
+     同じ形なので、飛ばした問がその場所で空くのが正しい。
+     円は真ん中に「2/20」と数を出す計器で、Q2・Q3 に先に答えると
+     てっぺんが空いて「まだ始まっていない」ように見えた（オーナー指摘）。
+     円は数を、帯は位置を担当する。 */
 function ringGrad(){
   const GAP_G=7,GAP_C=2.2;                                   /* 群間 / 目盛間（度） */
   const per=(360-GAP_G*PAGE_COUNT)/PAGE_COUNT;               /* 1群ぶん */
@@ -2327,7 +2334,7 @@ function ringGrad(){
   const put=(c,w)=>{st.push(`${c} ${a.toFixed(2)}deg ${(a+w).toFixed(2)}deg`);a+=w;};
   for(let g=0;g<PAGE_COUNT;g++){
     for(let c=0;c<PAGE_SIZE;c++){
-      put(typeof ans[g*PAGE_SIZE+c]==='number'?COL[g]:OFF,cell);
+      put(g*PAGE_SIZE+c<curQ?COL[g]:OFF,cell);
       if(c<PAGE_SIZE-1)put('transparent',GAP_C);
     }
     put('transparent',GAP_G);
