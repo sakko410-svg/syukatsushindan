@@ -1306,6 +1306,51 @@ html,body{background:var(--ink-field);}
      送り先であり、同じくヘッダに潜るため。 */
 .q-card,#lq-done,#q-next{scroll-margin-top:74px;}
 
+/* --- LPの進捗ゲージを浮かせる（オーナー要望・FAB的に）---------------------
+   診断画面の .prog-area は既に position:sticky; top:60px（170行）で
+   ヘッダの下に貼り付いている。浮いていなかったのは LP 側だけだった。
+
+   なぜ LP は下、診断画面は上なのか
+     診断画面は画面全体が診断なので、帯を上に置けば常に見える。
+     LP は長いページの中の1セクションで、上に貼ると
+     ヒーローを読んでいるあいだも出てしまう。
+     sticky の bottom は「親（#lp-quiz）が画面の下側にかかっているあいだ」
+     しか効かないので、Q1-5 を答えているときだけ出て、
+     5問を過ぎると自然に流れて消える。JS は1行も要らない。
+
+   z-index:40 … ヘッダ（1000）とドロワーより下、設問カードより上。
+   設問カードは position を持たないので、40 で確実に上に出る。 */
+/* ★前提のバグ修正。50行の html,body{overflow-x:hidden} が
+   position:sticky を殺していた。body が overflow を持つとスクロールの主体が
+   body になり、実際のスクロールは viewport で起きるため sticky が発火しない。
+   そのせいで診断画面の .prog-area（170行・sticky top:60px）も、
+   意図に反して一度も貼り付いていなかった（実測: y=0 で top=60、
+   y=400 で top=-324 と流れて消える）。
+   ★body 側は visible ではなく clip にする。
+     visible に戻すと、画面遷移のアニメーション
+     （@keyframes pageIn の translateX(20px)・54行）が0.34秒だけ
+     20px はみ出し、横スクロールバーが一瞬出る。実測で確認した
+     （scrollWidth が 390→410 / 320→340 になる）。
+     overflow:clip は overflow:hidden と違ってスクロールコンテナを
+     作らないので、はみ出しを切りながら position:sticky が生きる。 */
+html{overflow-x:hidden;}
+body{overflow-x:clip;}
+
+/* position:sticky では足りない。sticky の bottom は「自然位置より上にいる
+   あいだ」しか固定できず、.lq-foot は設問リストの末尾にあるため、実測で
+   y=841 を過ぎると流れてしまう（設問はまだ2問残っている）。
+   #lp-quiz が画面に入っているあいだだけ fixed にする（JS 側 lpFabWatch）。
+   .lq-foot は高さを保ったまま残るので、外れても版面が跳ねない。 */
+.lq-foot{min-height:32px;}
+.lq-foot.fab .prog-seg{
+  position:fixed;bottom:14px;z-index:40;
+  left:50%;transform:translateX(-50%);
+  width:min(calc(100% - 32px),448px);
+  /* 浮いているものとして読ませるため影を1段強くする。紺の面の上なので
+     硬い矩形の影（--sh-2 / 既存トークン）がそのまま効く。 */
+  box-shadow:var(--sh-2);
+}
+
 /* ============================================================================
    TEXTURE — 面に質感を足す
    ----------------------------------------------------------------------------
@@ -1358,23 +1403,29 @@ body::before{
 
 /* --- 網点。集中線を持たない紺の面だけ ---
    5px ピッチの点を半ピッチずらして2枚重ね、45度の網に見せる（昭和の印刷）。
-   z-index:-1 と isolation:isolate の組みは、この file の .res-type-name::before
-   （506行）と同じ手。親の地の上・本文の下に敷く。 */
-#lp-quiz-sec,.quiz-bg,.ftr{position:relative;isolation:isolate;}
-#lp-quiz-sec::before,.quiz-bg::before,.ftr::before{
-  content:'';position:absolute;inset:0;z-index:-1;pointer-events:none;
+
+   ★疑似要素ではなく background-image のレイヤとして載せる。
+     最初は ::before + z-index:-1 + isolation:isolate で作ったが、
+     isolation:isolate が #lp-quiz-sec に重ね合わせ文脈を作り、その中の
+     position:fixed（FABの進捗ゲージ）を閉じ込めてしまう。結果、後ろに
+     並ぶ #type-section が上に載ってゲージが消えた。
+     背景レイヤなら重ね合わせ文脈を1つも作らずに同じ絵になる。
+   ★色の指定（background:var(--ink-field)）は上書きしない。
+     background-image だけを足すので、地の色はそのまま残る。 */
+#lp-quiz-sec,.quiz-bg,.ftr{
   background-image:
     radial-gradient(rgba(255,255,255,.055) .7px,transparent .8px),
     radial-gradient(rgba(255,255,255,.04) .7px,transparent .8px);
   background-size:5px 5px,5px 5px;
   background-position:0 0,2.5px 2.5px;
+  background-repeat:repeat,repeat;
 }
 
 /* コントラストを上げる設定を選んでいる人には、質感の層を出さない。
    いずれも装飾であって情報を持たないため、消しても失うものが無い。 */
 @media (prefers-contrast:more){
-  body::before,body::after,
-  #lp-quiz-sec::before,.quiz-bg::before,.ftr::before{display:none;}
+  body::before,body::after{display:none;}
+  #lp-quiz-sec,.quiz-bg,.ftr{background-image:none;}
 }
 
 /* ============================================================================
@@ -2006,6 +2057,7 @@ window.addEventListener('DOMContentLoaded',()=>{
   checkSavedProgress();
   renderPage('lp');    /* LP埋め込み（Q1-5）。Q1-5 が置かれる唯一の場所 */
   renderPage('quiz');  /* 診断画面の先頭ページ（Q6-10）も先に描いておく */
+  lpFabWatch();        /* LPの進捗ゲージを、診断セクションにいるあいだ浮かせる */
   window.addEventListener('scroll',()=>document.getElementById('hdr').classList.toggle('sc',scrollY>10));
   document.addEventListener('click',e=>{
     const d=document.getElementById('drawer'),b=document.getElementById('ham');
@@ -2359,6 +2411,32 @@ function pick(el){
   /* 送り先（#lq-done）は updateLpDone() が出したあとでないと隠れているので、
      スクロールはこの順で最後に呼ぶ。 */
   if(firstForPos)scrollToNextQ(el,tg);
+}
+
+/* LPの進捗ゲージを FAB のように浮かせる（オーナー要望）。
+   #lp-quiz が画面にかかっているあいだだけ .lq-foot に .fab を付ける。
+   CSS の position:sticky では足りない理由は末尾の CSS コメントに書いた。
+   ★診断画面の .prog-area は CSS の sticky（170行）のままでよい。
+     あちらは画面全体が診断なので、ヘッダ直下に貼れば常に見える。
+   IntersectionObserver が無い環境では何もしない（ゲージは版面の中に残る）。 */
+function lpFabWatch(){
+  const q=document.getElementById('lq-list'),f=document.querySelector('.lq-foot');
+  if(!q||!f)return;
+  /* 条件は「設問リストがヘッダのすぐ下の線を跨いでいる」。
+     ・ヒーローを読んでいるあいだは出ない（リストがまだ線より下）
+     ・5問を過ぎると消える（リストが線より上へ抜ける）
+     ★IntersectionObserver の rootMargin では書けない。
+       '-74px 0px -100% 0px' と書くと root の高さが 844-74-844 = 負になり、
+       環境によって一度も交差しなくなる（実際に iframe 上で再現した）。
+       毎フレームの計算ではなくスクロールごとの2値なので、素直に測る。 */
+  const HDR=74;
+  const upd=()=>{
+    const r=q.getBoundingClientRect();
+    f.classList.toggle('fab',r.top<HDR&&r.bottom>HDR);
+  };
+  addEventListener('scroll',upd,{passive:true});
+  addEventListener('resize',upd);
+  upd();
 }
 
 /* 回答したら次の設問へスクロールする（オーナー要望）。

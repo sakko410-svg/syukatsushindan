@@ -145,9 +145,15 @@ try{
     chk(vi.pointerEvents==='none','版面の沈み（body::before）が操作を塞がない: pointer-events='+vi.pointerEvents);
     const op=parseFloat(gr.opacity);
     chk(op>0&&op<=.12,'紙の目の濃さが 0 < opacity <= .12 の範囲: '+gr.opacity);
-    const ht=w.getComputedStyle(d.getElementById('lp-quiz-sec'),'::before');
-    chk(/radial-gradient/.test(ht.backgroundImage),'網点が紺の面に載っている');
-    chk(ht.zIndex==='-1','網点は本文の下に敷かれている: z-index='+ht.zIndex);
+    /* 網点は背景レイヤとして載せる。疑似要素＋isolation:isolate にすると
+       重ね合わせ文脈ができ、その中の position:fixed（FABのゲージ）が
+       閉じ込められて後続セクションの下に潜る。実際に一度そうなった。 */
+    for(const sel of ['#lp-quiz-sec','.quiz-bg','.ftr']){
+      const s=w.getComputedStyle(d.querySelector(sel));
+      chk(/radial-gradient/.test(s.backgroundImage),'網点が載っている: '+sel);
+      chk(s.backgroundColor!=='rgba(0, 0, 0, 0)','地の色が消えていない: '+sel+' = '+s.backgroundColor);
+      chk(s.isolation!=='isolate','重ね合わせ文脈を作っていない: '+sel+' isolation='+s.isolation);
+    }
     /* 実際に押せること。全面オーバーレイの事故はここでしか出ない。 */
     const dot=d.querySelector('#lq-list .sdw');
     dot.scrollIntoView({block:'center'}); await sleep(120);
@@ -205,10 +211,35 @@ try{
       w.nextPage();
       await sleep(80);
     }
-    // ローディング 3.6s
-    await sleep(6200);
+    const prevRc=d.querySelector('.res-code');   // 前の回のノード（初回は null）
+    /* .res-code は countUpCode() が18回×60msかけて1文字ずつ確定させる
+       （showResult の 600ms 後に開始・合計およそ1.7秒）。固定の待ち時間で
+       読むと、その途中のフレーム（"HAWS" のような別の正しい形のコード）を
+       拾って落ちることがあった。実際に1度、DBWG の回で HAWS を読んでいる。
+       止まるまで待つ。2回続けて同じ文字列になったら確定とみなす。 */
+    await sleep(2500);                       // ローディング（1.8s）ぶん
+    let got='(なし)',prev=null,same=0;
+    for(let i=0;i<60;i++){
+      const rcEl=d.querySelector('.res-code');
+      /* ★前の回の結果画面をそのまま読まないこと。showResult() は
+         #screen-result を innerHTML ごと差し替えるので、.res-code は
+         毎回新しいノードになる。同じノードのままなら、まだこの回の
+         結果は描かれていない（実際に DBLG の回で1つ前の DBLS を読んだ）。 */
+      if(rcEl&&rcEl===prevRc){await sleep(200);continue;}
+      /* 要素がまだ無い（ローディング中）／初期値 "----" のあいだは数えない。
+         countUpCode は 60ms ごとに書き換わるので、200ms 間隔で3回続けて
+         同じ文字列なら止まったとみなす（途中で偶然2回一致することはある）。 */
+      if(rcEl){
+        const now=rcEl.textContent.trim();
+        if(now&&now!=='----'){
+          same=(now===prev)?same+1:0;
+          prev=now;got=now;
+          if(same>=2)break;
+        }
+      }
+      await sleep(200);
+    }
     const rc=d.querySelector('.res-code');
-    const got=rc?rc.textContent.trim():'(なし)';
     const gotJs=w.getCode();
     const nm=d.querySelector('.res-type-name');
     chk(d.getElementById('screen-result').classList.contains('active') && got===want,
@@ -563,6 +594,35 @@ try{
       chk(sTo===null,'#lq-done が隠れているうちは送らない: '+id(sTo));
 
       w.Element.prototype.scrollIntoView=realSIV;
+
+      /* --- 進捗ゲージが FAB として浮くこと ---
+         .lq-foot は設問リストの末尾にあるので position:sticky では足りず
+         （自然位置を過ぎると流れる）、#lq-list がヘッダ直下の線を跨いで
+         いるあいだだけ position:fixed にしている。 */
+      const lf=d.querySelector('.lq-foot'),lg=d.getElementById('lq-prog-seg');
+      const seen={hero:null,mid:null,past:null};
+      /* iframe 上では programmatic scroll の scroll イベントが届かないことが
+         あるため、位置を変えたあと明示的に発火させてから読む。
+         本番の挙動（実ブラウザ）は CDP で別途確認済み。 */
+      const settle=async y=>{w.scrollTo({top:y,behavior:'instant'});
+        w.dispatchEvent(new w.Event('scroll')); await sleep(250);};
+      await settle(0);
+      seen.hero=lf.classList.contains('fab');
+      await settle(900);
+      seen.mid=lf.classList.contains('fab');
+      {const rr=d.getElementById('lq-list').getBoundingClientRect();
+       seen.midY=w.scrollY; seen.midTop=rr.top; seen.midBot=rr.bottom;
+}
+      const mb=lg.getBoundingClientRect(), vh=w.innerHeight;
+      await settle(d.getElementById('lq-list').getBoundingClientRect().bottom+w.scrollY+200);
+      seen.past=lf.classList.contains('fab');
+      chk(seen.hero===false,'ヒーローを読んでいるあいだは浮かせない: fab='+seen.hero);
+      chk(seen.mid===true,'設問を答えているあいだは浮く: fab='+seen.mid+' / scrollY='+Math.round(seen.midY)
+        +' / #lq-list '+Math.round(seen.midTop)+'..'+Math.round(seen.midBot));
+      chk(seen.past===false,'設問を過ぎたら消える: fab='+seen.past);
+      chk(Math.abs(mb.bottom-(vh-14))<3,'浮いているとき画面下端から14px: bottom='+Math.round(mb.bottom)+' / 画面高 '+vh);
+      chk(mb.width<=448+1,'幅が本文の柱を超えない: '+Math.round(mb.width));
+      await settle(0);
 
       /* 最後の1問（Q5）が「初回の回答」になる順序で試す。上の続きでは Q5 を
          先に答えてしまっているので、保存を消して読み直す。 */
@@ -1234,7 +1294,20 @@ try{
     chk(pageH<=1600,'診断画面1ページの高さ('+vw+'px): '+pageH+'px（カード1枚 '+cardH+'px・目標1,600px以内）');
     p('     '+vw+'px: 1ページ '+pageH+'px / カード1枚 '+cardH+'px / 横スクロール '
       +(d.documentElement.scrollWidth>vw));
-    chk(d.documentElement.scrollWidth<=vw,'横スクロールが発生しない('+vw+'px): scrollWidth='+d.documentElement.scrollWidth);
+    /* 落ちたときに「何がはみ出したか」まで出す。scrollWidth だけでは
+       どの要素かが分からず、原因の特定に毎回スクリプトを書くことになる。 */
+    const cw=d.documentElement.clientWidth;
+    const okW=d.documentElement.scrollWidth<=vw;
+    /* ★落ちたときだけ列挙する。通っているときに出すと、body の overflow:clip で
+       切れているだけの要素（pageIn の translateX(20px) など）まで並んで、
+       問題が残っているように読めてしまう。 */
+    const outs=okW?[]:[...new Set([...d.querySelectorAll('body *')].filter(e=>{
+      const r=e.getBoundingClientRect();
+      return r.width>0&&r.right>cw+0.5;
+    }).map(e=>(e.id?'#'+e.id:(typeof e.className==='string'&&e.className?'.'+e.className.trim().split(/\s+/)[0]:e.tagName))
+      +'→'+Math.round(e.getBoundingClientRect().right)))].slice(0,6);
+    chk(okW,'横スクロールが発生しない('+vw+'px): scrollWidth='
+      +d.documentElement.scrollWidth+(outs.length?'  はみ出し: '+outs.join(' , '):''));
     w.clearSavedProgress();
   }
   f.style.width='390px';
