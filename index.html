@@ -1342,13 +1342,35 @@ body{overflow-x:clip;}
    #lp-quiz が画面に入っているあいだだけ fixed にする（JS 側 lpFabWatch）。
    .lq-foot は高さを保ったまま残るので、外れても版面が跳ねない。 */
 .lq-foot{min-height:32px;}
+
+/* 浮くときは円で右下に出す（オーナー指定）。
+   帯のままだと本文の幅を丸ごと塞ぐが、円なら62pxで済む。
+   中身は renderProgSeg() が作った --ring（20目盛を4群に分けた円環）と
+   data-done / data-total。帯と同じ状態から作っているので割れない。 */
 .lq-foot.fab .prog-seg{
-  position:fixed;bottom:14px;z-index:40;
-  left:50%;transform:translateX(-50%);
-  width:min(calc(100% - 32px),448px);
-  /* 浮いているものとして読ませるため影を1段強くする。紺の面の上なので
-     硬い矩形の影（--sh-2 / 既存トークン）がそのまま効く。 */
+  position:fixed;right:16px;bottom:16px;left:auto;transform:none;z-index:40;
+  width:62px;height:62px;padding:0;border-radius:50%;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;
+  background-color:var(--paper2);
+  /* 内側を紙で塗りつぶして環にする。closest-side なので直径に追従する。 */
+  background-image:
+    radial-gradient(closest-side,var(--paper2) 0 61%,transparent 61% 100%),
+    var(--ring);
+  border:var(--bd) solid var(--navy);
+  /* 浮いているものとして読ませるため影を1段強くする。硬い矩形の影
+     （--sh-2 / 既存トークン）が、円でもレトロの語法のまま効く。 */
   box-shadow:var(--sh-2);
+}
+.lq-foot.fab .ps-group{display:none;}   /* 帯の目盛は円環が引き継ぐ */
+.lq-foot.fab .prog-seg::before{
+  content:attr(data-done);
+  font-family:var(--disp);font-size:1.2rem;font-weight:700;line-height:1;color:var(--navy);
+}
+.lq-foot.fab .prog-seg::after{
+  /* 総数は data-total から取る。CSS に 20 を書くと Qs.length と二重管理になる。 */
+  content:'/' attr(data-total);
+  font-family:var(--disp);font-size:.58rem;font-weight:700;line-height:1;
+  color:var(--mid);margin-top:2px;
 }
 
 /* ============================================================================
@@ -2279,6 +2301,32 @@ function renderProgSeg(id,curGroup){
   el.innerHTML=h;
   el.setAttribute('aria-valuenow',String(curQ));
   el.setAttribute('aria-valuetext',`${Qs.length}問中${curQ}問に回答済み`);
+  /* 円形（FAB）で出すときの材料。帯と同じ状態から作るので、
+     見た目が2つに割れることがない。使う側は末尾CSSの .lq-foot.fab。 */
+  el.style.setProperty('--ring',ringGrad());
+  el.dataset.done=String(curQ);
+  el.dataset.total=String(Qs.length);
+}
+
+/* 20目盛を円環にする。帯と同じ「4群 × 5目盛」を保つ ── 群のあいだを広く空け、
+   色も .ps-group と同じ --cat-ink 系4色を使う。円にした瞬間に別の意味の
+   図形になってしまわないようにするため。12時から時計回り。 */
+function ringGrad(){
+  const GAP_G=7,GAP_C=2.2;                                   /* 群間 / 目盛間（度） */
+  const per=(360-GAP_G*PAGE_COUNT)/PAGE_COUNT;               /* 1群ぶん */
+  const cell=(per-GAP_C*(PAGE_SIZE-1))/PAGE_SIZE;            /* 目盛1つぶん */
+  const COL=['#123c9b','#14523a','#a4301f','#3d376c'];       /* .ps-group と同値 */
+  const OFF='rgba(17,26,48,.22)';                            /* 未回答 */
+  let a=0;const st=[];
+  const put=(c,w)=>{st.push(`${c} ${a.toFixed(2)}deg ${(a+w).toFixed(2)}deg`);a+=w;};
+  for(let g=0;g<PAGE_COUNT;g++){
+    for(let c=0;c<PAGE_SIZE;c++){
+      put(typeof ans[g*PAGE_SIZE+c]==='number'?COL[g]:OFF,cell);
+      if(c<PAGE_SIZE-1)put('transparent',GAP_C);
+    }
+    put('transparent',GAP_G);
+  }
+  return `conic-gradient(from -90deg,${st.join(',')})`;
 }
 
 /* 1問以上答えていたら、CTAの文言を実際の遷移先に合わせる。
@@ -2430,9 +2478,21 @@ function lpFabWatch(){
        環境によって一度も交差しなくなる（実際に iframe 上で再現した）。
        毎フレームの計算ではなくスクロールごとの2値なので、素直に測る。 */
   const HDR=74;
+  /* 譲る相手は #lq-continue（「次へ →」）。#lq-done ではない ──
+     あちらは5問そろうまで隠れているパネルで、ボタンはその外側の .q-nav に
+     あり常に出ている。円は右下に出るので、放っておくとボタンに重なる。
+
+     ★「見えたら消す」にはしない。LPの診断部は5問で約1,330pxしかなく、
+       ボタンが見えた時点で消すと、円が出るのは500pxぶんだけになる（実測）。
+       実際に重なっているあいだだけ譲る。重なりが解けたらまた出る。
+     ★16/62 は下の CSS（.lq-foot.fab .prog-seg の bottom / 幅）と同じ値。
+       ずれると重なり判定が効かなくなるので、e2e が実寸で見ている。 */
+  const cta=document.getElementById('lq-continue'),FAB_B=16,FAB_S=62;
   const upd=()=>{
     const r=q.getBoundingClientRect();
-    f.classList.toggle('fab',r.top<HDR&&r.bottom>HDR);
+    const c=cta&&cta.getBoundingClientRect();
+    const hit=c&&c.bottom>innerHeight-FAB_B-FAB_S&&c.top<innerHeight-FAB_B;
+    f.classList.toggle('fab',r.top<HDR&&r.bottom>HDR&&!hit);
   };
   addEventListener('scroll',upd,{passive:true});
   addEventListener('resize',upd);

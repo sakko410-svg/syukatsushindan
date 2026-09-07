@@ -593,33 +593,54 @@ try{
          （自然位置を過ぎると流れる）、#lq-list がヘッダ直下の線を跨いで
          いるあいだだけ position:fixed にしている。 */
       const lf=d.querySelector('.lq-foot'),lg=d.getElementById('lq-prog-seg'),lst=d.getElementById('lq-list');
+      const cta=d.getElementById('lq-continue');
       /* iframe 上では programmatic scroll の scroll イベントが届かないことが
          あるため、位置を変えたあと明示的に発火させてから読む。
          本番の実挙動は CDP（実ブラウザ）で別途確認済み。 */
       const settle=async y=>{w.scrollTo({top:Math.max(0,Math.round(y)),behavior:'instant'});
-        w.dispatchEvent(new w.Event('scroll')); await sleep(250);};
+        w.dispatchEvent(new w.Event('scroll')); await sleep(220);};
       /* ★スクロール量を決め打ちしない。CI には Web フォントが無く版面が縮むため、
-         「y=0 ならヒーローの途中」という前提が成り立たない（実際に CI で
-         y=0 の時点で Q1 が画面上部に来て落ちた）。
-         毎回その場の座標から期待値を出し、規則どおりかを見る。 */
-      const HDR=74;
+         「y=0 ならヒーローの途中」という前提が成り立たない（実際に CI で落ちた）。
+         見るのは位置ではなく性質:
+           ・答えているあいだに一度は浮く
+           ・「次へ →」に重なった状態では浮かない（円は右下・全幅ボタンの上）
+           ・設問を過ぎたら消える
+           ・浮いているときは右下の62px円で、環と残数を持つ */
       const absTop=lst.getBoundingClientRect().top+w.scrollY;
       const absBot=lst.getBoundingClientRect().bottom+w.scrollY;
-      let mismatch=[],sawOn=false,sawOff=false,floatRect=null;
-      for(const y of [absTop-300,absTop-HDR+20,(absTop+absBot)/2-300,absBot-HDR-20,absBot+300]){
-        await settle(y);
-        const r=lst.getBoundingClientRect();
-        const want=r.top<HDR&&r.bottom>HDR;
-        const got=lf.classList.contains('fab');
-        if(got!==want)mismatch.push('y='+Math.round(w.scrollY)+' 期待'+want+' 実際'+got);
-        if(want){sawOn=true;if(!floatRect)floatRect=lg.getBoundingClientRect();}else sawOff=true;
+      let sawOn=false,overlap=[],floatRect=null,floatCS=null,pastOn=null;
+      const steps=12;
+      for(let i=0;i<=steps;i++){
+        await settle(absTop-300+(absBot+300-(absTop-300))*i/steps);
+        const on=lf.classList.contains('fab');
+        if(on){
+          sawOn=true;
+          const g=lg.getBoundingClientRect(),c=cta.getBoundingClientRect();
+          if(!floatRect){floatRect=g;
+            /* ★浮いている「その瞬間」に測る。ループを抜けたあとに
+               getComputedStyle しても、そのときは既に帯へ戻っている。 */
+            const cs=w.getComputedStyle(lg);
+            floatCS={r:cs.borderRadius,bg:cs.backgroundImage,
+                     grp:w.getComputedStyle(d.querySelector('.lq-foot .ps-group')).display};}
+          if(c.bottom>g.top&&c.top<g.bottom&&c.right>g.left&&c.left<g.right)
+            overlap.push('y='+Math.round(w.scrollY));
+        }
       }
-      chk(mismatch.length===0,'浮かせる条件（設問リストがヘッダ直下を跨ぐ）と実際が全点で一致'
-        +(mismatch.length?' → '+mismatch.join(' / '):''));
-      chk(sawOn&&sawOff,'浮く場面と浮かない場面の両方を通った');
-      chk(!!floatRect&&Math.abs(floatRect.bottom-(w.innerHeight-14))<3,
-        '浮いているとき画面下端から14px: bottom='+(floatRect?Math.round(floatRect.bottom):'-')+' / 画面高 '+w.innerHeight);
-      chk(!!floatRect&&floatRect.width<=449,'幅が本文の柱を超えない: '+(floatRect?Math.round(floatRect.width):'-'));
+      await settle(absBot+400);
+      pastOn=lf.classList.contains('fab');
+      chk(sawOn,'答えているあいだに進捗ゲージが浮く');
+      chk(overlap.length===0,'「次へ →」に重なった状態では浮かない'+(overlap.length?' → '+overlap.join(','):''));
+      chk(pastOn===false,'設問を過ぎたら消える: fab='+pastOn);
+      /* 円であること・右下にいること。JS 側の重なり判定（FAB_B=16 / FAB_S=62）は
+         この寸法を前提にしているので、ずれたら必ずここで落ちる。 */
+      chk(!!floatRect&&Math.round(floatRect.width)===62&&Math.round(floatRect.height)===62,
+        '62pxの円: '+(floatRect?Math.round(floatRect.width)+'x'+Math.round(floatRect.height):'-'));
+      chk(!!floatRect&&Math.abs(floatRect.bottom-(w.innerHeight-16))<3&&Math.abs(floatRect.right-(w.innerWidth-16))<3,
+        '画面の右下から16px: '+(floatRect?'下'+Math.round(w.innerHeight-floatRect.bottom)+' 右'+Math.round(w.innerWidth-floatRect.right):'-'));
+      chk(!!floatCS&&floatCS.r==='50%','角丸50%（円）: '+(floatCS?floatCS.r:'-'));
+      chk(!!floatCS&&/conic-gradient/.test(floatCS.bg),'20目盛が環（conic-gradient）になっている');
+      chk(lg.dataset.done!==undefined&&lg.dataset.total==='20','残数を持つ: '+lg.dataset.done+'/'+lg.dataset.total);
+      chk(!!floatCS&&floatCS.grp==='none','帯の目盛は円のとき隠れる: '+(floatCS?floatCS.grp:'-'));
       await settle(0);
 
       /* 最後の1問（Q5）が「初回の回答」になる順序で試す。上の続きでは Q5 を

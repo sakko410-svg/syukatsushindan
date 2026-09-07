@@ -27,7 +27,14 @@ class El {
     this._nodes = [];            // 子ノード（El か文字列）
     this.attrs = Object.create(null);
     this.classList = new ClassList(this);
-    this.style = new Proxy({ cssText:'' }, { set(t,k,v){ t[k]=v; return true; }, get(t,k){ return t[k]===undefined?'':t[k]; } });
+    /* setProperty / getPropertyValue / removeProperty も持たせる。
+       カスタムプロパティ（--ring など）は el.style.foo では書けないので
+       実装側は setProperty を呼ぶ。無いと TypeError で落ちる。 */
+    const sb = { cssText:'' };
+    sb.setProperty = (k,v)=>{ sb[k]=String(v); };
+    sb.getPropertyValue = k => (sb[k]===undefined?'':sb[k]);
+    sb.removeProperty = k => { delete sb[k]; };
+    this.style = new Proxy(sb, { set(t,k,v){ t[k]=v; return true; }, get(t,k){ return t[k]===undefined?'':t[k]; } });
     this.dataset = {};
     this._innerHTML = '';
     this.offsetWidth = 100; this.offsetHeight = 40;
