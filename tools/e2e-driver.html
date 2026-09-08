@@ -1495,6 +1495,16 @@ try{
       const lb=getComputedStyle(ob).borderLeftColor;
       if(wasA)oa.classList.add('on'); if(wasB)ob.classList.add('on');
       chk(la===lb,list+' の A側 / B側の縦帯は選ぶ前は同色（優劣を付けない）: '+la+' vs '+lb);
+      /* ★帯の太さも A/B で同じであること。片方だけ細いと、内容の開始位置が
+         その差ぶん横にずれる（実際 .opt-b を「枠を毛髪線にする」一覧へ
+         入れてしまい、A=4px / B=1px で 3px ずれていた。
+         オーナー指摘「帯が細い 始点がずれてる」）。 */
+      const wa=getComputedStyle(oa).borderLeftWidth, wb=getComputedStyle(ob).borderLeftWidth;
+      chk(wa===wb,list+' の A側 / B側の帯は同じ太さ: '+wa+' vs '+wb);
+      chk(parseFloat(wa)>=4,list+' の帯は 4px 以上（細いと帯に見えない）: '+wa);
+      const xa=Math.round(oa.querySelector('.opt-key').getBoundingClientRect().left);
+      const xb=Math.round(ob.querySelector('.opt-key').getBoundingClientRect().left);
+      chk(xa===xb,list+' の A. と B. の左端が揃っている: '+xa+' vs '+xb);
       const hint=c0.querySelector('.spec-hint');
       chk(hint.firstElementChild.textContent==='A'&&hint.lastElementChild.textContent==='B',
           list+' の両端ラベルが A / B: '+[...hint.children].map(x=>x.textContent).join(' | '));

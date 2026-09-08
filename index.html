@@ -1689,7 +1689,10 @@ body::after,body::before{content:none;}
 .r-panel,.q-card,.tc,.job-tag,.res-kw,.cont-banner,.shared-banner,.famous-box,
 .friend-card,.friend-btn,.char-frame,.type-peek,.tp-img,.tc-pill,.d-lbl,.ca,
 .cm-badge,.rar-badge,.pct-badge,.agent-block,.ab-link,.pf-chip,.sb-img,.sb-cta,
-.compat-cbox img,.tc img,.opt-b,.lq-done,.q-badge,.tp-str-lbl{
+/* ★.opt-b をここに入れてはいけない。.opt-b の border-left は面を囲む枠ではなく
+   「行頭の帯」であり、細くすると A(4px) と B(1px) で内容の開始位置が 3px ずれる
+   （オーナー指摘「始点がずれてる」）。帯の太さは 14. で A/B まとめて決める。 */
+.compat-cbox img,.tc img,.lq-done,.q-badge,.tp-str-lbl{
   border-width:1px;border-color:var(--border);border-radius:var(--r-1);
 }
 .r-ph,.q-top,.prog-area,.hdr,.ftr,.narration{border-width:1px;border-color:var(--border);}
@@ -1868,12 +1871,10 @@ body::after,body::before{content:none;}
 /* --- 14. A / B の色分け -------------------------------------------------
    .opt-a はからし、.opt-b は紺だった。12. と同じ理由で、色相を2つ使わず
    「薄い構造色 ⇄ 白」の濃淡で分ける。文字色はどちらも本文色に揃える。 */
-.opt-a{border-left-color:var(--border2);}
-.opt-b{border-left-color:var(--border2);}
+.opt-a,.opt-b{border-left-width:5px;border-left-color:var(--border2);}
 .opt-a .opt-key,.opt-b .opt-key{color:var(--mid);}
 .opt-a.on,.opt-b.on{background:var(--paper2);color:var(--navy);}
-.opt-a.on{border-left-color:var(--sumi);}
-.opt-b.on{border-left-color:var(--sumi);}
+.opt-a.on,.opt-b.on{border-left-color:var(--info);}
 
 /* --- 15. 明朝のWebフォント -----------------------------------------------
    明朝が要るのは16タイプ名と16コードだけ（82文字）。全字種なら数百KB だが、
