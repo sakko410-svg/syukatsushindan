@@ -203,23 +203,25 @@ th{background:var(--paper2);font-weight:900;white-space:nowrap;}
   <section class="card">
     <h2>7. Cookie・アクセス解析ツールと外部送信</h2>
 
-    <h3>現在の状況</h3>
-    <p><strong>現時点で、当サイトはアクセス解析ツールを導入していません。</strong>広告配信事業者による行動ターゲティング広告も配信していません。したがって、閲覧しただけで利用者の情報が外部へ送信されることはありません。</p>
-
     <!-- ============================================================
-         TODO: GA4 の測定ID（index.html の const GA_ID）を入れたら、
-         下の <h3>導入した場合の取り扱い</h3> を「現在の状況」として書き換え、
-         上の段落を削除すること。導入と本ページの改定は同時に行う。
-         あわせて 未決事項 U-7（Cookie同意バナーの要否）を法務確認の結果と
-         セットで判断すること。
+         2026-09-08 に GA4（測定ID G-7BLNQN4P61）を導入した。
+         ★index.html の const GA_ID を空に戻したら、この節も
+           「導入していません」に戻すこと。片方だけ動かすと虚偽記載になる
+           （docs/specs/diagnosis-experience-revamp.md §D-7 D-L5）。
+         ★Cookie 同意バナーは置かない判断（未決事項 U-7）。
+           外部送信規律が求めているのは通知または公表であって同意ではなく、
+           この節の公表がその役割を果たす。置く判断に変わったら、
+           バナーを出してから測定IDを入れ直すこと。
          ============================================================ -->
-    <h3>導入した場合の取り扱い</h3>
-    <p>今後、利用状況の把握のために次のツールを導入する場合があります。導入時には本ポリシーを改定し、送信先・送信される情報・利用目的を明記します。</p>
+    <h3>現在の状況</h3>
+    <p>当サイトは、利用状況の把握のために <strong>Google アナリティクス 4</strong> を利用しています。広告配信事業者による行動ターゲティング広告は配信していません。</p>
+    <p>下記の情報が Google LLC へ送信されます。<strong>氏名・メールアドレス・電話番号は取得していないため、これらが送信されることはありません。</strong></p>
     <table>
       <tr><th>送信先</th><td>Google LLC（Google アナリティクス 4）</td></tr>
       <tr><th>送信される情報</th><td>Cookie に保存された識別子、閲覧ページのURL、参照元、端末・ブラウザの種類、おおよその地域、および <strong>3. でうかがった立場・卒業年度・性別・業界・職種の選択値</strong>（いずれも選択肢のコード値であり、自由入力の文字列は送信しません）</td></tr>
-      <tr><th>利用目的</th><td>サイトの利用状況の分析と改善</td></tr>
-      <tr><th>停止方法</th><td>ブラウザの設定で Cookie を無効にするか、Google が提供するオプトアウトアドオンを利用してください</td></tr>
+      <tr><th>利用目的</th><td>サイトの利用状況の分析と改善、および 4. に記載した目的</td></tr>
+      <tr><th>停止方法</th><td>ブラウザの設定で Cookie を無効にするか、Google が提供する<a href="https://tools.google.com/dlpage/gaoptout?hl=ja" target="_blank" rel="noopener noreferrer">オプトアウトアドオン</a>を利用してください</td></tr>
+      <tr><th>提供事業者のポリシー</th><td><a href="https://policies.google.com/privacy?hl=ja" target="_blank" rel="noopener noreferrer">Google プライバシーポリシー</a> ／ <a href="https://business.safety.google/privacy/" target="_blank" rel="noopener noreferrer">Google のビジネス向けサービスにおけるデータ利用</a></td></tr>
     </table>
     <p class="note">これらの情報は単体で特定の個人を識別するものではありません。取り扱いは各提供事業者のプライバシーポリシーにも従います。</p>
   </section>

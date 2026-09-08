@@ -645,9 +645,20 @@ console.log('[lint] 設定の集約');
   }
   const ga = html.match(/const GA_ID='([^']*)'/);
   check(!!ga, 'GA_ID が定義されている');
+  // 空に戻せば外部送信が完全に止まる、という逃げ道は残し続ける。
   check(/if\(!GA_ID\)return;/.test(html), 'GA_ID が空なら外部送信しない分岐がある');
-  if (ga && ga[1] === '') {
-    check(!/googletagmanager\.com[^']*'\s*\+?\s*$/.test(html) || true, 'GA_ID は未設定（外部送信なし）');
+
+  // ★測定IDと privacy.html の記載は同時に動かす（§D-7 D-L5「片方だけ先に出さない」）。
+  //   投入済みなのにポリシーが「導入していません」のままだと虚偽記載になる。
+  const pv = read('privacy.html');
+  const on = !!(ga && ga[1]);
+  check(on === /Google アナリティクス 4<\/strong> を利用しています/.test(pv),
+    on ? 'GA_ID を入れたので privacy.html も「利用しています」になっている'
+       : 'GA_ID が空なので privacy.html も「導入していません」のまま');
+  if (on) {
+    check(pv.includes(ga[1]) || /Google アナリティクス 4/.test(pv), `privacy.html が GA4 の利用を公表している`);
+    check(/オプトアウト/.test(pv), `privacy.html に停止方法（オプトアウト）が書いてある`);
+    check(/policies\.google\.com/.test(pv), `privacy.html に Google のプライバシーポリシーへのリンクがある`);
   }
 }
 

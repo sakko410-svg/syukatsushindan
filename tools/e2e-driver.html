@@ -578,12 +578,21 @@ try{
   w.eval("AGENTS.length=0;showResult(true,'quiz')"); await sleep(150);
   chk(d.querySelectorAll('#agent-primary,#agent-secondary,.ab-link').length===0,'掲載を0件に戻すと枠ごと消える');
 
-  // ---------- F. GA4 は測定IDが空なら一切読み込まれない ----------
+  // ---------- F. GA4（2026-09-08 に測定IDを投入）----------
   await load('index.html'); w=f.contentWindow; d=f.contentDocument;
   await sleep(400);
-  chk(d.querySelectorAll('script[src*="googletagmanager"]').length===0,'GA_ID が空 → gtag.js を読み込まない');
-  chk(typeof w.gtag==='undefined','GA_ID が空 → gtag が定義されない');
-  chk(w.eval('GA_ID')==='','GA_ID は空文字');
+  {
+    const id=w.eval('GA_ID');
+    chk(/^G-[A-Z0-9]+$/.test(id),'GA_ID が入っている: '+id);
+    chk(d.querySelectorAll('script[src*="googletagmanager"]').length===1,'gtag.js を1つだけ読み込む');
+    const src=d.querySelector('script[src*="googletagmanager"]').src;
+    chk(src.indexOf(id)>=0,'読み込むURLに測定IDが入っている');
+    chk(typeof w.gtag==='function','gtag が定義される');
+    /* ★空に戻せば完全に止まる、という逃げ道が残っていること。
+       ここが壊れると「止めたいのに止められない」状態になる。 */
+    chk(/if\(!GA_ID\)return;/.test(w.eval('String(initGA)')),'GA_ID が空なら initGA は何もしない');
+    chk(/if\(!GA_ID\)return;/.test(w.eval('String(track)')),'GA_ID が空なら track は送らない');
+  }
   chk(w.eval('SITE_BASE')==='https://w-t-n-b.github.io/syukatsushindan/','SITE_BASE');
   chk(w.eval('AGENTS.length')===0,'出荷時の AGENTS は0件');
 

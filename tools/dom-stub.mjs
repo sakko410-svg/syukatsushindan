@@ -194,6 +194,9 @@ function build(){
 
   const document = {
     body: new El('body'),
+    /* GA_ID が入ると initGA() が document.head.appendChild() を呼ぶ。
+       無いと TypeError で落ちる。実ブラウザと同じく <head> を持たせる。 */
+    head: new El('head'),
     documentElement: new El('html'),
     getElementById: id => byId.get(id) || null,
     querySelector: sel => {
