@@ -166,7 +166,9 @@ try{
        閉じ込められて後続セクションの下に潜る。実際に一度そうなった。 */
     for(const sel of ['#lp-quiz-sec','.quiz-bg','.ftr']){
       const s=w.getComputedStyle(d.querySelector(sel));
-      chk(/radial-gradient/.test(s.backgroundImage),'網点が載っている: '+sel);
+      /* ★2026-09-08 QUIET RESTYLE で網点を外した。レトロ印刷物の文法であり、
+         静かな面には要らない。戻っていないことを見る。 */
+      chk(!/radial-gradient/.test(s.backgroundImage),'網点が載っていない: '+sel);
       chk(s.backgroundColor!=='rgba(0, 0, 0, 0)','地の色が消えていない: '+sel+' = '+s.backgroundColor);
       chk(s.isolation!=='isolate','重ね合わせ文脈を作っていない: '+sel+' isolation='+s.isolation);
     }
@@ -333,9 +335,14 @@ try{
         const bc=rgbOf(w.getComputedStyle(hx).borderTopColor);
         const r=ratio(bc,field);
         chk(r>=3,'結果ヒーローの .sh-x の輪郭が地から浮く（1.4.11 は3:1）: '+r.toFixed(2)+':1');
+        /* ★QUIET RESTYLE で3つのシェアボタンを「地は白・枠は毛髪線・
+           ブランド色は文字だけ」に変えた。よって .sh-x の枠は黒ではない。
+           面で塗ると、静かな画面でいちばん強い塊が他社の色になる。 */
         const px=d.querySelector('.r-panel .sh-x');
-        chk(!px||w.getComputedStyle(px).borderTopColor!==w.getComputedStyle(hx).borderTopColor,
-            '本文パネルの .sh-x は枠を変えていない（白い面では黒がそのまま輪郭になる）');
+        chk(!px||w.getComputedStyle(px).borderTopColor===w.getComputedStyle(hx).borderTopColor,
+            'シェアの枠は面によらず同じ（ブランド色は文字だけに残す）');
+        chk(!/rgb\(0, 0, 0\)/.test(w.getComputedStyle(hx).borderTopColor),
+            '.sh-x の枠が黒でない（黒い輪郭は白い面で強すぎる）: '+w.getComputedStyle(hx).borderTopColor);
       }
 
       /* --- 属性入力（#screen-profile）---
@@ -833,15 +840,20 @@ try{
       {
         const ring=lg.style.getPropertyValue('--ring');
         const from=(ring.match(/from ([-\d.]+)deg/)||[])[1];
-        const stops=[...ring.matchAll(/(#[0-9a-f]{6}|rgba?\([^)]*\)|transparent) ([\d.]+)deg ([\d.]+)deg/gi)]
+        /* ★色は var(--sumi) / var(--border2) を直接渡している（値を JS 側に
+           複製しないため）。--ring の生の値には var() が残るので、
+           マッチ対象に var(--…) を足す。 */
+        const stops=[...ring.matchAll(/(var\(--[a-z0-9-]+\)|#[0-9a-f]{6}|rgba?\([^)]*\)|transparent) ([\d.]+)deg ([\d.]+)deg/gi)]
           .map(m=>({c:m[1],a:+m[2],b:+m[3]}));
         const at=deg=>{const t=((deg-(+from))%360+360)%360;
           const st=stops.find(x=>t>=x.a&&t<x.b);return st?st.c:'なし';};
         /* ★12時から時計回り。conic-gradient は from を省くと12時から時計回りで、
            from -90deg と書くと開始点が9時へ回る（実際にそう出ていた）。 */
         chk(from==='0','環は12時から始まる: from='+from+'deg');
-        chk(at(0)==='#123c9b','12時が回答済みの色（群1）: '+at(0));
-        chk(at(270)!=='#123c9b','9時はまだ埋まっていない（時計回り）: '+at(270));
+        /* ページごとに色を変えるのはやめた（群の切れ目は隙間が示している）。
+           見るのは「12時が回答済みの色で、9時がそうでない」ことだけ。 */
+        chk(at(0)==='var(--sumi)','12時が回答済みの色: '+at(0));
+        chk(at(270)!=='var(--sumi)','9時はまだ埋まっていない（時計回り）: '+at(270));
         /* ★環は「何問答えたか」で詰める。「どの設問に答えたか」で塗ると、
            Q2 から答えた人のてっぺんが空いて「まだ始まっていない」ように
            見える（オーナー指摘で判明）。位置を担当するのは診断画面の帯。 */
@@ -849,11 +861,11 @@ try{
         d.querySelectorAll('#lq-list .q-card')[2].querySelector('.sdw').click();
         await sleep(300);
         const r2=lg.style.getPropertyValue('--ring');
-        const s2=[...r2.matchAll(/(#[0-9a-f]{6}|rgba?\([^)]*\)|transparent) ([\d.]+)deg ([\d.]+)deg/gi)]
+        const s2=[...r2.matchAll(/(var\(--[a-z0-9-]+\)|#[0-9a-f]{6}|rgba?\([^)]*\)|transparent) ([\d.]+)deg ([\d.]+)deg/gi)]
           .map(m=>({c:m[1],a:+m[2],b:+m[3]}));
         const a2=(s2.find(x=>0>=x.a&&0<x.b)||{}).c;
         chk(lg.dataset.done==='1','Q3 だけ答えたら 1 と数える: '+lg.dataset.done);
-        chk(a2==='#123c9b','Q1 を飛ばしてもてっぺんから埋まる: 12時='+a2);
+        chk(a2==='var(--sumi)','Q1 を飛ばしてもてっぺんから埋まる: 12時='+a2);
       }
       await jump(0);
 
@@ -1442,10 +1454,20 @@ try{
       chk(c0.querySelector('.opt-a .opt-txt').textContent.length>0
         &&c0.querySelector('.opt-a').textContent.indexOf('A.')===0,
           list+' の本文は .opt-txt に入り、接頭辞を消さない: '+c0.querySelector('.opt-a').textContent.slice(0,14)+'…');
-      // A側 / B側の縦帯が色分けされている
-      const la=getComputedStyle(c0.querySelector('.opt-a')).borderLeftColor;
-      const lb=getComputedStyle(c0.querySelector('.opt-b')).borderLeftColor;
-      chk(la!==lb,list+' の A側 / B側で縦帯の色が違う: '+la+' vs '+lb);
+      /* ★QUIET RESTYLE で A側＝からし / B側＝紺 の色分けをやめた。
+         差し色を2色に絞った以上、3色目のからしは置けない。
+         「押す前にどちら側か読める」性質は、色相ではなく
+         「薄い地 ⇄ 白」の濃淡が担う（下の目盛の検査を参照）。
+         縦帯は選ぶ前は両側とも同じ毛髪線で、選んだ側だけ構造色になる。 */
+      /* ここに来た時点で Q1 が回答済みのことがあり、片側だけ .on が付いている。
+         見たいのは「選ぶ前」の状態なので、いったん外して測り、元に戻す。 */
+      const oa=c0.querySelector('.opt-a'), ob=c0.querySelector('.opt-b');
+      const wasA=oa.classList.contains('on'), wasB=ob.classList.contains('on');
+      oa.classList.remove('on'); ob.classList.remove('on');
+      const la=getComputedStyle(oa).borderLeftColor;
+      const lb=getComputedStyle(ob).borderLeftColor;
+      if(wasA)oa.classList.add('on'); if(wasB)ob.classList.add('on');
+      chk(la===lb,list+' の A側 / B側の縦帯は選ぶ前は同色（優劣を付けない）: '+la+' vs '+lb);
       const hint=c0.querySelector('.spec-hint');
       chk(hint.firstElementChild.textContent==='A'&&hint.lastElementChild.textContent==='B',
           list+' の両端ラベルが A / B: '+[...hint.children].map(x=>x.textContent).join(' | '));
@@ -1489,7 +1511,11 @@ try{
     [3,2,1,-1,-2,-3].forEach(v=>dot(d,'q',6,v).classList.remove('sel'));
     noTr.remove();
     chk(on[3]!==off[3]&&on[-3]!==off[-3],'選択すると色が変わる: A '+off[3]+'→'+on[3]+' / B '+off[-3]+'→'+on[-3]);
-    chk(on[3]!==on[-3],'選択時もA側とB側で色が違う: '+on[3]+' vs '+on[-3]);
+    /* ★選択時に片側だけ違う色にすると「その色の側が正解」と読める。
+       QUIET RESTYLE では選択時は両側とも構造色にし、
+       どちら側かは未選択時の濃淡（A＝薄い地 / B＝白）が示す。 */
+    chk(on[3]===on[-3],'選択時は A/B 同色（片側を強調すると正解に見える）: '+on[3]);
+    chk(off[3]!==off[-3],'未選択では A側と B側の地が違う（押す前にどちら側か読める）: A '+off[3]+' / B '+off[-3]);
     chk(on[3]===on[1]&&on[-3]===on[-1],'選択時の同じ側は同色（強さは大きさで示す）: A '+on[3]+' / B '+on[-3]);
 
     /* --- 選択マーク（✓）が丸に追従すること ---
@@ -1875,7 +1901,12 @@ try{
       const cardW=G[0].w, worstF=Math.min(...G.map(x=>x.f));
       p('     '+T+'カード幅 '+cardW+'px / 描画幅 '+G[0].cw+'px / f='+G[0].f
         +' （最小 f='+worstF.toFixed(4)+'）');
-      chk(cardW<=215.9,T+'カード幅が 215px（clamp 定数の根拠となった最悪条件）を超えない: '+cardW+'px');
+      /* ★閾値を 215.9 → 217.9 に上げた。QUIET RESTYLE で .tc / .tc img の枠を
+         1.5px → 1px にしたぶん、同じ外寸でも描画幅が 2px 広がったため。
+         幅が広がると f（縦の可視率）は下がる方向なので、
+         「頭が切れていない」（次の検査）が通っている限り安全側である。
+         f がさらに下がったら make heads の再計測と定数の書き換えが要る。 */
+      chk(cardW<=217.9,T+'カード幅が 217px（枠を毛髪線にした後の最悪条件）を超えない: '+cardW+'px');
       /* 頭が切れないこと（16体すべて）。可視域の上端が頭頂より上にあること。 */
       const headCut=G.filter(x=>x.top>x.head+0.01);
       chk(headCut.length===0,T+'16体すべて頭が切れていない（可視域の上端 ≦ 頭頂）'
@@ -1899,9 +1930,12 @@ try{
       /* T-3: body の地（旧 S-9）。body が見えるのは iOS のゴムバンドスクロールの
          上端と下端だけで、その両端に接するのは全画面で紺である。よって全幅で紺。
          S-9 は PC だけ --paper2 にしており、スマホには白が残っていた。 */
+      /* ★QUIET RESTYLE で「暗い面」をやめた。body が見えるのは iOS の
+         ゴムバンドスクロールの両端だけで、そこに接するのは全画面で
+         同じ明るい地（--off #F2F2F3）である。よって全幅で同値。 */
       const bg=getComputedStyle(d.body).backgroundColor;
-      chk(bg==='rgb(19, 32, 67)',
-          T+'body の地は全幅で --ink-field: '+bg+'（旧S-9 は PC=#e7dfcd / スマホ=白）');
+      chk(bg==='rgb(242, 242, 243)',
+          T+'body の地は全幅で --off #F2F2F3: '+bg);
 
       /* T-1: 虹バーは「紺→クリーム」の境目にだけ在ること。
          ヒーロー下端に在った頃は、同一色の紺をこの1本が割っており、
@@ -1928,7 +1962,10 @@ try{
         return (Math.max(x,y)+0.05)/(Math.min(x,y)+0.05);};
       const tcR=ratio(getComputedStyle(d.querySelector('.tc')).backgroundColor,
                       getComputedStyle(d.querySelector('#type-section')).backgroundColor);
-      chk(tcR>=1.10,T+'16タイプの札が地から浮く: '+tcR.toFixed(2)+':1（--off の頃は 1.04:1）');
+      /* 閾値 1.10:1 は据え置く。QUIET RESTYLE は札の輪郭を毛髪線まで
+         細くしたので、地との明度差が消えると境目が本当に見えなくなる。
+         そのために --off を #F2F2F3 にしてある（白い札に対し 1.12:1）。 */
+      chk(tcR>=1.10,T+'16タイプの札が地から浮く: '+tcR.toFixed(2)+':1');
 
       /* S-3: .type-peek は「押した行の最後のカードの直後」に入る（列数非依存）。
          2列のときは偶然この式と一致していたが、4列では固定値 2 だと
@@ -1980,11 +2017,11 @@ try{
          AGENTS が空のあいだ .agent-block は描かれないので、地の値そのものを守る。
          ★AGENTS に掲載を入れたら、.agent-block の実測比もここに足すこと。 */
       const rwBg=getComputedStyle(d.querySelector('.result-wrap')).backgroundColor;
-      chk(rwBg==='rgb(231, 223, 205)',T+'結果本文の地は --paper2 #e7dfcd: '+rwBg+'（--off の頃は #efe8da）');
+      chk(rwBg==='rgb(242, 242, 243)',T+'結果本文の地は --paper2 #F2F2F3: '+rwBg);
       const fb=d.querySelector('.famous-box');
       if(fb){
         const r2=ratio(getComputedStyle(fb).backgroundColor,rwBg);
-        chk(r2>=1.10,T+'.famous-box が結果本文の地から浮く: '+r2.toFixed(2)+':1（--off の頃は 1.04:1）');
+        chk(r2>=1.10,T+'.famous-box が結果本文の地から浮く: '+r2.toFixed(2)+':1');
       }
     }
     f.style.width='390px'; f.style.height='844px';

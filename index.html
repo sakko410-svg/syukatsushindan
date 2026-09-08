@@ -1567,6 +1567,285 @@ body::before{
      （noindex・どこからも参照なし）なので触っていない。現役に戻すなら
      ここと同じ方針で外すこと。
    ========================================================================== */
+
+/* ============================================================================
+   QUIET RESTYLE — 世界観の作り替え（2026-09-08・オーナー判断）
+   ----------------------------------------------------------------------------
+   きっかけ: 「キャリアというトピックにしてはポップすぎるのでは」。
+   5案を並べて分かったのは、ポップさの出どころが**キャラクターではなく装飾**
+   だったこと。硬い影・2pxの枠・朱色・軸ごとの4色・極太の見出しを外すと、
+   キャラクターを1ミリも触らずに温度が落ちた。よってキャラは無加工で残す。
+
+   決めたこと
+     配色 … 墨 #3B3B40（構造）× 群青 #1F3A93（強調）。差し色はこの2つだけ。
+             群青は「軸のマーカー」と「押す場所」の2箇所にしか出さない。
+     書体 … ★規則: 指す言葉は明朝。述べる言葉と操作する言葉はゴシック。
+             判定は1つ「それだけで誰のことか特定できるか」。
+             はいと言えるのは16タイプのコードと名前だけ。よって明朝は
+             .res-code / .res-type-name / .tc-code / .tc-name / .compat-name
+             と t/*.html のタイプ名に限る。ほかは全部ゴシック。
+             （系統名「リーダー」は4タイプで共有＝誰か絞れないのでゴシック。
+               サイトロゴも本人の名前ではないのでゴシック。）
+     階層 … 書体差で階層を作れないぶん、サイズ・ウェイト・色で作る。7段。
+             本文は 13px → 14px。明朝をやめて可読性を取りにいく判断なので、
+             そこは素直に取る。
+
+   ★このブロックは RETRO RESTYLE v2（上方）を置き換える。
+     RETRO 側は消していない。ここを削除すればレトロの見た目に戻る。
+     したがって RETRO 側のルールは今後も書き換えないこと。
+
+   規則書と経緯: docs/design/mocks/type-rule.html
+                 docs/design/mocks/world-direction.html（5案の比較）
+   ============================================================================ */
+
+/* --- 1. トークン ---------------------------------------------------------
+   ここを差し替えるだけで、既存ルールの大半が新しい配色に移る。
+   --navy は「濃い色」の意味で 132 箇所に使われており、文字色でもあるので
+   薄くしない。墨 #1B1B1F に置き換える（レトロ紺 #111A30 とほぼ同じ濃さ）。 */
+:root{
+  /* 地は #F2F2F3、その上に載る札は白。比 1.12:1 で、e2e が要求する
+     「札が地から浮く（>=1.10:1）」を満たす。#F7F7F8 では 1.06:1 で足りず、
+     札の輪郭が毛髪線しか無いこの意匠では境目が消えていた。 */
+  --paper:#ffffff; --paper2:#f2f2f3; --off:#f2f2f3;
+  --ink-field:#f2f2f3;      /* 「暗い面」をやめた。下の 4. で文字色を直す */
+
+  --navy:#1b1b1f;  --ink:#1b1b1f;
+  --mid:#4c4f55;   --light:#8e8e93;
+  --border:#e3e3e6; --border2:#d6d6da;
+
+  /* ★★ 色は未決（2026-09-08 時点）。下の2行が唯一の決定点である。
+     経緯: 「墨 × 群青」で一度決めたが、オーナーから「墨は地味すぎる」。
+           別の色を検討中で、いまは判断を保留している。
+     いまの値は保留中の暫定であって、決定ではない。
+     ★この2行以外に色は書かれていない。旧アクセント（青3種・朱・からし・
+       緑・藤の8色）は下でこの2つを参照するようにしてあるので、
+       色を変えるときに触るのはここだけで済む。 */
+  --sumi:#3b3b40;  /* 構造色。軸の線・目盛・図版の線。地味すぎると指摘あり */
+  --gun:#1f3a93;   /* 強調色。軸のマーカーと押す場所の2箇所だけ */
+
+  /* ★旧アクセント（青3種・朱・からし・緑・藤 …）は全部 --sumi / --gun へ
+     吸収する。値を直接書かず変数で受けるので、色を変えるときに触るのは
+     上の --sumi と --gun の2行だけで済む。新しい色は1つも足さない。 */
+  --blue:var(--gun); --blue2:var(--gun); --blue3:var(--sumi);
+  --blue-l:var(--paper2); --blue-m:var(--border2);
+  --verm:var(--gun); --must:var(--sumi); --forest:var(--sumi); --lav:var(--sumi);
+  --lav-ink:var(--sumi); --cat:var(--gun); --cat-ink:var(--gun);
+  --green:var(--sumi); --red:var(--navy); --purple:var(--sumi);
+  --shadow:transparent; --shadow2:transparent;
+
+  /* 硬い影をやめる。トークン経由の 18 箇所はこれで消える */
+  --sh-1:none; --sh-2:none; --sh-3:none; --sh-cat:none;
+
+  /* 枠は毛髪線、角はほぼ立てる */
+  --bd-hair:1px; --bd:1px; --bd-heavy:1px;
+  --r-0:0; --r-1:2px; --r-2:3px;
+
+  /* 書体。既定はすべてゴシック。明朝は下の 5. で名指しした要素だけ */
+  --gothic:'Zen Kaku Gothic New','Noto Sans JP','Hiragino Sans','Hiragino Kaku Gothic ProN',sans-serif;
+  --mincho:'CQMincho','Hiragino Mincho ProN','Yu Mincho',YuMincho,'Noto Serif JP',serif;
+  --disp:var(--gothic); --jp-disp:var(--gothic); --jp-body:var(--gothic); --lat:var(--gothic);
+  --ls-disp:-.02em; --ls-lbl:.2em; --ls-lat:.06em;
+}
+html,body{background:var(--off);}
+
+/* --- 2. 質感をやめる -----------------------------------------------------
+   TEXTURE ブロックが足した粒子・ビネット・網点を全部外す。
+   あれは「レトロ印刷物」を作るためのもので、静かな面には要らない。 */
+body::after,body::before{content:none;}
+#lp-quiz-sec,.quiz-bg,.ftr{background-image:none;}
+
+/* --- 3. 硬い影をやめ、枠を毛髪線にする -----------------------------------
+   トークンを通っていない影（3px 3px 0 var(--navy) 等）が半分あるので、
+   面を持つセレクタを名指しで潰す。列挙は冗長だが、消し漏れが目で分かる。 */
+.r-panel,.r-ph,.q-card,.q-top,.tc,.tc img,.btn,.d-cta,.retry-btn,.back-btn,
+.job-tag,.hero-badge,.rar-badge,.pct-badge,.res-kw,.cont-banner,.shared-banner,
+.famous-box,.friend-card,.friend-btn,.sb-cta,.sb-img,.char-frame,.type-peek,
+.tp-img,.tp-str-lbl,.tc-pill,.d-lbl,.ca,.cm-badge,.compat-cbox img,.drawer,
+.hdr,.ftr,.prog-area,.prog-seg,.lq-foot .prog-seg,.lq-done,.q-badge,.narration,
+.opt-b,.l-bar-wrap,.ps-cell,.sd,.sdw.sel .sd,.sh,.stat-track,.stat-marker,
+.av-track,.av-marker,.agent-block,.ab-link,.pf-chip,.hdr-dot,.result-hero{
+  box-shadow:none;
+}
+.r-panel,.q-card,.tc,.job-tag,.res-kw,.cont-banner,.shared-banner,.famous-box,
+.friend-card,.friend-btn,.char-frame,.type-peek,.tp-img,.tc-pill,.d-lbl,.ca,
+.cm-badge,.rar-badge,.pct-badge,.agent-block,.ab-link,.pf-chip,.sb-img,.sb-cta,
+.compat-cbox img,.tc img,.opt-b,.lq-done,.q-badge,.tp-str-lbl{
+  border-width:1px;border-color:var(--border);border-radius:var(--r-1);
+}
+.r-ph,.q-top,.prog-area,.hdr,.ftr,.narration{border-width:1px;border-color:var(--border);}
+.char-frame{border-radius:var(--r-1);}
+/* 立体の押し込み演出も外す。面が動くのはポップさの一因だった */
+.btn:hover,.btn:active,.tc:hover,.d-cta:hover,.retry-btn:hover,.friend-btn:hover,
+.pf-chip:hover,.ab-link:hover,.sb-cta:hover{transform:none;box-shadow:none;}
+
+/* --- 4. 「暗い面」をやめたので、その上に載っていた文字を直す -------------
+   紺地の上で読ませるために白系にしていた色が、白地では消えてしまう。 */
+.hero-title{color:var(--navy);text-shadow:none;}
+.hero-title em{color:var(--gun);text-shadow:none;}
+.hero-sub{color:var(--mid);}
+.btn-ghost{border-color:var(--border2);color:var(--mid);}
+.btn-ghost:hover{border-color:var(--navy);color:var(--navy);background:transparent;}
+.q-remain{color:var(--light);}
+.q-remain.done{color:var(--gun);}
+.res-kw{background:var(--w);border-color:var(--border);color:var(--mid);}
+.ftr{color:var(--mid);border-top:1px solid var(--border);}
+.ftr-logo{color:var(--navy);}
+.ftr-note{color:var(--mid);}
+.ftr-links a{color:var(--gun);}
+.ftr-links a:hover{color:var(--navy);}
+.ftr-copy{color:var(--light);}
+.ftr-todo{border-color:var(--border2);color:var(--light);}
+/* 紺地の装飾（同心円・集中線）は白の半透明なので、白地では見えないうえ
+   意味も無い。消す。 */
+.o1,.ro1,.rpl-dot,.q-top::before{display:none;}
+
+/* --- 5. 書体規則 ---------------------------------------------------------
+   ★明朝はこの5つだけ。ここに足すときは規則書の判定を通すこと。
+     「それだけで誰のことか特定できるか」——はいなら明朝。 */
+.res-code,.res-type-name,.tc-code,.tc-name,.compat-name{
+  font-family:var(--mincho);
+}
+/* 逆に、レトロ側で表示用書体を当てていた「述べる／操作する」側を戻す */
+.hero-title,.sec-title,.q-text,.btn,.d-cta,.retry-btn,.hero-badge,.ca-lbl,
+.tc-pill,.av-result,.sh,.hdr-logo,.d-title,.sec-lbl,.prog-num,.q-badge,
+.res-announce,.ftr-logo{
+  font-family:var(--gothic);font-feature-settings:'palt' 1;
+}
+
+/* --- 6. 型スケール（7段）-------------------------------------------------
+   code 46 / name 27 / title 22 / section 15 / body 14 / sub 12.5 / label 10。
+   書体で階層を作れないぶん、サイズとウェイトと色で作り切る。 */
+.res-code{
+  font-size:clamp(2.6rem,12vw,3.4rem);font-weight:400;letter-spacing:.3em;
+  line-height:1;color:var(--navy);text-shadow:none;margin-bottom:4px;
+  padding-left:.3em;                  /* 字間ぶん右に寄るのを戻す */
+}
+.res-type-name{
+  display:block;background:none;-webkit-text-fill-color:currentColor;
+  color:var(--navy);font-size:1.7rem;font-weight:600;letter-spacing:.04em;
+  padding:0;border:none;box-shadow:none;
+}
+.res-type-name::before,.res-type-name::after{content:none;}
+.sec-title{font-size:1.4rem;font-weight:700;color:var(--navy);}
+.hero-title{font-size:clamp(1.7rem,6.4vw,2.2rem);font-weight:700;line-height:1.4;}
+.r-pt{font-size:.94rem;font-weight:700;letter-spacing:-.01em;color:var(--navy);}
+.body-txt,.narration{font-size:.875rem;line-height:1.95;color:var(--mid);}
+.tc-code{font-size:.95rem;letter-spacing:.14em;color:var(--gun)!important;}
+.tc-name{font-size:.8rem;font-weight:600;color:var(--navy);letter-spacing:.02em;}
+.compat-name{font-size:1rem;font-weight:600;letter-spacing:.03em;}
+
+/* --- 7. 押す場所は群青、それ以外に色を置かない ---------------------------
+   群青が1画面に何度も出ると、どこを押せばいいのかが消える。 */
+.btn,.d-cta,.retry-btn,.friend-btn,.sb-cta{
+  background:var(--gun);color:#fff;border:1px solid var(--gun);
+  border-radius:var(--r-1);font-weight:700;letter-spacing:.04em;
+}
+.btn{font-size:1rem;padding:17px 24px;}
+.retry-btn{background:transparent;color:var(--mid);border-color:var(--border2);}
+.job-tag{background:var(--w);color:var(--gun);font-weight:600;border-radius:var(--r-1);}
+
+/* --- 8. 取りこぼし ------------------------------------------------------- */
+/* タグラインは紺地の上で読ませる色（#cfd6e6）だった。白地では消える */
+.res-tagline{color:var(--mid);font-size:.88rem;line-height:1.85;}
+/* 「20問・4軸による傾向の分類です」。地の生成りと茶色の字はレトロの名残 */
+.rar-badge,.pct-badge{background:var(--w);border-color:var(--border);color:var(--mid);font-weight:600;}
+/* .narration の左端の色タブ（--cat の帯）。差し色は2色に絞ったので外す */
+.narration{border-left-width:1px;border-left-color:var(--border);}
+.narration::before{content:none;}
+/* 軸の棒。倒れた側だけ塗り、反対側は地のまま。マーカーだけ群青 */
+.av-track{background:var(--paper2);border-color:var(--border);}
+.av-marker{background:var(--gun)!important;border-color:var(--gun)!important;box-shadow:none!important;}
+.av-fill-l,.av-fill-r{opacity:1!important;}
+.av-center{background:var(--border2);}
+.av-l{font-weight:600;}
+/* 見出しの▲▼。硬い印象の三角を弱める */
+.r-tog{color:var(--light);}
+
+/* --- 9. 面の装飾（4色の帯・方眼・オーブ）------------------------------- */
+/* .hero::after / .result-hero::after の5pxの帯は、カテゴリ4色を並べたもの。
+   差し色を2色に絞った以上、4色の帯は成立しない。方眼とオーブも同様。 */
+.hero::after,.result-hero::after,.hero::before,.result-hero::before,
+.loading-wrap::before{content:none;}
+.hero-orb,.ro{display:none;}
+.l-bar{background:var(--sumi);}
+
+/* --- 10. 軸の棒。色は「塗り」だけに使い、文字には使わない --------------
+   ca/cb は倒れた側／反対側の塗りに渡している。同じ値が軸名（.av-l）と
+   結果（.av-result）の文字色にも inline で入るため、薄い側の文字が
+   コントラスト不足になっていた（--border2 は線の色であって文字の色ではない）。
+   文字は CSS 側で決め切る。方向は塗りとマーカーが示す。 */
+.av-l{color:var(--mid)!important;font-weight:600;}
+.av-result{color:var(--navy)!important;font-weight:700;}
+
+/* --- 11. 小見出しラベルの色をやめる ------------------------------------
+   .d-lbl は ls（青）/ lc（紫）/ lt（赤）/ lg（緑）/ la（無彩）の5色だった。
+   差し色を2色に絞った以上、5色の分類ラベルは成立しない。
+   ラベルの違いは色ではなく文字（強み／コミュニケーション／…）が担う。 */
+.ls,.lc,.lt,.lg,.la{background:var(--paper2);color:var(--navy);}
+.d-lbl{border-color:var(--border);font-weight:700;}
+/* .famous-box の上辺に刺さる色帯。1画面の強調は2箇所までなので外す */
+.famous-box::before{content:none;}
+/* 装飾の円は確実に消す（.ro2 等の派生クラスが残っていた） */
+.ro,.ro1,.ro2,.ro3,.o1,.o2,.o3,.hero-orb{display:none!important;}
+
+/* --- 12. 6段階の目盛（A/B）------------------------------------------------
+   もとは A側＝からし（#cf9a24 系）、B側＝紺 の2色で塗り分けていた。
+   差し色を2色に絞ったので、からしは置けない。
+   ただし「押す前にどちら側か読める」という性質（quiz-five-per-page の判断）は
+   守る必要がある。★色相を2つ使うのではなく、同じ構造色の濃淡で分ける:
+     A側 未選択 … 構造色のごく薄い地   B側 未選択 … 白
+     どちらも選択時は構造色で塗る（A/Bに優劣を付けない）
+   優劣を付けないのは、片側だけ強調色（群青）にすると
+   「群青の側が正解」と読めてしまうため。 */
+.spec-track .sdw .sd{border-color:var(--border2);background:var(--w);box-shadow:none;}
+.spec-track .sdw:nth-child(-n+3) .sd{background:#eceee9;border-color:var(--border2);}
+.spec-track .sdw:nth-child(n+4)  .sd{background:var(--w);border-color:var(--border2);}
+.spec-track .sdw.sel .sd,
+.spec-track .sdw:nth-child(-n+3).sel .sd,
+.spec-track .sdw:nth-child(n+4).sel  .sd{
+  background:var(--sumi);border-color:var(--sumi);box-shadow:none;}
+.spec-track .sdw:nth-child(-n+3).sel .sd::after,
+.spec-track .sdw:nth-child(n+4).sel  .sd::after{color:#fff;}
+.spec-hint .sh-a,.spec-hint .sh-b{color:var(--mid);}
+.opt-key{color:var(--mid);}
+
+/* --- 13. シェアの3ボタン --------------------------------------------------
+   X の黒、LINE の緑（#06C755）は他社のブランド色で、この2色の規則の外にある。
+   面で塗ると、静かな画面の中でいちばん強い塊が「他社の色」になってしまう。
+   地は白・枠は毛髪線にし、ブランド色は文字と記号だけに残す。
+   ★見分けはつくが、押される率は下がりうる。戻すならこのブロックを消せばよい。 */
+.sh{background:var(--w)!important;border:1px solid var(--border2)!important;font-weight:700;}
+.sh-x{color:#000!important;}
+.sh-ln{color:#06c755!important;}
+.sh-cp{color:var(--gun)!important;}
+.result-hero .sh-x{border-color:var(--border2)!important;}
+
+/* --- 14. A / B の色分け -------------------------------------------------
+   .opt-a はからし、.opt-b は紺だった。12. と同じ理由で、色相を2つ使わず
+   「薄い構造色 ⇄ 白」の濃淡で分ける。文字色はどちらも本文色に揃える。 */
+.opt-a{border-left-color:var(--border2);}
+.opt-b{border-left-color:var(--border2);}
+.opt-a .opt-key,.opt-b .opt-key{color:var(--mid);}
+.opt-a.on,.opt-b.on{background:var(--paper2);color:var(--navy);}
+.opt-a.on{border-left-color:var(--sumi);}
+.opt-b.on{border-left-color:var(--sumi);}
+
+/* --- 15. 明朝のWebフォント -----------------------------------------------
+   明朝が要るのは16タイプ名と16コードだけ（82文字）。全字種なら数百KB だが、
+   82文字を焼けば約11KB で済む。生成は tools/gen-font.mjs（make font）。
+   ★ファイルが無いときは端末標準の明朝に落ちる。表示は成立するが、
+     Mac（Hiragino Mincho ProN）と Windows（Yu Mincho）で別物になる。
+   ★Google Fonts のリンクにしない理由: 和文は頻度順のチャンクに分かれており、
+     82文字が散ると多数のチャンクを引く。自前なら1リクエストで確定し、
+     外部への通信も1つ減る。 */
+@font-face{
+  font-family:'CQMincho';
+  src:url('fonts/cq-mincho.woff2') format('woff2');
+  font-weight:400 700;
+  font-display:swap;
+  /* 焼いた82文字の範囲外は、この書体を探しにいかせない */
+  unicode-range:U+0041-005A,U+3041-309F,U+30A0-30FF,U+4E00-9FFF;
+}
 </style>
 </head>
 <body data-screen="screen-title">
@@ -1882,11 +2161,16 @@ function track(name,params){
 }
 
 /* ===== AXIS DEFINITIONS (from new UI) ===== */
+/* ★軸ごとに違う色（青/紫・橙/緑・水/赤・琥珀/紫の8色）は 2026-09-08 にやめた。
+   4本の棒が別々の色で塗られていると、色が「軸の意味」を持っているように見える。
+   実際には色に意味は無く、ただ賑やかにしていただけだった（QUIET RESTYLE）。
+   いまは倒れた側＝構造色（--sumi）、反対側＝薄い地。マーカーだけ群青。
+   ★ca/cb は buildAxisViz() が inline style で使う。値は CSS 変数を渡す。 */
 const AX=[null,
-  {l:"対人",r:"対課題",ca:"#2563eb",cb:"#7c3aed",bg:["#eef5ff","#f0f4ff"]},
-  {l:"攻め",r:"支え",ca:"#ea580c",cb:"#16a34a",bg:["#fff7ed","#f0fdf4"]},
-  {l:"ライフ重視",r:"ワーク重視",ca:"#0891b2",cb:"#dc2626",bg:["#ecfeff","#fef2f2"]},
-  {l:"自走型",r:"育成型",ca:"#d97706",cb:"#7c3aed",bg:["#fffbeb","#f5f3ff"]}
+  {l:"対人",r:"対課題",ca:"var(--sumi)",cb:"var(--border2)",bg:["#f7f7f8","#f7f7f8"]},
+  {l:"攻め",r:"支え",ca:"var(--sumi)",cb:"var(--border2)",bg:["#f7f7f8","#f7f7f8"]},
+  {l:"ライフ重視",r:"ワーク重視",ca:"var(--sumi)",cb:"var(--border2)",bg:["#f7f7f8","#f7f7f8"]},
+  {l:"自走型",r:"育成型",ca:"var(--sumi)",cb:"var(--border2)",bg:["#f7f7f8","#f7f7f8"]}
 ];
 
 /* ===== QUESTIONS (from ORIGINAL, field names adapted) ===== */
@@ -2481,8 +2765,10 @@ function ringGrad(){
   const GAP_G=7,GAP_C=2.2;                                   /* 群間 / 目盛間（度） */
   const per=(360-GAP_G*PAGE_COUNT)/PAGE_COUNT;               /* 1群ぶん */
   const cell=(per-GAP_C*(PAGE_SIZE-1))/PAGE_SIZE;            /* 目盛1つぶん */
-  const COL=['#123c9b','#14523a','#a4301f','#3d376c'];       /* .ps-group と同値 */
-  const OFF='rgba(17,26,48,.22)';                            /* 未回答 */
+  /* ★ページごとに色を変えていた（4色）が、差し色を2色に絞ったのでやめた。
+     群の切れ目は GAP_G の隙間が示しており、色は要らなかった（QUIET RESTYLE）。 */
+  const COL=['var(--sumi)','var(--sumi)','var(--sumi)','var(--sumi)'];
+  const OFF='var(--border2)';                                /* 未回答 */
   let a=0;const st=[];
   const put=(c,w)=>{st.push(`${c} ${a.toFixed(2)}deg ${(a+w).toFixed(2)}deg`);a+=w;};
   for(let g=0;g<PAGE_COUNT;g++){

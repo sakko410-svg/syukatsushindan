@@ -813,6 +813,43 @@ console.log('[lint] タイプページと og:image');
         `shareUrl() が t/<CODE>.html を返す（16枚の og:image が使われる経路）`);
 }
 
+// --- 明朝サブセット（焼き忘れを止める）-------------------------------------
+// 書体の規則で明朝を当てるのは「指す言葉」＝16タイプのコードと名前だけ。
+// だから必要な文字は数え上げられ、82文字を焼けば約11KB で済む。
+// ★タイプ名を1文字でも変えたら焼き直しが要る。これは必ず忘れるので検査する。
+console.log('[lint] 明朝サブセット');
+{
+  const { neededChars } = await import('./gen-font.mjs');
+  const { chars } = neededChars(html);
+  check(chars.length > 0 && chars.length < 200,
+    `明朝が要る文字は数え上げられる範囲（${chars.length}文字）`);
+  check(/@font-face\{[^}]*'CQMincho'/.test(html.replace(/\s+/g, m => m.includes('\n') ? '' : m)) ||
+        /font-family:'CQMincho'/.test(html),
+    '@font-face で CQMincho を宣言している');
+  check(/--mincho:'CQMincho'/.test(html),
+    '--mincho の先頭が CQMincho（焼いたものを最優先で使う）');
+  check(/'Hiragino Mincho ProN'/.test(html),
+    '端末標準の明朝へのフォールバックがある（焼く前でも表示は成立する）');
+
+  const baked = path.join(ROOT, 'fonts/cq-mincho.chars.txt');
+  if (fs.existsSync(baked)) {
+    const have = new Set([...fs.readFileSync(baked, 'utf8').trim()]);
+    const missing = chars.filter(c => !have.has(c));
+    check(missing.length === 0,
+      `焼いたサブセットが現在のタイプ名を全部含む（不足: ${missing.join('') || 'なし'}）`);
+    check(fs.existsSync(path.join(ROOT,'fonts/cq-mincho.woff2')), 'fonts/cq-mincho.woff2 が存在する');
+    if (fs.existsSync(path.join(ROOT,'fonts/cq-mincho.woff2'))) {
+      const kb = fs.statSync(path.join(ROOT,'fonts/cq-mincho.woff2')).size / 1024;
+      check(kb < 60, `サブセットが十分小さい（${kb.toFixed(1)}KB < 60KB）`);
+    }
+  } else {
+    // まだ焼いていない状態は「未完了」であって「壊れている」ではない。
+    // 端末標準の明朝に落ちるので表示は成立する。落とさずに知らせるだけにする。
+    console.log('  --   fonts/cq-mincho.woff2 は未生成。端末標準の明朝で表示される');
+    console.log('       （Mac と Windows で見え方が変わる。make font で焼くこと）');
+  }
+}
+
 // --- 絵文字を1つも置かない -------------------------------------------------
 // 絵文字はOSが描くので、iOS・Android・Windows で形も色も光沢も変わる。
 // このサイトは紺・クリーム・赤・からしの平面で組んであり、光沢のある

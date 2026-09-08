@@ -26,7 +26,7 @@
 SHELL := /bin/bash
 NODE  := node
 
-.PHONY: check lint type typecheck test e2e serve shot heads ogp types sitemap gen golden help
+.PHONY: check lint type typecheck test e2e serve shot heads ogp types sitemap gen golden font help
 
 check: lint typecheck test e2e
 	@echo ""
@@ -92,6 +92,10 @@ types:
 sitemap:
 	@echo "── sitemap（sitemap.xml / robots.txt）─"
 	@$(NODE) tools/gen-sitemap.mjs
+
+font:
+	@printf '\033[36m── 明朝サブセット（16タイプ名＋コードの82文字だけ）──\033[0m\n'
+	@node tools/gen-font.mjs
 
 gen: ogp types sitemap
 
