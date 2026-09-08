@@ -372,6 +372,33 @@ try{
         w.nextPage(); await sleep(120);
         chk(d.body.dataset.screen==='screen-profile','20問完走の次は属性入力（ローディングでも結果でもない）: '+d.body.dataset.screen);
 
+        /* --- この画面の文字が地から読めること ---
+           ここは 885 件の検査が1件も見ていなかった穴である。
+           #screen-profile は元々 --ink-field（紺）の上に載る面として組まれ、
+           文字を白系（var(--paper) / #c3cbdd / #9aa6c0）にしていた。
+           後段のリスタイルが --ink-field を #f2f2f3 に変えたとき、
+           §4「暗い面をやめたので文字を直す」は .hero-* だけを直し、
+           この画面を丸ごと取りこぼした。結果、出荷状態で
+           .pf-desc が 1.45:1（＝完全に見えない）のまま公開されていた。
+           **地の色を直接見張らない。** 比だけを見張れば、地が紺に戻っても
+           白に留まっても「対で見直せ」と落ちる。 */
+        {
+          const rgb=v=>(v.match(/(\d+),\s*(\d+),\s*(\d+)/)||[]).slice(1).map(Number);
+          const lum=c=>{const m=c.map(v=>{v/=255;return v<=0.03928?v/12.92:Math.pow((v+0.055)/1.055,2.4);});
+            return 0.2126*m[0]+0.7152*m[1]+0.0722*m[2];};
+          const ratio=(a,b)=>{const x=lum(a),y=lum(b);return (Math.max(x,y)+0.05)/(Math.min(x,y)+0.05);};
+          const bg=rgb(w.getComputedStyle(d.querySelector('.pf-wrap')).backgroundColor);
+          /* .pf-title は 24px/900 ＝ WCAG の「大きな文字」なので 3:1。残りは 4.5:1。 */
+          [['.pf-title',3,'見出し'],['.pf-desc',4.5,'説明'],['.pf-need',4.5,'必須の案内'],
+           ['.pf-label',4.5,'項目名'],['.pf-opt',4.5,'「任意」'],['.pf-hint',4.5,'注記'],
+           ['.pf-legal',4.5,'脚注'],['.pf-legal a',4.5,'ポリシーへのリンク']].forEach(([sel,need,nm])=>{
+            const el=d.querySelector('#screen-profile '+sel);
+            if(!el){chk(false,'属性入力に '+sel+' が無い');return;}
+            const r=ratio(rgb(w.getComputedStyle(el).color),bg);
+            chk(r>=need,'属性入力の'+nm+'が地から読める（'+need+':1 以上）'+sel+': '+r.toFixed(2)+':1');
+          });
+        }
+
         w.pfSubmit(); await sleep(120);
         chk(d.body.dataset.screen==='screen-profile','立場も年度も未選択なら進まない');
         chk(/立場を選んで/.test(d.getElementById('pf-warn').textContent),'進まない理由が画面に出る: '+d.getElementById('pf-warn').textContent);
@@ -1713,6 +1740,42 @@ try{
     chk(lpReds.length>0, 'LP に赤が出ている（押す場所がある）: '+lpReds.join(', '));
     chk(lpReds.every(okTag),
         'LP の赤は押す場所（button / a）だけ: '+lpReds.filter(x=>!okTag(x)).join(', ')||'違反なし');
+
+    /* ★診断画面が監査から漏れていた。そのせいで進捗の帯（群ごとの4色）と
+       キャラ系統の4色が、2色の規則の外で生き残っていた
+       （オーナーのスクリーンショットで判明）。3画面すべてを通す。 */
+    w.eval("[...document.querySelectorAll('#lq-list .q-card')].forEach(c=>c.querySelectorAll('.sdw')[1].click())");
+    await sleep(500);
+    d.getElementById('lq-continue').click();
+    await sleep(800);
+    chk(d.getElementById('screen-quiz').classList.contains('active'),'診断画面へ移った');
+    const quizReds = REDS();
+    chk(quizReds.every(okTag),
+        '診断画面の赤も押す場所だけ: '+(quizReds.filter(x=>!okTag(x)).join(', ')||'違反なし'));
+    /* 診断画面に無彩色でも2色でもない色が無いこと（帯の群色・系統色の再発を止める） */
+    const quizHues = w.eval(`(()=>{const out=[];
+      for(const el of document.querySelectorAll('#screen-quiz *')){
+        if(el.getBoundingClientRect().width<1) continue;
+        const c=getComputedStyle(el);
+        for(const v of [c.color,c.backgroundColor,c.borderTopColor]){
+          const m=v.match(/rgba?\\((\\d+), (\\d+), (\\d+)(?:, ([\\d.]+))?/); if(!m) continue;
+          if((m[4]===undefined?1:+m[4])<0.05) continue;
+          const [r,g,b]=[+m[1],+m[2],+m[3]];
+          if(Math.max(r,g,b)-Math.min(r,g,b)<=14) continue;   /* 無彩色は素通し */
+          out.push(v+' .'+(el.className.toString().trim().split(/\\s+/)[0]||el.tagName.toLowerCase()));
+        }
+      }
+      return [...new Set(out)];})()`);
+    const known = x => /rgb\(31, 58, 147\)|rgb\(168, 64, 47\)/.test(x);
+    chk(quizHues.every(known),
+        '診断画面の有彩色は青と赤の2つだけ: '+(quizHues.filter(x=>!known(x)).join(' / ')||'違反なし'));
+    /* 進捗の環は Q1 から Q20 まで同じ場所に居続ける（オーナー指摘
+       「2ページ目以降に FAB が消えている」）。LP と診断画面の両方で見る。 */
+    const fab=d.querySelector('#screen-quiz .prog-seg');
+    const fr=fab&&fab.getBoundingClientRect();
+    chk(!!fab && w.getComputedStyle(fab).position==='fixed' && fr.width>40,
+        '診断画面にも進捗の環が出ている: '+(fr?Math.round(fr.width)+'x'+Math.round(fr.height):'なし'));
+    chk(!!fab && fab.dataset.done==='5','環が LP の5問を引き継いでいる: '+(fab&&fab.dataset.done));
 
     w.eval("scores={1:6,2:5,3:-4,4:7};ans=Array(20).fill(2);showResult(true,'quiz')");
     await sleep(2400);

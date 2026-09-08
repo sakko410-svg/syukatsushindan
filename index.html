@@ -1703,6 +1703,20 @@ body::after,body::before{content:none;}
 .hero-title{color:var(--navy);text-shadow:none;}
 .hero-title em{color:var(--gun);text-shadow:none;}
 .hero-sub{color:var(--mid);}
+/* ★ #screen-profile（属性入力）も --ink-field の上に載っていた面である。
+   このリスタイルで --ink-field が #f2f2f3 になったとき .hero-* だけが直され、
+   属性画面が丸ごと取りこぼされていた。実測（430px幅・出荷状態）:
+     .pf-title  #ffffff on #f2f2f3 = 1.13:1
+     .pf-desc   #c3cbdd on #f2f2f3 = 1.54:1   ← ほぼ完全に見えない
+     .pf-label  #ffffff on #f2f2f3 = 1.13:1
+     .pf-opt / .pf-hint / .pf-legal  #9aa6c0 on #f2f2f3 = 2.29:1
+   .pf-need / .pf-req / .pf-warn / .pf-legal a は var(--must) 経由で
+   var(--info) に落ちるため既に読める。直すのは下の6つだけでよい。
+   色は .hero-title / .hero-sub と同じ作法（見出し=--navy / 本文=--mid /
+   補助=--light）に揃える。**新しい色は作らない。** */
+.pf-title,.pf-label{color:var(--navy);}
+.pf-desc{color:var(--mid);}
+.pf-opt,.pf-hint,.pf-legal{color:var(--light);}
 .btn-ghost{border-color:var(--border2);color:var(--mid);}
 .btn-ghost:hover{border-color:var(--navy);color:var(--navy);background:transparent;}
 .q-remain{color:var(--light);}
@@ -1912,6 +1926,58 @@ body::after,body::before{content:none;}
 /* ③ アコーディオンの▼。--light を濃くしたので 5.15:1 になる（上の :root）。
    操作の手がかりなので、記号でも本文と同じ基準で読めるようにしておく。 */
 .r-tog{color:var(--light);}
+
+/* --- 18. 診断画面（ここは 2色の監査から漏れていた）--------------------
+   ★lint / e2e の色の監査は LP と結果画面しか見ておらず、診断画面を通って
+     いなかった。そのため4群の帯（青・緑・朱・藤）とカテゴリ4色がそのまま
+     残っていた。検査を診断画面へ広げたうえで、ここで畳む。 */
+
+/* ① 進捗の帯。群ごとに色を変えていた（--ps-c の4色）。
+   群の切れ目は隙間が示しているので色は要らない（FABの環と同じ判断）。 */
+.ps-group:nth-child(1),.ps-group:nth-child(2),
+.ps-group:nth-child(3),.ps-group:nth-child(4){--ps-c:var(--info);}
+.ps-group.cur{background:var(--paper2);box-shadow:inset 0 0 0 1px var(--border2);}
+.ps-cell{border-color:var(--border2);}
+
+/* ② キャラの系統でヒーローと札の色を変えていた（:has() の4分岐）。
+   系統は4タイプで共有するので指す言葉ではなく、押す場所でもない。 */
+.result-hero,.result-hero:has(.res-char[src*="chars/b"]),
+.result-hero:has(.res-char[src*="chars/c"]),.result-hero:has(.res-char[src*="chars/d"]),
+.tc,.tc:has(img[src*="chars/b"]),.tc:has(img[src*="chars/c"]),
+.tc:has(img[src*="chars/d"]){--cat:var(--info);--cat-ink:var(--info);}
+
+/* ③ 相性バッジと小見出しラベルの淡色（紫・桃・緑）も畳む */
+.lc,.lt,.lg,.ls,.la,.cm-good,.cm-bad{background:var(--paper2);color:var(--navy);}
+.cm-good,.cm-bad{border:1px solid var(--border);}
+
+/* --- 19. 進捗の環を診断画面でも出す ------------------------------------
+   オーナー指摘「2ページ目以降に FAB が消えている」。
+   環は #screen-title の中にあり、.screen{display:none} で画面ごと消えていた
+   （LP専用の設計だった）。診断画面に移った瞬間に進捗の表示が別物に変わる。
+   ★同じ環を診断画面の .prog-seg にも当て、Q1 から Q20 まで1つの部品が
+     ずっと同じ場所に居るようにする。
+   ★帯の目盛は環が引き継ぐので隠す。.prog-area には残りページ数の文言だけが残る
+     （環は「何問答えたか」、文言は「あと何ページか」で、役割が重なっていない）。 */
+#screen-quiz .prog-area{background:transparent;border-bottom:none;padding:10px 20px 0;}
+#screen-quiz .prog-seg{
+  position:fixed;right:16px;bottom:16px;left:auto;transform:none;z-index:40;
+  width:62px;height:62px;padding:0;border-radius:50%;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;
+  background-color:var(--paper2);
+  background-image:
+    radial-gradient(closest-side,var(--paper2) 0 61%,transparent 61% 100%),
+    var(--ring);
+  border:1px solid var(--border2);box-shadow:none;
+}
+#screen-quiz .prog-seg .ps-group{display:none;}
+#screen-quiz .prog-seg::before{
+  content:attr(data-done);
+  font-size:1.2rem;font-weight:700;line-height:1;color:var(--navy);
+}
+#screen-quiz .prog-seg::after{
+  content:'/' attr(data-total);
+  font-size:.6rem;font-weight:700;color:var(--mid);margin-top:1px;
+}
 </style>
 </head>
 <body data-screen="screen-title">
