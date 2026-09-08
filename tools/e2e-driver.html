@@ -264,7 +264,15 @@ try{
       chk(!/希少度|診断者の|しかいない/.test(t),'結果画面に希少度/診断者%が無い');
       chk(!/孫正義|マッキンゼー|サイバーエージェント|トヨタ自動車|三菱商事/.test(t),'結果画面に実在の人名・企業名が無い');
       chk(/傾向の分類/.test(t),'「傾向の分類」の明示がある');
-      chk(/掲載順に優劣はなく/.test(d.getElementById('screen-result').innerHTML),'職種例の注記がある');
+      /* かつては .co-note「※…掲載順に優劣はなく、特定の企業の採用基準や選考とは
+         関係ありません。」があることを見ていた。2026-09-08 に「業界別の職種例」の
+         パネルごと削除したので、注記が指す対象（企業名・業態の一般名称）が画面から
+         消えた。注記の有無ではなく「対象が無いこと」を見る。
+         限定の表明は1行上の「傾向の分類」（.rar-badge）が担っている。 */
+      chk(!/掲載順に優劣はなく|業界別の職種例/.test(d.getElementById('screen-result').innerHTML),
+          '職種例のパネルと、その注記が無い');
+      chk(!/メガバンク|総合商社|総合広告代理店|戦略系コンサルティングファーム/.test(t),
+          '業態の一般名称が結果画面に無い（会社の名称は実在・一般名称を問わず出さない）');
       chk(d.querySelectorAll('.ab-link').length===0,'AGENTS が0件なので送客リンクは0件');
       chk(d.querySelectorAll('#agent-primary,#agent-secondary').length===0,'送客ブロックは DOM ごと描画されない');
       const rh=d.getElementById('screen-result').innerHTML;
@@ -533,33 +541,29 @@ try{
   chk(ap.querySelectorAll('.ab-note').length===1 && !/許可/.test(ap.querySelector('.ab-note').textContent),'許可番号が空なら出さない: '+ap.querySelector('.ab-note').textContent);
   chk(lk.getAttribute('href').indexOf('utm_content=HALS-primary')>=0,'utm_content=<CODE>-<position>: '+lk.getAttribute('href'));
   chk(!!ap.querySelector('.ab-disc'),'.ab-disc（紹介料の開示）がある');
-  /* 職種の節（「向いている職種」→「業界別の職種例」）を締めくくる位置か。
-     以前は「向いている職種」の直後を見ていたが、design/conversion-structure-and-pc-grid.md
-     S-5 で「業界別の職種例」をあいだへ移した。仕様 §A-4 が求めているのは
-     「職種を読み終えた直後」なので、職種の2パネルが連続し、その直後に
-     #agent-primary が来ることを見る（娯楽側の相性パネルは後ろへ送った）。
+  /* 送客ブロックの置き場所。仕様 §A-4 は「価値を受け取った直後」を求め、
+     workplace-fit.md §7-2 で文脈の頂点が「あなたが働きやすい職場」へ移った。
+     順序は 向いている職種 → あなたが働きやすい職場 → 送客。
      あわせて S-4：「向いている職種」が既定で開いていること。閉じていると
-     #agent-primary の直前は44pxの見出し行で、置き場所の根拠が成立しない。 */
+     #agent-primary の直前は44pxの見出し行で、置き場所の根拠が成立しない。
+     ★2026-09-08 に「業界別の職種例」を落としたので、あいだのパネルは無い
+     （オーナー判断「業界別の職種例→いらない」）。 */
   const panels=[...d.querySelectorAll('#screen-result .r-panel')];
   const jobPanel=panels.find(x=>/向いている職種/.test(x.textContent));
-  const indPanel=panels.find(x=>/業界別の職種例/.test(x.textContent));
+  const envPanel=panels.find(x=>/あなたが働きやすい職場/.test(x.textContent));
   chk(!!jobPanel&&!!jobPanel.querySelector('.r-ph.aopen')&&!!jobPanel.querySelector('.r-pb.aopen'),
       '「向いている職種」が既定で開いている（S-4）');
-  chk(jobPanel && jobPanel.nextElementSibling===indPanel,'「業界別の職種例」が「向いている職種」の直後（S-5）');
-  /* workplace-fit.md §7-2 で置き場所を更新した。A-4 の理屈（価値提供の直後に
-     置く）は維持したまま、文脈の頂点が「あなたが働きやすい職場」へ移ったため。
-     順序は 向いている職種 → 業界別の職種例 → あなたが働きやすい職場 → 送客。 */
-  const envPanel=panels.find(x=>/あなたが働きやすい職場/.test(x.textContent));
-  chk(indPanel && indPanel.nextElementSibling===envPanel,'「あなたが働きやすい職場」が職種の2パネルの直後');
+  chk(!panels.some(x=>/業界別の職種例/.test(x.textContent)),'「業界別の職種例」のパネルが無い');
+  chk(jobPanel && jobPanel.nextElementSibling===envPanel,'「あなたが働きやすい職場」が「向いている職種」の直後');
   chk(envPanel && envPanel.nextElementSibling===ap,'#agent-primary が「あなたが働きやすい職場」の直後');
   chk(!!envPanel&&!!envPanel.querySelector('.r-ph.aopen')&&!!envPanel.querySelector('.r-pb.aopen'),
       '「あなたが働きやすい職場」が既定で開いている（閉じていると送客の置き場所の根拠が消える）');
-  chk(!!indPanel && !indPanel.querySelector('.r-ph.aopen'),'「業界別の職種例」は閉じたまま（移動しただけ）');
-  /* 移動によって .co-note（掲載順に優劣はなく…）と .ab-lead（わかるのは傾向まで…）が
-     隣り合う。この2文が送客ブロックの信頼性を支えている（wording-audit.md §8）。 */
-  chk(!!indPanel && /特定の企業の採用基準や選考とは関係ありません/.test(indPanel.textContent)
-      && /この診断でわかるのは働き方の傾向までです/.test(ap.querySelector('.ab-lead').textContent),
-      '.co-note の直後に .ab-lead が来る（限定の2文が隣り合う）');
+  /* 限定の1文。以前は .co-note（掲載順に優劣はなく…）と .ab-lead が隣り合うことを
+     見ていたが、.co-note は「業界別の職種例」と一緒に消えた。企業名・業態名を
+     画面から出さなくなったので注記の対象そのものが無く、限定は .ab-lead が引き受ける
+     （wording-audit.md §8）。 */
+  chk(/この診断でわかるのは働き方の傾向までです/.test(ap.querySelector('.ab-lead').textContent),
+      '送客ブロックの直前に限定の1文（.ab-lead）がある');
   chk(d.querySelector('.retry-btn').previousElementSibling===as,'#agent-secondary が「もう一度診断する」の直前');
   /* 外部サイトを示す ↗ は .ab-name の中にある（S-8）ので、サービス名は
      先頭のテキストノードで見る。記号そのものは次の行で別に確かめる。 */
@@ -673,7 +677,7 @@ try{
   // 総数で見ると 8>=5 なので診断画面へ送ってしまい、穴を埋める手段が消える。
   await load('index.html'); w=f.contentWindow; d=f.contentDocument; await sleep(200);
   w.localStorage.setItem('cq_p3',JSON.stringify({curQ:8,scores:{1:0,2:0,3:0,4:0},
-    ans:[2,null,2,null,2,2,2,2,2,2],selectedIndustries:[]}));
+    ans:[2,null,2,null,2,2,2,2,2,2]}));
   await load('index.html'); w=f.contentWindow; d=f.contentDocument; await sleep(400);
   chk(d.getElementById('cont-banner').style.display==='flex','歯抜け8問でも #cont-banner が出る');
   w.continueDiag(); await sleep(150);
@@ -994,7 +998,7 @@ try{
 
   // 1問ずつ時代に保存された cq_p3（連続した ans）はそのまま復元できる（§E-1）
   await load('index.html'); w=f.contentWindow; d=f.contentDocument; await sleep(200);
-  w.localStorage.setItem('cq_p3',JSON.stringify({curQ:7,scores:{1:99,2:99,3:99,4:99},ans:[3,-2,1,-1,2,3,-3],selectedIndustries:[]}));
+  w.localStorage.setItem('cq_p3',JSON.stringify({curQ:7,scores:{1:99,2:99,3:99,4:99},ans:[3,-2,1,-1,2,3,-3]}));
   await load('index.html'); w=f.contentWindow; d=f.contentDocument; await sleep(400);
   chk(d.getElementById('cont-banner').style.display==='flex','旧形式の cq_p3 でも #cont-banner が出る（保存キーは変えていない）');
   w.continueDiag(); await sleep(200);
@@ -1006,7 +1010,7 @@ try{
 
   // 旧バージョンの保存データ（cq_p / cq_p2）は捨てる
   await load('index.html'); w=f.contentWindow; d=f.contentDocument; await sleep(200);
-  w.localStorage.setItem('cq_p',JSON.stringify({curQ:7,scores:{1:5,2:5,3:5,4:5},ans:[2,2,2,2,2,2,2],selectedIndustries:[]}));
+  w.localStorage.setItem('cq_p',JSON.stringify({curQ:7,scores:{1:5,2:5,3:5,4:5},ans:[2,2,2,2,2,2,2]}));
   await load('index.html'); w=f.contentWindow; d=f.contentDocument; await sleep(400);
   chk(w.localStorage.getItem('cq_p')===null,'旧キー cq_p は起動時に削除される');
   chk(d.getElementById('cont-banner').style.display!=='flex','旧データでは #cont-banner を出さない');
@@ -1024,7 +1028,7 @@ try{
     chk(d.getElementById('screen-result').innerHTML.trim()==='','結果DOMそのものが生成されない');
     chk(d.querySelectorAll('#agent-primary,#agent-secondary,.ab-link').length===0,'送客ブロックが出ない');
     chk(d.querySelectorAll('.axis-viz,.av-track').length===0,'4軸スコアの棒グラフが出ない');
-    chk(!/判定理由/.test(d.body.innerText),'「判定理由」が出ない');
+    chk(!/4つの軸で見ると/.test(d.body.innerText),'軸の内訳（「4つの軸で見ると」）が出ない');
     chk(/DBWG/.test(pk.innerText)&&/コツコツマイスター/.test(pk.innerText),'タイプコードと名前が出る');
     chk(!!pk.querySelector('.tp-str-txt')&&pk.querySelector('.tp-str-txt').textContent.split('。').length===2,'強みは先頭1文だけ: '+pk.querySelector('.tp-str-txt').textContent);
     chk(pk.parentElement===tc.parentElement,'押したカードと同じ .type-grid の中に展開される');
@@ -1202,12 +1206,14 @@ try{
     const avr=[...d.querySelectorAll('.av-result')].map(x=>x.textContent.trim());
     chk(avr.length===4&&avr.every(t=>/僅差/.test(t)),'診断スコアの4軸すべてに「僅差」の但し書き: '+avr.join(' / '));
     chk(!/バランス型/.test(d.getElementById('screen-result').innerText),'タイプコードと食い違う「バランス型」を出さない');
-    // 判定理由のタグも同じ向きで出る（合計0でコードと逆を書かない）
-    const rbt=[...d.querySelectorAll('.rbt')].map(x=>x.textContent.trim());
-    chk(rbt.length===4&&/^対課題 /.test(rbt[0])&&/^攻め /.test(rbt[1])&&/^ワーク重視 /.test(rbt[2])&&/^自走型 /.test(rbt[3]),
-        '判定理由のタグが判定（DAWS）と同じ向きの軸名で出る: '+rbt.join(' / '));
+    /* 向きが判定と一致すること。以前は「判定理由」の .rbt（軸名＋%の札）で見ていたが、
+       2026-09-08 にその箱ごと落とした（診断スコアと同じ4軸・同じ%の二重掲載だった）。
+       検査対象を .av-result へ移す。守っている性質は同じで、
+       「合計0の軸でタイプコードと逆向きの名前を書かない」こと。 */
+    chk(avr.length===4&&/^対課題/.test(avr[0])&&/^攻め/.test(avr[1])&&/^ワーク重視/.test(avr[2])&&/^自走型/.test(avr[3]),
+        '診断スコアが判定（DAWS）と同じ向きの軸名で出る: '+avr.join(' / '));
     // 「対人:高」「対人:低」は存在しない基準との比較を含意する（wording-audit.md R-2）
-    chk(!rbt.some(t=>/[高低]|:/.test(t)),'タグは「倒れた側の名前 ＋ %」だけ: '+rbt.join(' / '));
+    chk(!avr.some(t=>/[高低]|:/.test(t)),'軸の結果は「倒れた側の名前」だけ: '+avr.join(' / '));
     w.clearSavedProgress();
   }
 
@@ -1255,8 +1261,8 @@ try{
 
   // 旧スケールの保存データ（cq_p2）は黙って捨てる
   await load('index.html'); w=f.contentWindow; d=f.contentDocument; await sleep(200);
-  w.localStorage.setItem('cq_p2',JSON.stringify({curQ:7,scores:{1:5,2:5,3:5,4:5},ans:[2,2,2,2,2,2,2],selectedIndustries:[]}));
-  w.localStorage.setItem('cq_p',JSON.stringify({curQ:3,scores:{1:2,2:0,3:0,4:0},ans:[2,2,2],selectedIndustries:[]}));
+  w.localStorage.setItem('cq_p2',JSON.stringify({curQ:7,scores:{1:5,2:5,3:5,4:5},ans:[2,2,2,2,2,2,2]}));
+  w.localStorage.setItem('cq_p',JSON.stringify({curQ:3,scores:{1:2,2:0,3:0,4:0},ans:[2,2,2]}));
   await load('index.html'); w=f.contentWindow; d=f.contentDocument; await sleep(400);
   chk(w.localStorage.getItem('cq_p2')===null&&w.localStorage.getItem('cq_p')===null,'旧キー cq_p / cq_p2 は起動時に削除される');
   chk(d.getElementById('cont-banner').style.display!=='flex','旧スケールのデータでは #cont-banner を出さない');
@@ -1541,24 +1547,38 @@ try{
   }
   f.style.width='390px';
 
-  // ---------- R. サブタイプに説明が付いていること ----------
-  // 「サブタイプってなんのことだ」（オーナー）。コードとキャラだけでは伝わらない。
+  // ---------- R. 落とした結果パネル（2026-09-08・オーナー判断）----------
+  // 「判定理由」「サブタイプ」「業界別の職種例」の3つを結果画面から外した。
+  // どれも一度は説明文や注記を足して直そうとした経緯がある（サブタイプには
+  // .sub-note を、職種例には .co-note を足した）。放っておくと「説明を足せば
+  // 戻せる」と読めるので、戻っていないことを結果DOMで見る。
   await load('index.html'); w=f.contentWindow; d=f.contentDocument; await sleep(300);
   {
-    // 僅差の軸を作る（軸1だけ ±1）。getSubCode() は軸1を反転したコードを返す。
+    // 軸1だけ僅差にする。かつて getSubCode() がここでサブタイプのカードを出していた。
     w.eval("scores={1:1,2:9,3:9,4:9};ans=[3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,-3];showResult(false,'quiz')");
     await sleep(700);
-    const card=d.querySelector('.subtype-card');
-    chk(!!card,'サブタイプのカードが出る');
-    const note=card&&card.querySelector('.sub-note');
-    chk(!!note&&note.textContent.trim().length>=30,'.sub-note に説明がある: '+(note?note.textContent.slice(0,24)+'…':'なし'));
-    chk(!!note&&/僅差/.test(note.textContent),'説明が「僅差だった軸を反転したもの」であることに触れている');
-    // 断定しない姿勢（診断で分かるのは傾向まで）と矛盾しないこと
-    chk(!!note&&!/必ず|断言|確実|あなたは.*です。/.test(note.textContent),'説明が断定表現を含まない');
-    // .sub-head「あなたのサブタイプ」は削除した（パネル見出し「サブタイプ」の
-    // 言い直しだった。wording-audit.md R-14）。説明はカードの先頭に来る。
-    chk(!card.querySelector('.sub-head'),'.sub-head（パネル見出しの言い直し）が無い');
-    chk(card.firstElementChild===note,'説明はサブタイプのカードの先頭にある');
+    const res=d.getElementById('screen-result');
+    chk(!d.querySelector('.subtype-card'),'サブタイプのカードが出ない');
+    chk(!/サブタイプ/.test(res.innerText),'「サブタイプ」の語が結果画面に無い');
+    chk(!/2番目に近いタイプ/.test(res.innerText),'「2番目に近いタイプ」が出ない');
+    chk(!d.querySelector('.reason-box')&&!/判定理由/.test(res.innerText),'「判定理由」の箱が出ない');
+    chk(d.querySelectorAll('.rbt').length===0,'軸名＋%の札（.rbt）が出ない');
+    chk(!/業界別の職種例/.test(res.innerText)&&!d.querySelector('.co-item'),'「業界別の職種例」が出ない');
+    // 企業名・業態の一般名称を画面に出さない（legal-self-assessment.md §1-1 より強い状態）
+    chk(!/メガバンク|総合商社|総合広告代理店/.test(res.innerText),'業態の一般名称が結果画面に無い');
+
+    // ★消したのは箱であって、軸の開示ではない。文は「性格タイプ詳細」の中へ移した。
+    const detail=[...res.querySelectorAll('.r-panel')].find(x=>/性格タイプ詳細/.test(x.textContent));
+    const lbls=[...detail.querySelectorAll('.d-lbl')].map(x=>x.textContent.trim());
+    chk(lbls[0]==='4つの軸で見ると','「4つの軸で見ると」が性格タイプ詳細の最初の見出し: '+lbls.join(' / '));
+    const axSec=detail.querySelector('.d-lbl.la').parentElement.querySelector('.body-txt');
+    chk(!!axSec&&axSec.textContent.trim().length>=40,'軸の説明文が入っている: '+axSec.textContent.slice(0,28)+'…');
+    chk(!/[0-9]+%/.test(axSec.textContent),'その節に % を出さない（診断スコアとの二重掲載を避ける）');
+    // 開示自体は診断スコアに残っている
+    chk(d.querySelectorAll('.av-result').length===4,'4軸の開示は診断スコアに残っている');
+
+    // getSubCode() は残す（golden の指紋 { code, sub, scores } が参照している）
+    chk(typeof w.getSubCode==='function','getSubCode() は残っている（表示しないだけ）');
   }
 
   // ---------- S. ヒーローの作り替え（浮遊キャラ / 3ステップ削除 / ファーストビュー）----------

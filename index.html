@@ -264,14 +264,11 @@ a{color:var(--blue2);text-decoration:none;}a:hover{color:var(--verm);}
 .r-pb.aopen{display:block;animation:qIn .28s ease forwards;}
 .r-pb.always{display:block;}
 .body-txt{font-size:.84rem;line-height:1.95;color:var(--mid);}
-.reason-box{background:var(--w);border:1.5px solid var(--navy);border-radius:8px;padding:16px 18px;margin-bottom:14px;box-shadow:3px 3px 0 rgba(37,99,235,.16);position:relative;}
-.rb-title{font-family:var(--disp);font-size:10px;font-weight:700;letter-spacing:3px;color:var(--verm);text-transform:uppercase;margin-bottom:8px;}
-.rb-text{font-size:.84rem;line-height:1.8;color:var(--navy);font-weight:500;}
-.rb-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px;}
-.rbt{font-size:.68rem;font-weight:900;padding:3px 10px;border-radius:3px;border:1px solid var(--navy);}
-.rbt1{background:#dbeafe;color:#1d4ed8;}.rbt2{background:#fdf0d0;color:#7a4a10;}.rbt3{background:#d8efe2;color:#125239;}.rbt4{background:#e9e7f4;color:#4f477c;}
 .d-sec{margin-bottom:16px;}
 .d-lbl{display:inline-block;font-size:.65rem;font-weight:900;letter-spacing:2px;padding:3px 10px;border-radius:3px;border:1px solid var(--navy);text-transform:uppercase;margin-bottom:8px;}
+/* .la は「4つの軸で見ると」用。ls/lc/lt/lg が特性の4分類を色分けしているのに対し、
+   これはタイプの説明ではなく判定の内訳なので、系統から外して無彩色にする。 */
+.la{background:var(--paper2);color:var(--navy);}
 .ls{background:#dbeafe;color:var(--blue);}.lc{background:#e9e7f4;color:#4f477c;}.lt{background:#fbe0dc;color:#a4301f;}.lg{background:#d8efe2;color:#125239;}
 .axis-viz{padding:4px 0 8px;}
 .av-row{margin-bottom:18px;}
@@ -290,19 +287,6 @@ a{color:var(--blue2);text-decoration:none;}a:hover{color:var(--verm);}
 .stat-center{position:absolute;top:-3px;bottom:-3px;left:50%;width:2px;background:var(--navy);}
 .stat-marker{position:absolute;top:50%;transform:translate(-50%,-50%);width:18px;height:18px;border-radius:50%;border:2px solid var(--navy);box-shadow:2px 2px 0 rgba(15,23,42,.2);}
 .stat-result{font-size:.65rem;text-align:right;font-weight:900;letter-spacing:1px;}
-.subtype-card{background:var(--paper);border:1.5px solid var(--navy);border-radius:8px;padding:14px 16px;box-shadow:3px 3px 0 rgba(139,132,182,.4);}
-/* .sub-head は削除した。パネル見出し「サブタイプ」の言い直しだった（wording-audit.md R-14）。 */
-/* サブタイプが何なのかは、これまで画面のどこにも書いていなかった（コードと
-   キャラだけが出ていた）。getSubCode() は「いちばん僅差だった軸を1つだけ
-   反転したタイプ」を返す＝「あと少しでこちらだった」という情報なので、
-   その1点だけを添える。断定はしない（判定そのものは変えていない）。 */
-.sub-note{font-size:.72rem;line-height:1.8;color:var(--mid);margin-bottom:12px;}
-.sub-inner{display:flex;align-items:center;gap:14px;}
-.sub-img{width:60px;height:60px;object-fit:contain;border-radius:6px;background:var(--w);border:1.5px solid var(--navy);padding:3px;}
-.sub-code{font-family:var(--disp);font-size:1.5rem;font-weight:700;color:var(--navy);letter-spacing:3px;}
-.sub-name{font-size:.82rem;font-weight:700;color:var(--navy);margin-top:2px;}
-.sub-tag{font-size:.7rem;color:var(--mid);margin-top:3px;}
-.sub-pct{font-size:.68rem;font-weight:900;background:var(--blue-l);border:1px solid var(--navy);color:var(--blue2);padding:3px 10px;border-radius:3px;display:inline-block;margin-top:8px;}
 .job-tags{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:12px;}
 .job-tag{font-size:.74rem;font-weight:700;padding:6px 14px;background:var(--blue-l);color:var(--blue);border-radius:100px;border:1.5px solid var(--navy);}
 .compat-item{padding:14px 0;border-bottom:1px solid var(--border);}
@@ -322,18 +306,6 @@ a{color:var(--blue2);text-decoration:none;}a:hover{color:var(--verm);}
 .ca{background:var(--off);border:1.5px solid var(--navy);border-radius:6px;padding:9px 8px;text-align:center;}
 .ca-lbl{font-family:var(--disp);font-size:10px;font-weight:700;color:var(--blue2);letter-spacing:1px;margin-bottom:4px;text-transform:uppercase;display:block;}
 .ca-txt{font-size:.68rem;color:var(--mid);line-height:1.5;}
-.co-item{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--border);}
-.co-item:last-child{border-bottom:none;}
-/* .co-rank（1〜5の連番）は削除した。同じパネルの .co-note が「掲載順に優劣はなく」と
-   書いているのに、画面が順位を表示していたため（wording-audit.md R-4）。
-   .co-info p（業界名の再掲）も同時に削除した（R-9）。 */
-.co-info{flex:1;}
-.co-info h4{font-size:.88rem;font-weight:700;color:var(--navy);}
-.co-job{font-size:.65rem;font-weight:900;padding:2px 8px;background:var(--w);border:1px solid var(--navy);color:var(--blue2);border-radius:100px;white-space:nowrap;flex-shrink:0;}
-.ind-grid-sm{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;}
-.ind-sm{padding:12px 8px;background:var(--w);border:1.5px solid var(--navy);border-radius:6px;text-align:center;font-family:inherit;font-size:.78rem;font-weight:700;color:var(--ink);cursor:pointer;transition:transform .14s,box-shadow .14s;box-shadow:2px 2px 0 rgba(15,23,42,.14);}
-.ind-sm:hover{transform:translate(-1px,-1px);box-shadow:3px 3px 0 rgba(15,23,42,.16);}
-.ind-sm.sel{background:var(--blue2);color:#fff;box-shadow:2px 2px 0 var(--navy);}
 .retry-btn{display:block;width:100%;padding:19px;background:var(--verm);color:#fff;border:1.5px solid var(--navy);font-family:var(--disp);font-size:1.05rem;font-weight:700;letter-spacing:2px;cursor:pointer;text-align:center;border-radius:9px;box-shadow:4px 4px 0 var(--navy);transition:transform .14s,box-shadow .14s;margin-top:14px;position:relative;overflow:hidden;}
 .retry-btn::before{content:none;}
 .retry-btn:hover{transform:translate(-1px,-1px);box-shadow:5px 5px 0 var(--navy);}
@@ -389,14 +361,14 @@ a{color:var(--blue2);text-decoration:none;}a:hover{color:var(--verm);}
 
 /* --- #5 #6 和文タイポグラフィ：面積の大きい文字に表示用書体を当てる ------- */
 .hero-title,.res-type-name,.sec-title,.q-text,.btn,.d-cta,.retry-btn,
-.hero-badge,.rb-title,.ca-lbl,.tc-pill,.av-result,.sh{
+.hero-badge,.ca-lbl,.tc-pill,.av-result,.sh{
   font-family:var(--jp-disp);font-weight:900;
   font-feature-settings:'palt' 1;font-kerning:normal;
 }
 .hero-title,.sec-title,.res-type-name{letter-spacing:var(--ls-disp);}
-.hero-badge,.rb-title,.ca-lbl{letter-spacing:var(--ls-lbl);}
+.hero-badge,.ca-lbl{letter-spacing:var(--ls-lbl);}
 /* 欧文のみの文字列に --lat を限定（混植を止める） */
-.res-code,.tc-code,.sub-code,.prog-num,.q-badge,.res-announce,
+.res-code,.tc-code,.prog-num,.q-badge,.res-announce,
 .hdr-logo,.d-title,.sec-lbl{
   font-family:var(--lat);letter-spacing:var(--ls-lat);
 }
@@ -734,13 +706,6 @@ body[data-screen="screen-loading"] .ftr{display:none;}
 .ab-disc{font-size:10px;line-height:1.8;color:var(--light);
   border-top:var(--bd-hair) solid var(--border);padding-top:10px;margin:0;}
 
-/* --- 職種例の注記（実在企業名の順位表示を削除した箇所） ------------------ */
-/* .ind-lbl は業界チップの上に置く1行（wording-audit.md R-10）。
-   新しい色は作らず .co-note と同じ指定をそのまま使う（--mid on --paper2）。 */
-.co-note,.ind-lbl{font-size:11px;line-height:1.8;color:var(--mid);
-  background:var(--paper2);border-left:3px solid var(--border2);
-  padding:8px 10px;margin-bottom:12px;}
-
 /* --- アクセシビリティ：可視フォーカスが1箇所も無かった ------------------ */
 :focus-visible{outline:3px solid var(--must);outline-offset:2px;}
 @media (prefers-reduced-motion:reduce){
@@ -797,7 +762,7 @@ body[data-screen="screen-loading"] .ftr{display:none;}
    とは別系統にする必要がある。同じ質問カード上で .q-badge の影と .prog-seg が
    その4色を「軸」の意味で使っており、目盛にも同系色を置くと
    「青い目盛＝軸1のこと？」という誤読を作るため。
-     A側 = からし  --must #cf9a24（濃い側は #7a4a10。既存 .rbt2 / .rar-badge の色）
+     A側 = からし  --must #cf9a24（濃い側は #7a4a10。既存 .rar-badge の色）
      B側 = 墨      --navy #111a30
    彩度ではなく明度でも離れている（両者のコントラスト比 6.8:1）ので、
    色覚特性によらず区別できる。 */
@@ -1060,7 +1025,7 @@ body[data-screen="screen-loading"] .ftr{display:none;}
 .cont-banner{margin-top:28px;margin-bottom:0;}
 
 /* --- C-6: 16タイプ一覧のタップ先。結果全文ではなくタイプ紹介を出す --------
-   .r-panel / .subtype-card の意匠を流用し、押した .tc の行の直後に展開する。 */
+   .r-panel の意匠を流用し、押した .tc の行の直後に展開する。 */
 .type-peek{
   grid-column:1 / -1;position:relative;
   --cat:#1a56db;--cat-ink:#123c9b;
@@ -1428,7 +1393,7 @@ body{overflow-x:clip;}
 /* --- 属性入力（#screen-profile）-------------------------------------------
    docs/specs/diagnosis-experience-revamp.md §D-4。
    背景は紺（--ink-field）。診断 → 属性 → ローディング → 結果 の暗い流れを保つ。
-   チップは新規のビジュアルを作らず、既存の .job-tag / .ind-sm と同じ作法
+   チップは新規のビジュアルを作らず、既存の .job-tag と同じ作法
    （クリーム地・紺枠・硬い矩形の影）で組む。 */
 .pf-wrap{min-height:100svh;background:var(--ink-field);padding:80px 16px 56px;}
 .pf-inner{max-width:448px;margin:0 auto;}
@@ -2172,14 +2137,13 @@ const TD={
    企業の関与なく実名を順位付きで出すと「この企業に向いている＝受かりやすい」と読まれうるため、
    実名を含まない「業界 × 企業タイプ × 職種」の粒度に置き換えている。
    co = 企業タイプ（実名を書かないこと）／ job = 職種。 */
-const CD={
-  "IT / Web":[{co:"ネット広告・メディアの事業会社",job:"デジタルマーケター"},{co:"大手ECプラットフォーム",job:"プロダクトマネージャー"},{co:"ポータル・検索サービス",job:"データアナリスト"},{co:"C2Cサービスの開発組織",job:"ソフトウェアエンジニア"},{co:"人材・販促の総合ネット企業",job:"事業企画"}],
-  "広告 / メディア":[{co:"総合広告代理店",job:"コピーライター・プランナー"},{co:"広告会社のプランニング部門",job:"アカウントプランナー"},{co:"デジタル専業の広告会社",job:"SNSマーケター"},{co:"メディアバイイングの専門会社",job:"メディアプランナー"},{co:"ハウスエージェンシー",job:"営業プロデューサー"}],
-  "金融":[{co:"メガバンク",job:"法人営業"},{co:"地域金融機関",job:"リテール営業"},{co:"大手証券会社",job:"投資銀行部門"},{co:"損害保険会社",job:"損害サービス"},{co:"生命保険会社",job:"ファイナンシャルプランナー"}],
-  "コンサル":[{co:"戦略系コンサルティングファーム",job:"戦略コンサルタント"},{co:"総合系コンサルティングファーム",job:"業務コンサルタント"},{co:"会計系コンサルティングファーム",job:"財務コンサルタント"},{co:"IT系コンサルティングファーム",job:"ITコンサルタント"},{co:"リスク・内部統制の専門ファーム",job:"リスクコンサルタント"}],
-  "メーカー":[{co:"自動車メーカー",job:"技術開発"},{co:"総合電機メーカー",job:"商品企画"},{co:"産業機械メーカー",job:"プロダクトマネージャー"},{co:"精密機器・センサーメーカー",job:"テクニカルセールス"},{co:"食品メーカー",job:"マーケティング"}],
-  "商社":[{co:"総合商社",job:"トレーダー"},{co:"総合商社の事業投資部門",job:"プロジェクトマネージャー"},{co:"専門商社",job:"ビジネスディベロップメント"},{co:"商社の海外拠点",job:"グローバル営業"},{co:"商社の新規事業部門",job:"新規事業開発"}]
-};
+/* 業界の一覧。属性入力（#screen-profile）の業界チップだけが使う。
+   もとは const CD = { 業界: [{co:業態の一般名称, job:職種名}, …] } という
+   「業界別の職種例」パネル用のデータだった。2026-09-08 にそのパネルを落とし
+   （オーナー判断「業界別の職種例→いらない」）、業態名と職種名は行き先を失った。
+   キーだけが属性入力で生きているので、配列に畳んだ。
+   これで画面から企業名・業態名が完全に無くなった（職種名は t.jobs 側にある）。 */
+const IND_NAMES=["IT / Web","広告 / メディア","金融","コンサル","メーカー","商社"];
 
 /* ===== STATE ===== */
 /* ans[] だけが一次情報である。
@@ -2194,7 +2158,6 @@ let ans=[];                            /* 出題位置 -> 値。未回答は und
 let scores={1:0,2:0,3:0,4:0};          /* ans[] からの派生。pick 以外から直接書かない */
 let curQ=0;                            /* 回答済みの問数。ans[] からの派生 */
 let curPage=1;                         /* 診断画面で表示中のページ（QUIZ_FIRST_PAGE〜PAGE_COUNT-1） */
-let selectedIndustries=[];
 let quizStartedAt=0;   /* quiz_complete の duration_sec 用 */
 /* quiz_start はセッション内で1回だけ発火させる（LPでの回答か、CTA経由か） */
 let quizStarted=false;
@@ -2302,7 +2265,7 @@ function buildTypeOverview(){
    利用者に「前回の途中から続ける」を見せて、実は別の重みで足す方が害が大きい。 */
 const SAVE_KEY='cq_p3';
 const LEGACY_SAVE_KEYS=['cq_p','cq_p2'];
-function saveProgress(){try{localStorage.setItem(SAVE_KEY,JSON.stringify({curQ,scores,ans,selectedIndustries}));}catch(e){}}
+function saveProgress(){try{localStorage.setItem(SAVE_KEY,JSON.stringify({curQ,scores,ans}));}catch(e){}}
 function clearSavedProgress(){try{localStorage.removeItem(SAVE_KEY);}catch(e){}}
 function dropLegacyProgress(){try{LEGACY_SAVE_KEYS.forEach(k=>localStorage.removeItem(k));}catch(e){}}
 function checkSavedProgress(){
@@ -2325,7 +2288,6 @@ function continueDiag(){
        二重加算の防止と同じ原理を復帰経路にも通す。旧データ（1問ずつ時代の
        連続した ans）はこれでそのまま正しく復元される。 */
     ans=Array.isArray(d.ans)?d.ans.slice(0,Qs.length):[];
-    selectedIndustries=d.selectedIndustries||[];
     recalcScores();
     quizStartedAt=Date.now();
     if(!quizStarted){quizStarted=true;track('quiz_start',{entry:'continue'});}
@@ -2377,7 +2339,7 @@ function scrollToTypes(cat){
 /* 回答をすべて捨てて最初からやり直す。Q1 は LP にしか無いので #lp-quiz へ送る。
    いま呼ぶのは continueDiag() の復旧経路（保存データが壊れていたとき）だけ。 */
 function startFresh(entry){
-  ans=[];selectedIndustries=[];curPage=QUIZ_FIRST_PAGE;
+  ans=[];curPage=QUIZ_FIRST_PAGE;
   recalcScores();
   quizStartedAt=Date.now();
   if(!quizStarted){quizStarted=true;track('quiz_start',{entry:entry||'lp_inline'});}
@@ -2787,6 +2749,13 @@ function getCode(){
 /* 「いちばん僅差だった軸」を1本だけ反転させたタイプ。
    スケールが ±10 → ±15 に広がっても、比べているのは |score| どうしなので
    アルゴリズムは変わらない。反転は必ず1文字なので、primary とは必ず異なる。 */
+/* ★この関数の出力は画面に出ない。2026-09-08 にサブタイプのパネルを落とした
+   （オーナー判断「サブタイプ無くして良い」）。結果を1つに絞る設計と、
+   「2番目に近いタイプ」を併記することが噛み合っていなかった。
+   それでも関数を残すのは、golden（tools/golden-diagnosis.json / 200パターンの指紋）が
+   { code, sub, scores } を記録しているからである。消すと指紋が変わり、
+   採点ロジックを変えていないことを過去と突き合わせて示せなくなる。
+   tools/test-diagnosis.mjs から呼ばれている。 */
 function getSubCode(){
   const v=axisVotes();
   const absS=[Math.abs(scores[1]),Math.abs(scores[2]),Math.abs(scores[3]),Math.abs(scores[4])];
@@ -2849,11 +2818,11 @@ function yearChoices(stance,now){
 
 const PF_STANCE=[{v:'shinsotsu',t:'新卒（就活中）'},{v:'chuto',t:'中途（社会人）'}];
 const PF_SEX=[{v:'f',t:'女性'},{v:'m',t:'男性'},{v:'o',t:'その他'},{v:'n',t:'答えない'}];
-/* 業界は結果画面の「業界別の職種例」（CD のキー）と同じ語彙を使う。
+/* 業界の語彙は IND_NAMES を正とする。
    別の言い方を作ると、同じものを2つの言葉で呼ぶことになる（wording-audit P-5）。
    ★職種の粒度は暫定。提携先が何で絞るかを聞いてから確定する。
      ここ1箇所を書き換えれば画面に反映される。 */
-const PF_IND=Object.keys(CD).map(k=>({v:k,t:k})).concat([{v:'other',t:'その他'}]);
+const PF_IND=IND_NAMES.map(k=>({v:k,t:k})).concat([{v:'other',t:'その他'}]);
 const PF_JOB=['営業','企画・マーケ','エンジニア・技術','コンサル','クリエイティブ','事務・管理','その他']
   .map(t=>({v:t,t}));
 
@@ -3181,26 +3150,6 @@ document.addEventListener('keydown',function(e){
   if(document.querySelector('.type-peek'))closeTypePeek();
 });
 
-function buildCoHTML(inds){
-  let h='';
-  inds.forEach(ind=>{
-    const cos=CD[ind]||[];
-    h+=`<div style="margin-bottom:16px;"><div style="font-size:9px;font-weight:900;letter-spacing:3px;color:var(--blue2);text-transform:uppercase;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--border);">${ind}</div>`;
-    /* 1〜5の連番（.co-rank）は出さない。すぐ下の .co-note が「掲載順に優劣はなく」と
-       書いているのに、画面は順位を表示していた（wording-audit.md R-4）。
-       業界名の再掲（<p>${ind}</p>）も落とした。同じブロックの見出しに出ている（R-9）。 */
-    cos.forEach(c=>{h+=`<div class="co-item"><div class="co-info"><h4>${c.co}</h4></div><span class="co-job">${c.job}</span></div>`;});
-    h+=`</div>`;
-  });
-  return h;
-}
-function toggleIndSm(el,ind){
-  el.classList.toggle('sel');
-  if(el.classList.contains('sel'))selectedIndustries.push(ind);
-  else selectedIndustries=selectedIndustries.filter(i=>i!==ind);
-  const cl=document.getElementById('company-list');
-  if(cl)cl.innerHTML=buildCoHTML(selectedIndustries.length?selectedIndustries:Object.keys(CD));
-}
 
 function countUpCode(el,code){
   const pools=['HD','AB','LW','SG'];
@@ -3220,20 +3169,17 @@ function countUpCode(el,code){
    呼び出し側（?type= 来訪・テスト）が位置引数で source を渡しているため、
    引数の位置だけ残してある。 */
 function showResult(_unusedSkipIntro=false,source='quiz'){
-  const code=getCode(),t=TD[code],subCode=getSubCode();
+  const code=getCode(),t=TD[code];
   const cat=code.slice(0,2),sub=code.slice(2,4);
-  const inds=selectedIndustries.length>0?selectedIndustries:Object.keys(CD);
   const r=REASON[cat],rl=REASON_L[sub];
-  /* 判定理由のタグは getCode() と同じ根拠で向きを出す。scores>=0 のままだと、
-     合計0の軸でタイプコード（多数決）と逆向きの札が並ぶ。
-     4軸とも「倒れた側の名前 ＋ %」に統一した。「高/低」は存在しない基準との
-     比較を含意し、軸1・2 だけ書式が違っていた（wording-audit.md R-2）。 */
-  const _v=axisVotes();
-  const h=axisIsPos(1,_v),a=axisIsPos(2,_v),l=axisIsPos(3,_v),s=axisIsPos(4,_v);
-  const s1=Math.min(100,Math.round(Math.abs(scores[1]/AX_MAX)*100));
-  const s2=Math.min(100,Math.round(Math.abs(scores[2]/AX_MAX)*100));
-  const s3=Math.min(100,Math.round(Math.abs(scores[3]/AX_MAX)*100));
-  const s4=Math.min(100,Math.round(Math.abs(scores[4]/AX_MAX)*100));
+  /* 「判定理由」という独立した箱はやめ、この文（r.h / r.a / rl）を
+     「性格タイプ詳細」の中の1節（.d-lbl lt「4つの軸で見ると」）へ移した。
+     2026-09-08・オーナー指摘「結果の判定理由っていうところが気持ちわるい →
+     説明に入ってよいかも？」。判定・審査の語で結果を突きつける形をやめ、
+     タイプの説明の一部として読ませる。
+     箱にあった「軸名 ＋ %」の4つの札も落とした。すぐ上の「診断スコア」が
+     同じ4軸を同じ%で棒グラフにしており、二重掲載だった。
+     ★軸の開示そのものは診断スコアに残っている（結果の根拠を隠さない）。 */
   /* varMsg（回答の散らばりから「診断精度が高い」等を出す3分岐）は削除した。
      精度は測っていない（privacy.html §9「心理検査としての妥当性・信頼性の検証は
      行っていません」）うえ、3分岐すべてが褒め言葉になっていた。
@@ -3252,16 +3198,6 @@ function showResult(_unusedSkipIntro=false,source='quiz'){
     return h+`</div></div>`;
   }
 
-  let subH='';
-  if(subCode&&TD[subCode]){
-    const st=TD[subCode];
-    /* .sub-head「あなたのサブタイプ」は、3行上のパネル見出し「サブタイプ」の
-       言い直しだったので削除した（wording-audit.md R-14）。
-       .sub-note は主語のねじれを直した（R-15）。 */
-    subH=`<div class="r-panel fade-in"><button type="button" class="r-ph" aria-expanded="false" onclick="toggleAcc(this)"><div class="r-pt">サブタイプ</div><span class="r-tog">▼</span></button><div class="r-pb"><div class="subtype-card"><div class="sub-note">4つの軸のうち、いちばん差が小さかった1つが逆に出ていれば、こちらのタイプでした。それだけ僅差だったということなので、こちらの傾向も併せて見ると、自分の振れ幅がつかめます。</div><div class="sub-inner"><img class="sub-img" src="images/chars/sm/${codeImg(subCode)}.webp" alt=""><div><div class="sub-code">${subCode}</div><div class="sub-name">${st.name}</div><div class="sub-tag">${st.tag}</div><span class="sub-pct">2番目に近いタイプ</span></div></div></div></div></div>`;
-  }
-
-  const indChips=Object.keys(CD).map(ind=>`<div class="ind-sm${selectedIndustries.includes(ind)?' sel':''}" onclick="toggleIndSm(this,'${ind}')">${ind}</div>`).join('');
 
   /* -----------------------------------------------------------------------
      結果ページの縦構造（docs/design/conversion-structure-and-pc-grid.md §3-4）
@@ -3269,10 +3205,10 @@ function showResult(_unusedSkipIntro=false,source='quiz'){
        結果DOMに毎回入り、「未診断者に送客ブロックを出さない」検査が
        文字列一致で誤検知する。
 
-     narration / reason-box / 診断スコア(開) / サブタイプ / 性格タイプ詳細(開)
+     narration / 診断スコア(開) / 性格タイプ詳細(開)
      → 向いている職種（★S-4 で開いた状態にした）
-     → 業界別の職種例（★S-5 でここへ移動。閉じたまま）
      → 主送客ブロック
+     → あなたが働きやすい職場
      → 相性の良いタイプ / 注意が必要なタイプ / 結果をシェア
      → 副送客ブロック / もう一度診断する
 
@@ -3280,11 +3216,13 @@ function showResult(_unusedSkipIntro=false,source='quiz'){
           直後」と定めているのに、そのパネルだけ既定で閉じていた。閉じていると
           直前にあるのは 44px の見出し行で、置き場所の根拠が成立しない。
           「診断スコア」「性格タイプ詳細」と同じ扱いに揃えた。
-     S-5: 職種の話を連続させる。.co-note「※…特定の企業の採用基準や選考とは
-          関係ありません。」の直後に .ab-lead「この診断でわかるのは働き方の
-          傾向までです。…」が来る。この2文は同じ受け渡しを2段で言っており、
-          離して置く理由がない。送客ブロックは職種の節を中断するのではなく
-          締めくくる位置になる。娯楽側（相性・注意）は後ろへ送る。
+     S-5 は失効した。2026-09-08 に「業界別の職種例」のパネルごと落としたため
+          （オーナー判断「業界別の職種例→いらない」）。全16タイプで中身が同じで、
+          タイプ固有の情報が無く、業態の一般名称を並べているだけだった。
+          そこにあった .co-note「※…特定の企業の採用基準や選考とは関係ありません。」も
+          一緒に消えたが、限定は送客ブロックの .ab-lead「この診断でわかるのは
+          働き方の傾向までです。…」が引き受けている。企業・業態の名称を
+          画面から一切出さなくなったので、注記の対象そのものが無い。
      ----------------------------------------------------------------------- */
   document.getElementById('screen-result').innerHTML=`
   <div class="result-wrap">
@@ -3310,12 +3248,9 @@ function showResult(_unusedSkipIntro=false,source='quiz'){
     </div>
     <div class="wrap" style="padding-top:20px;">
       <div class="narration fade-in">${t.desc}</div>
-      <div class="reason-box fade-in"><div class="rb-title">判定理由</div><div class="rb-text">${r.h} ${r.a} ${rl}</div><div class="rb-tags"><span class="rbt rbt1">${h?AX[1].l:AX[1].r} ${s1}%</span><span class="rbt rbt2">${a?AX[2].l:AX[2].r} ${s2}%</span><span class="rbt rbt3">${l?AX[3].l:AX[3].r} ${s3}%</span><span class="rbt rbt4">${s?AX[4].l:AX[4].r} ${s4}%</span></div></div>
       <div class="r-panel fade-in"><button type="button" class="r-ph aopen" aria-expanded="true" onclick="toggleAcc(this)"><div class="r-pt">診断スコア</div><span class="r-tog" style="transform:rotate(180deg);">▼</span></button><div class="r-pb aopen">${buildAxisViz(scores)}</div></div>
-      ${subH}
-      <div class="r-panel fade-in"><button type="button" class="r-ph aopen" aria-expanded="true" onclick="toggleAcc(this)"><div class="r-pt">性格タイプ詳細</div><span class="r-tog" style="transform:rotate(180deg);">▼</span></button><div class="r-pb aopen"><div class="body-txt" style="margin-bottom:16px;">${t.per}</div><div class="d-sec"><div class="d-lbl ls">強み</div><div class="body-txt">${t.str}</div></div><div class="d-sec"><div class="d-lbl lc">コミュニケーション</div><div class="body-txt">${t.com}</div></div><div class="d-sec"><div class="d-lbl lg">成長のヒント</div><div class="body-txt">${t.grw}</div></div></div></div>
+      <div class="r-panel fade-in"><button type="button" class="r-ph aopen" aria-expanded="true" onclick="toggleAcc(this)"><div class="r-pt">性格タイプ詳細</div><span class="r-tog" style="transform:rotate(180deg);">▼</span></button><div class="r-pb aopen"><div class="body-txt" style="margin-bottom:16px;">${t.per}</div><div class="d-sec"><div class="d-lbl la">4つの軸で見ると</div><div class="body-txt">${r.h}${r.a}${rl}</div></div><div class="d-sec"><div class="d-lbl ls">強み</div><div class="body-txt">${t.str}</div></div><div class="d-sec"><div class="d-lbl lc">コミュニケーション</div><div class="body-txt">${t.com}</div></div><div class="d-sec"><div class="d-lbl lg">成長のヒント</div><div class="body-txt">${t.grw}</div></div></div></div>
       <div class="r-panel fade-in"><button type="button" class="r-ph aopen" aria-expanded="true" onclick="toggleAcc(this)"><div class="r-pt">向いている職種</div><span class="r-tog" style="transform:rotate(180deg);">▼</span></button><div class="r-pb aopen"><div class="job-tags">${t.jobs.map(j=>`<div class="job-tag">${j}</div>`).join('')}</div><div class="body-txt">${t.why}</div></div></div>
-      <div class="r-panel fade-in"><button type="button" class="r-ph" aria-expanded="false" onclick="toggleAcc(this)"><div class="r-pt">業界別の職種例</div><span class="r-tog">▼</span></button><div class="r-pb"><p class="ind-lbl">気になる業界を選ぶと絞り込めます</p><div class="ind-grid-sm">${indChips}</div><p class="co-note">※タイプの傾向に近い職種の例です。掲載順に優劣はなく、特定の企業の採用基準や選考とは関係ありません。</p><div id="company-list">${buildCoHTML(inds)}</div></div></div>
 
       <div class="r-panel fade-in"><button type="button" class="r-ph aopen" aria-expanded="true" onclick="toggleAcc(this)"><div class="r-pt">あなたが働きやすい職場</div><span class="r-tog" style="transform:rotate(180deg);">▼</span></button><div class="r-pb aopen">${buildEnvHTML()}<div class="d-sec"><div class="d-lbl lt">消耗しやすいところ</div><div class="body-txt">${t.sts}</div></div></div></div>
 
