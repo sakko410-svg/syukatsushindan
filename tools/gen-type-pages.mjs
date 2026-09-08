@@ -194,6 +194,11 @@ main{background:var(--paper2);padding:28px 0 40px;}
   h1{font-size:2.05rem;}
   .face{width:220px;height:330px;}
 }
+/* Character-file visual identity; keep this share landing independent of scores. */
+:root{--paper:#f7f0dc;--ink-field:#2456e8;--navy:#101938;}
+.hero{background:#2456e8;}.hero::before{background-image:linear-gradient(#ffffff18 1px,transparent 1px),linear-gradient(90deg,#ffffff18 1px,transparent 1px);background-size:44px 44px;}
+.card{border:3px solid #101938;border-radius:0;box-shadow:6px 6px 0 #101938;}
+.card h2{border-bottom:3px solid #101938;background:#ffd84d;padding:10px;}
 </style>
 </head>
 <body>
