@@ -90,6 +90,13 @@ main{background:var(--paper2);padding:28px 0 40px;}
 .jobs{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px;}
 .jobs span{font-size:.8rem;font-weight:700;color:#fff;background:var(--cat-ink);
   border-radius:4px;padding:4px 11px;}
+/* 検索でこのページに入った人が、3枚の .mini 以外へ回遊できなかった。
+   一覧は LP の #type-section にある（専用の一覧ページは作っていない）。
+   主CTA（診断）と競合させないよう、下線付きのテキストリンクにする。
+   index.html の .tp-more と同じ役目・同じ見え方。 */
+.all-link{display:block;margin-top:14px;text-align:center;
+  font-size:.76rem;font-weight:700;color:var(--cat-ink);
+  text-decoration:underline;text-underline-offset:3px;}
 .minis{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:4px;}
 .mini{display:flex;flex-direction:column;align-items:center;gap:6px;
   text-decoration:none;background:var(--paper);border:2px solid var(--navy);
@@ -185,6 +192,7 @@ main{background:var(--paper2);padding:28px 0 40px;}
       <h2>相性がよい組み合わせ</h2>
       <div class="minis"><a class="mini" href="DAWS.html"><img src="../images/chars/sm/c3.webp" alt="" loading="lazy" width="56" height="84"><span class="mini-t"><b style="color:#c8412e">DAWS</b>突き抜けパイオニア</span></a><a class="mini" href="HBWS.html"><img src="../images/chars/sm/b3.webp" alt="" loading="lazy" width="56" height="84"><span class="mini-t"><b style="color:#1d6b4c">HBWS</b>黒子のプロデューサー</span></a><a class="mini" href="DBLS.html"><img src="../images/chars/sm/d1.webp" alt="" loading="lazy" width="56" height="84"><span class="mini-t"><b style="color:#4b4483">DBLS</b>冷静なブレイン</span></a></div>
       <p class="note">タイプ同士の傾向の話であり、特定の人との関係を判定するものではありません。</p>
+      <a class="all-link" href="../index.html#type-section">16タイプをすべて見る →</a>
     </section>
 
     <a class="cta" href="../index.html?ref=type">20問で自分のタイプを調べる →</a>

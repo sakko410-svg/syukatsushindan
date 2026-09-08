@@ -792,6 +792,22 @@ console.log('[lint] タイプページと og:image');
   check(/class="tp-more" href="t\/\$\{esc\(code\)\}\.html"/.test(html),
         `16タイプ一覧の紹介パネルから t/<CODE>.html へのリンクがある`);
 
+  // 結果画面の相性パネルから、相手のタイプページへ辿れること。
+  // コードと名前とキャラだけが出ていて、読みに行く先が無かった。
+  check(/class="tp-more" href="t\/\$\{esc\(c\)\}\.html"/.test(html),
+        `相性パネルの各タイプから t/<CODE>.html へのリンクがある`);
+  // ★自分のタイプページへは張らない（結果画面のほうが情報が多く、押すと減る）
+  check(!/href="t\/\$\{esc\(code\)\}\.html"[^`]*もっと|自分のタイプのページ/.test(html),
+        `結果画面から自分のタイプページへは張っていない`);
+
+  // t/*.html から一覧へ戻れること。検索で入った人が3枚の .mini 以外へ回遊できなかった。
+  {
+    const noAll = pages.filter(p2 => !/class="all-link" href="\.\.\/index\.html#type-section"/.test(p2.html));
+    check(noAll.length === 0,
+      `t/*.html 16枚すべてに一覧（#type-section）への導線がある（欠け: ${noAll.map(x=>x.code).join(',')||'なし'}）`);
+  }
+  check(/id="type-section"/.test(html), 't/*.html が指す #type-section が index.html に存在する');
+
   // shareUrl() が t/ を指していること（?type=&ref=share のままだと16枚が使われない）
   check(/function shareUrl\(code\)\{return SITE_BASE\+'t\/'/.test(html),
         `shareUrl() が t/<CODE>.html を返す（16枚の og:image が使われる経路）`);

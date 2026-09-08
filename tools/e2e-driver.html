@@ -732,6 +732,30 @@ try{
           '詳細リンクは下線付きのテキスト（ボタンにしない）');
       if(pk)w.closeTypePeek();
       await sleep(100);
+
+      /* 結果画面の相性パネルからも、相手のタイプページへ辿れること。
+         コードと名前とキャラだけが出ていて、読みに行く先が無かった。
+         ここで結果DOMを作るので、一覧を見る検査はすべて上で済ませてある。 */
+      w.eval("scores={1:6,2:5,3:-4,4:7};ans=Array(20).fill(2);showResult(true,'quiz')");
+      await sleep(700);
+      const cItems=[...d.querySelectorAll('#screen-result .compat-item')];
+      chk(cItems.length>=3,'相性パネルに項目がある: '+cItems.length+'件');
+      const cLinks=cItems.map(x=>x.querySelector('.tp-more')).filter(Boolean);
+      chk(cLinks.length===cItems.length,
+          '相性パネルの全項目に詳細ページへのリンクがある: '+cLinks.length+'/'+cItems.length);
+      chk(cLinks.every(a=>/^t\/[A-Z]{4}\.html$/.test(a.getAttribute('href'))),
+          'リンク先が t/<CODE>.html: '+cLinks.map(a=>a.getAttribute('href')).join(','));
+      /* 自分のコードへ張ると、押した先は結果画面より情報が少ない（4軸スコア・
+         あなたが働きやすい職場・相性が無い）。相手のコードだけを指すこと。 */
+      const meCode=w.getCode();   // .res-code はカウントアップ中の中間フレームを返す
+      chk(cLinks.every(a=>a.getAttribute('href')!=='t/'+meCode+'.html'),
+          '自分のタイプページ（'+meCode+'）へは張っていない');
+      chk(cLinks.every(a=>a.textContent.includes(a.getAttribute('href').slice(2,6))),
+          '文言に相手のタイプコードが入っている: '+(cLinks[0]?cLinks[0].textContent.trim():'-'));
+      chk(cLinks.every(a=>w.getComputedStyle(a).textDecorationLine==='underline'),
+          '相性パネルのリンクも下線付きのテキスト（主CTAと競合させない）');
+      /* ここで結果画面へ移っているので、LPを前提にした後続の検査のために戻す。 */
+      await load('index.html'); w=f.contentWindow; d=f.contentDocument; await sleep(300);
     }
 
     chk(d.querySelectorAll('#lq-list .q-card').length===5,'LPにも5問並ぶ: '+d.querySelectorAll('#lq-list .q-card').length);

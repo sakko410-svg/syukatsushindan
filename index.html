@@ -1379,10 +1379,12 @@ body{overflow-x:clip;}
    基準は 6px 超なので 64px を採る。 */
 .cont-banner{margin-top:64px;}
 
-/* --- 一覧 → 詳細ページの副導線（.tp-more）-------------------------------
-   主CTA（.tp-cta「20問で確かめる」）の下に置く控えめなリンク。
-   ボタンを2つ並べると、一覧を見に来た人の行き先が分かれる。
-   下線付きのテキストリンクにして、主従をはっきりさせる。 */
+/* --- 詳細ページ（t/<CODE>.html）への副導線（.tp-more）---------------------
+   2箇所で使う。
+     ① 一覧の .type-peek … 主CTA（.tp-cta「20問で確かめる」）の下
+     ② 結果画面の相性パネル … 相手のタイプの説明へ
+   どちらも「主CTAではない」ことを形で示す必要がある。ボタンを2つ並べると
+   行き先が分かれるので、下線付きのテキストリンクにして主従をはっきりさせる。 */
 .tp-more{
   display:block;margin-top:11px;text-align:center;
   font-size:.76rem;font-weight:700;color:var(--cat-ink,#123c9b);
@@ -3188,12 +3190,18 @@ function showResult(_unusedSkipIntro=false,source='quiz'){
   /* バッジは「相性◎ / 要注意」だった。◎ は根拠のない格付けの記号で、
      「要注意」は他人の人格への警告として強すぎる（bR の中身はペースの違いの話）。
      docs/design/wording-audit.md R-7。パネル自体を置くかは未決（オーナー判断3）。 */
+  /* 相手のタイプページへの導線。コードと名前とキャラだけが出ていて、
+     「この人が何者か」を読みに行く先が無かった。t/<CODE>.html には
+     そのタイプの説明が全部載っている（一覧の .type-peek から張っているのと同じ先）。
+     ★自分のタイプページへは張らない。結果画面のほうが情報が多く
+       （4軸スコア・あなたが働きやすい職場・相性）、押すと減る。
+       自分のページは shareUrl() が他人へ配るためのものである。 */
   function compatSec(codes,cls,title){
     if(!codes?.length)return'';
     let h=`<div class="r-panel fade-in"><button type="button" class="r-ph" aria-expanded="false" onclick="toggleAcc(this)"><div class="r-pt">${title}</div><span class="r-tog">▼</span></button><div class="r-pb">`;
     codes.forEach(c=>{
       const ct=TD[c],gr=cls==='good'?t.gR:t.bR;
-      h+=`<div class="compat-item"><div class="compat-chars"><div class="compat-cbox">${cImg(code,54)}<span class="code" style="color:var(--blue2);">${code}</span></div><span class="compat-vs">⇔</span><div class="compat-cbox">${cImg(c,54)}<span class="code" style="color:var(--blue2);">${c}</span></div><div class="compat-info"><span class="cm-badge cm-${cls}">${cls==='good'?'相性が良い':'すれ違いやすい'}</span><div class="compat-name">${ct.name}</div><div class="compat-tag">${ct.tag}</div></div></div><div class="compat-angles"><div class="ca"><span class="ca-lbl">チームで</span><div class="ca-txt">${gr.team}</div></div><div class="ca"><span class="ca-lbl">先輩なら</span><div class="ca-txt">${gr.senpai}</div></div><div class="ca"><span class="ca-lbl">就活仲間なら</span><div class="ca-txt">${gr.friend}</div></div></div></div>`;
+      h+=`<div class="compat-item"><div class="compat-chars"><div class="compat-cbox">${cImg(code,54)}<span class="code" style="color:var(--blue2);">${code}</span></div><span class="compat-vs">⇔</span><div class="compat-cbox">${cImg(c,54)}<span class="code" style="color:var(--blue2);">${c}</span></div><div class="compat-info"><span class="cm-badge cm-${cls}">${cls==='good'?'相性が良い':'すれ違いやすい'}</span><div class="compat-name">${ct.name}</div><div class="compat-tag">${ct.tag}</div></div></div><div class="compat-angles"><div class="ca"><span class="ca-lbl">チームで</span><div class="ca-txt">${gr.team}</div></div><div class="ca"><span class="ca-lbl">先輩なら</span><div class="ca-txt">${gr.senpai}</div></div><div class="ca"><span class="ca-lbl">就活仲間なら</span><div class="ca-txt">${gr.friend}</div></div></div><a class="tp-more" href="t/${esc(c)}.html">${esc(ct.name)}（${c}）の説明を読む →</a></div>`;
     });
     return h+`</div></div>`;
   }
