@@ -813,6 +813,70 @@ console.log('[lint] タイプページと og:image');
         `shareUrl() が t/<CODE>.html を返す（16枚の og:image が使われる経路）`);
 }
 
+// --- 2色の意味（青＝分かったこと / 赤＝押す場所）---------------------------
+// オーナー判断「色は青系と赤系で、それぞれに意味を持たせて配色したい」。
+// 意味を持たせた以上、置き場所が広がると意味が消える。ソース側で守る。
+console.log('[lint] 2色の意味');
+{
+  const m = html.match(/--info:(#[0-9a-f]{6});[\s\S]{0,80}?--act:(#[0-9a-f]{6});/i);
+  check(!!m, '--info（青）と --act（赤）が 1 箇所で定義されている');
+  if (m) {
+    const [, info, act] = m;
+    const hex = h => [1, 3, 5].map(i => parseInt(h.substr(i, 2), 16));
+    const [ir, ig, ib] = hex(info), [ar, ag, ab] = hex(act);
+    check(ib > ir + 30, `--info は青系（B が R より大きい）: ${info}`);
+    check(ar > ag + 30 && ar > ab + 30, `--act は赤系（R が G/B より大きい）: ${act}`);
+
+    const lum = h => { const c = hex(h).map(v => v / 255)
+      .map(v => v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4));
+      return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]; };
+    const ratio = (a, b) => { const x = lum(a), y = lum(b);
+      return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); };
+    check(ratio(info, '#ffffff') >= 4.5, `青は白地で文字にできる: ${ratio(info, '#ffffff').toFixed(2)}:1`);
+    check(ratio('#ffffff', act) >= 4.5, `赤は白抜き文字を載せられる: ${ratio('#ffffff', act).toFixed(2)}:1`);
+    // ★2色の明度が近いと、色覚特性のある人には見分けがつかない。
+    //   ただし赤は必ず「塗られたボタン」、青は「文字と細い塗り」で、
+    //   形が違うので色だけに依存していない（WCAG 1.4.1）。数値は記録に残す。
+    console.log(`  --   青と赤の明度比 ${ratio(info, act).toFixed(2)}:1`
+      + `（形でも区別している。色だけに頼っていない）`);
+  }
+
+  // 新しい層（QUIET RESTYLE 以降）が色を1つも足していないこと。
+  // ★基層と RETRO 側には旧アクセントの値が残っている。これは消さない——
+  //   「QUIET RESTYLE を削除すればレトロの見た目に戻る」ためには、
+  //   下の層が無傷で残っている必要があるからである。
+  //   旧アクセントは QUIET の :root が var(--info) / var(--act) で潰しており、
+  //   実際に描画されていないことは e2e「2色の意味」が実画面で数えて確かめる。
+  //   ここで見るのは「新しい層が色を持ち込んでいないか」だけ。
+  const quiet = html.slice(html.indexOf('QUIET RESTYLE'))
+    .replace(/\/\*[\s\S]*?\*\//g, '');
+  for (const dead of ['#c8412e', '#cf9a24', '#7c3aed', '#16a34a', '#dc2626',
+                      '#ea580c', '#0891b2', '#d97706', '#123c9b', '#1d6b4c']) {
+    check(!quiet.includes(dead), `QUIET RESTYLE が旧アクセント ${dead} を持ち込んでいない`);
+  }
+  // 新しい層に現れてよい色は、2色とその hover、無彩色だけ
+  const hexes = [...new Set((quiet.match(/#[0-9a-f]{6}/gi) || []).map(x => x.toLowerCase()))];
+  const isGray = h => { const [r, g, b] = [1, 3, 5].map(i => parseInt(h.substr(i, 2), 16));
+    return Math.max(r, g, b) - Math.min(r, g, b) <= 14; };
+  const allow = new Set([m ? m[1].toLowerCase() : '', m ? m[2].toLowerCase() : '',
+                         '#8c3527', '#eceee9', '#06c755', '#ffffff']);
+  const extra = hexes.filter(h => !isGray(h) && !allow.has(h));
+  check(extra.length === 0,
+    `QUIET RESTYLE に3色目が無い（2色＋hover＋無彩色＋LINE緑のみ）: ${extra.join(', ') || 'なし'}`);
+  // 赤をエラー・警告に使わない。この配色では赤＝前進である
+  check(!/注意が必要[^<]*<\/div>[\s\S]{0,120}var\(--act\)/.test(quiet),
+    '「注意が必要なタイプ」に赤を当てていない（赤＝危険ではなく前進）');
+
+  // タイプページ側にも同じ2色があり、値が一致すること
+  const tp = read('tools/gen-type-pages.mjs');
+  const m2 = tp.match(/--info:(#[0-9a-f]{6});--act:(#[0-9a-f]{6});/i);
+  check(!!m2, 'tools/gen-type-pages.mjs にも --info / --act がある');
+  if (m && m2) {
+    check(m[1].toLowerCase() === m2[1].toLowerCase() && m[2].toLowerCase() === m2[2].toLowerCase(),
+      `index.html とタイプページで2色が一致（${m[1]}/${m[2]} vs ${m2[1]}/${m2[2]}）`);
+  }
+}
+
 // --- 明朝サブセット（焼き忘れを止める）-------------------------------------
 // 書体の規則で明朝を当てるのは「指す言葉」＝16タイプのコードと名前だけ。
 // だから必要な文字は数え上げられ、82文字を焼けば約11KB で済む。

@@ -269,7 +269,7 @@ a{color:var(--blue2);text-decoration:none;}a:hover{color:var(--verm);}
 /* .la は「4つの軸で見ると」用。ls/lc/lt/lg が特性の4分類を色分けしているのに対し、
    これはタイプの説明ではなく判定の内訳なので、系統から外して無彩色にする。 */
 .la{background:var(--paper2);color:var(--navy);}
-.ls{background:#dbeafe;color:var(--blue);}.lc{background:#e9e7f4;color:#4f477c;}.lt{background:#fbe0dc;color:#a4301f;}.lg{background:#d8efe2;color:#125239;}
+.ls{background:var(--paper2);color:var(--blue);}.lc{background:#e9e7f4;color:#4f477c;}.lt{background:#fbe0dc;color:#a4301f;}.lg{background:#d8efe2;color:#125239;}
 .axis-viz{padding:4px 0 8px;}
 .av-row{margin-bottom:18px;}
 .av-labels{display:flex;justify-content:space-between;margin-bottom:6px;}
@@ -1613,24 +1613,40 @@ body::before{
   --mid:#4c4f55;   --light:#8e8e93;
   --border:#e3e3e6; --border2:#d6d6da;
 
-  /* ★★ 色は未決（2026-09-08 時点）。下の2行が唯一の決定点である。
-     経緯: 「墨 × 群青」で一度決めたが、オーナーから「墨は地味すぎる」。
-           別の色を検討中で、いまは判断を保留している。
-     いまの値は保留中の暫定であって、決定ではない。
+  /* ★★ 色は2つ。それぞれに意味を持たせる（オーナー判断 2026-09-08）。
+     ------------------------------------------------------------------
+       --info（青系）… 「診断が返してきたもの」＝自分について分かったこと。
+                       タイプコード / 軸の塗りとマーカー / 職種チップ /
+                       内部リンク / 選んだ痕・進捗。繰り返し出てよい。
+       --act （赤系）… 「自分がこれから動くところ」＝押すと次へ進む場所。
+                       主CTA / 次の5問へ / 送客ボタン。それ以外に出さない。
+     ------------------------------------------------------------------
+     ★赤を「押す場所」だけに閉じ込めるのが規則の要である。
+       状態（選択中・進捗）まで赤にすると、押す場所が埋もれて意味が消える。
+     ★赤をエラーや警告に使わない。この配色では赤＝前進であって危険ではない。
+       注記・免責・「注意が必要なタイプ」は無彩色のままにすること。
+     ★A/B の目盛は青にも赤にもしない（下の 12.）。片側に色を付けると
+       「その側が正解」と読める。
      ★この2行以外に色は書かれていない。旧アクセント（青3種・朱・からし・
-       緑・藤の8色）は下でこの2つを参照するようにしてあるので、
-       色を変えるときに触るのはここだけで済む。 */
-  --sumi:#3b3b40;  /* 構造色。軸の線・目盛・図版の線。地味すぎると指摘あり */
-  --gun:#1f3a93;   /* 強調色。軸のマーカーと押す場所の2箇所だけ */
+       緑・藤の8色）は下でこの2つを参照する。色を変えるならここだけ。 */
+  --info:#1f3a93;  /* 青系。分かったこと */
+  --act:#a8402f;   /* 赤系。これから動くところ */
+  --sumi:var(--info);  /* 構造色は青に寄せる（線・塗り・図版） */
+  --gun:var(--info);   /* 旧名。情報側の別名として残す */
 
   /* ★旧アクセント（青3種・朱・からし・緑・藤 …）は全部 --sumi / --gun へ
      吸収する。値を直接書かず変数で受けるので、色を変えるときに触るのは
      上の --sumi と --gun の2行だけで済む。新しい色は1つも足さない。 */
-  --blue:var(--gun); --blue2:var(--gun); --blue3:var(--sumi);
+  --blue:var(--info); --blue2:var(--info); --blue3:var(--info);
   --blue-l:var(--paper2); --blue-m:var(--border2);
-  --verm:var(--gun); --must:var(--sumi); --forest:var(--sumi); --lav:var(--sumi);
-  --lav-ink:var(--sumi); --cat:var(--gun); --cat-ink:var(--gun);
-  --green:var(--sumi); --red:var(--navy); --purple:var(--sumi);
+  /* ★旧・朱（--verm）は「押す場所」だけでなく、装飾ラベルにも使われていた
+     （.sec-lbl / .res-announce / .d-title / .hdr-dot / .compat-vs / a:hover）。
+     ここを赤にすると赤が画面じゅうに散り、「赤＝押す場所」の意味が消える。
+     よって --verm は情報側（青）へ落とし、赤は下の 7. の5セレクタだけに与える。 */
+  --verm:var(--info);
+  --must:var(--info); --forest:var(--info); --lav:var(--info);
+  --lav-ink:var(--info); --cat:var(--info); --cat-ink:var(--info);
+  --green:var(--info); --red:var(--navy); --purple:var(--info);
   --shadow:transparent; --shadow2:transparent;
 
   /* 硬い影をやめる。トークン経由の 18 箇所はこれで消える */
@@ -1686,7 +1702,7 @@ body::after,body::before{content:none;}
 .btn-ghost{border-color:var(--border2);color:var(--mid);}
 .btn-ghost:hover{border-color:var(--navy);color:var(--navy);background:transparent;}
 .q-remain{color:var(--light);}
-.q-remain.done{color:var(--gun);}
+.q-remain.done{color:var(--info);}
 .res-kw{background:var(--w);border-color:var(--border);color:var(--mid);}
 .ftr{color:var(--mid);border-top:1px solid var(--border);}
 .ftr-logo{color:var(--navy);}
@@ -1717,7 +1733,7 @@ body::after,body::before{content:none;}
    書体で階層を作れないぶん、サイズとウェイトと色で作り切る。 */
 .res-code{
   font-size:clamp(2.6rem,12vw,3.4rem);font-weight:400;letter-spacing:.3em;
-  line-height:1;color:var(--navy);text-shadow:none;margin-bottom:4px;
+  line-height:1;color:var(--info);text-shadow:none;margin-bottom:4px;
   padding-left:.3em;                  /* 字間ぶん右に寄るのを戻す */
 }
 .res-type-name{
@@ -1730,19 +1746,27 @@ body::after,body::before{content:none;}
 .hero-title{font-size:clamp(1.7rem,6.4vw,2.2rem);font-weight:700;line-height:1.4;}
 .r-pt{font-size:.94rem;font-weight:700;letter-spacing:-.01em;color:var(--navy);}
 .body-txt,.narration{font-size:.875rem;line-height:1.95;color:var(--mid);}
-.tc-code{font-size:.95rem;letter-spacing:.14em;color:var(--gun)!important;}
+.tc-code{font-size:.95rem;letter-spacing:.14em;color:var(--info)!important;}
 .tc-name{font-size:.8rem;font-weight:600;color:var(--navy);letter-spacing:.02em;}
 .compat-name{font-size:1rem;font-weight:600;letter-spacing:.03em;}
 
 /* --- 7. 押す場所は群青、それ以外に色を置かない ---------------------------
    群青が1画面に何度も出ると、どこを押せばいいのかが消える。 */
-.btn,.d-cta,.retry-btn,.friend-btn,.sb-cta{
-  background:var(--gun);color:#fff;border:1px solid var(--gun);
+/* ★赤＝押すと次へ進む場所。ここに挙げた5つ以外に赤を出さない。 */
+/* ★.lq-done は「ここまで5問」の案内パネルであってボタンではない。
+   面ごと赤にすると、中の文字が赤地に載って読みにくくなるうえ、
+   「赤＝押す場所」が成立しなくなる。赤はこの中の .btn だけに出る。 */
+.btn,.d-cta,.friend-btn,.sb-cta{
+  background:var(--act);color:#fff;border:1px solid var(--act);
   border-radius:var(--r-1);font-weight:700;letter-spacing:.04em;
 }
 .btn{font-size:1rem;padding:17px 24px;}
+.btn:hover,.d-cta:hover,.friend-btn:hover,.sb-cta:hover{background:#8c3527;}
+/* 「もう一度診断する」は前進ではなくやり直しなので赤にしない */
 .retry-btn{background:transparent;color:var(--mid);border-color:var(--border2);}
-.job-tag{background:var(--w);color:var(--gun);font-weight:600;border-radius:var(--r-1);}
+/* 青＝分かったこと。職種・内部リンク・タイプコードはこちら */
+.job-tag{background:var(--w);color:var(--info);font-weight:600;border-radius:var(--r-1);}
+.tp-more,.ftr-links a{color:var(--info);}
 
 /* --- 8. 取りこぼし ------------------------------------------------------- */
 /* タグラインは紺地の上で読ませる色（#cfd6e6）だった。白地では消える */
@@ -1754,7 +1778,7 @@ body::after,body::before{content:none;}
 .narration::before{content:none;}
 /* 軸の棒。倒れた側だけ塗り、反対側は地のまま。マーカーだけ群青 */
 .av-track{background:var(--paper2);border-color:var(--border);}
-.av-marker{background:var(--gun)!important;border-color:var(--gun)!important;box-shadow:none!important;}
+.av-marker{background:var(--info)!important;border-color:var(--info)!important;box-shadow:none!important;}
 .av-fill-l,.av-fill-r{opacity:1!important;}
 .av-center{background:var(--border2);}
 .av-l{font-weight:600;}
@@ -1846,6 +1870,17 @@ body::after,body::before{content:none;}
   /* 焼いた82文字の範囲外は、この書体を探しにいかせない */
   unicode-range:U+0041-005A,U+3041-309F,U+30A0-30FF,U+4E00-9FFF;
 }
+
+/* --- 16. 系統ピル（HA系 — リーダー 等）---------------------------------
+   .pa/.pb/.pc/.pd に4色（青・緑・朱・藤）を持たせていた。
+   系統名は「指す言葉」ではなく（4タイプで共有するので誰か絞れない）、
+   「押す場所」でもない。よって青にも赤にもせず、無彩色にする。
+   ★.pc は朱（#c8412e）だったため、赤の監査に引っかかっていた。
+     赤は押す場所だけ、という規則が破れていた箇所である。 */
+.tc-pill,.pa,.pb,.pc,.pd{
+  background:var(--paper2)!important;color:var(--mid)!important;
+  border:1px solid var(--border)!important;font-weight:600;letter-spacing:.12em;
+}
 </style>
 </head>
 <body data-screen="screen-title">
@@ -1869,9 +1904,9 @@ body::after,body::before{content:none;}
   <div class="d-title" style="margin-top:4px;">16Types</div>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:0 4px;">
     <button class="d-link" style="padding:10px 12px;" onclick="scrollToTypes('HA');closeDrawer()"><div class="d-icon" style="font-size:.7rem;font-weight:900;color:var(--blue2);">HA系</div>リーダー</button>
-    <button class="d-link" style="padding:10px 12px;" onclick="scrollToTypes('HB');closeDrawer()"><div class="d-icon" style="font-size:.7rem;font-weight:900;color:#7c3aed;background:#ede9fe;">HB系</div>サポート</button>
-    <button class="d-link" style="padding:10px 12px;" onclick="scrollToTypes('DA');closeDrawer()"><div class="d-icon" style="font-size:.7rem;font-weight:900;color:#0f766e;background:#ccfbf1;">DA系</div>推進</button>
-    <button class="d-link" style="padding:10px 12px;" onclick="scrollToTypes('DB');closeDrawer()"><div class="d-icon" style="font-size:.7rem;font-weight:900;color:#334155;background:var(--off);">DB系</div>分析</button>
+    <button class="d-link" style="padding:10px 12px;" onclick="scrollToTypes('HB');closeDrawer()"><div class="d-icon" style="font-size:.7rem;font-weight:900;color:var(--mid);background:var(--paper2);">HB系</div>サポート</button>
+    <button class="d-link" style="padding:10px 12px;" onclick="scrollToTypes('DA');closeDrawer()"><div class="d-icon" style="font-size:.7rem;font-weight:900;color:var(--mid);background:var(--paper2);">DA系</div>推進</button>
+    <button class="d-link" style="padding:10px 12px;" onclick="scrollToTypes('DB');closeDrawer()"><div class="d-icon" style="font-size:.7rem;font-weight:900;color:var(--mid);background:var(--off);">DB系</div>分析</button>
   </div>
   <button class="d-cta" id="cta-drawer" onclick="continueOrStart('drawer');closeDrawer()">▶ 診断をはじめる</button>
   <div class="d-div"></div>
@@ -2524,7 +2559,10 @@ function buildTypeOverview(){
   /* ラベルは「系」を付けない。ピルが「${cat}系 — ${lbl}」なので、付けると
      1つのピルに「系」が2回出る。ドロワーの系統ボタン（HA系＋リーダー）とも
      表記が割れていた（wording-audit.md T-1）。 */
-  const cats=[['HA','リーダー','pa','#2563eb',['HALS','HALG','HAWS','HAWG']],['HB','サポート','pb','#7c3aed',['HBLS','HBLG','HBWS','HBWG']],['DA','推進','pc','#0f766e',['DALS','DALG','DAWS','DAWG']],['DB','分析','pd','#334155',['DBLS','DBLG','DBWS','DBWG']]];
+  /* ★カテゴリごとの4色（青・紫・緑・スレート）は 2026-09-08 にやめた。
+     系統は4タイプで共有するので「指す言葉」ではなく、押す場所でもない。
+     色を持たせる理由が無い（QUIET RESTYLE / 2色の意味）。 */
+  const cats=[['HA','リーダー','pa','var(--info)',['HALS','HALG','HAWS','HAWG']],['HB','サポート','pb','var(--info)',['HBLS','HBLG','HBWS','HBWG']],['DA','推進','pc','var(--info)',['DALS','DALG','DAWS','DAWG']],['DB','分析','pd','var(--info)',['DBLS','DBLG','DBWS','DBWG']]];
   let h='';
   cats.forEach(([cat,lbl,pill,col,codes])=>{
     h+=`<div id="type-cat-${cat}" style="margin-bottom:20px;"><div class="type-cat-hd"><div class="tc-pill ${pill}">${cat}系 — ${lbl}</div><div class="tc-line"></div></div><div class="type-grid">`;

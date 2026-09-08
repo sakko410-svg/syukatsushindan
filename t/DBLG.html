@@ -31,10 +31,10 @@
 :root{
   /* ★index.html の QUIET RESTYLE と同じ2色。色を変えるときは両方直すこと
      （lint「タイプページの配色」が食い違いを検出する）。 */
-  --sumi:#3b3b40;--gun:#1f3a93;
+  --info:#1f3a93;--act:#a8402f;--sumi:var(--info);--gun:var(--info);
   --paper:#ffffff;--paper2:#f2f2f3;--ink-field:#f2f2f3;--navy:#1b1b1f;
   --ink:#1b1b1f;--mid:#4c4f55;--light:#8e8e93;--border:#e3e3e6;--border2:#d6d6da;
-  --must:var(--sumi);--verm:var(--gun);
+  --must:var(--info);--verm:var(--info);
   --cat:var(--gun);--cat-ink:var(--gun);
   /* 書体の規則: 指す言葉（タイプコードとタイプ名）だけ明朝。あとはゴシック */
   --gothic:'Zen Kaku Gothic New','Noto Sans JP','Hiragino Sans','Hiragino Kaku Gothic ProN',sans-serif;
@@ -123,7 +123,7 @@ main{background:var(--paper2);padding:28px 0 40px;}
 /* --- CTA --- */
 .cta{display:block;text-align:center;text-decoration:none;
   font-family:var(--jp-disp);font-weight:900;font-size:1.06rem;color:#fff;
-  background:var(--verm);border:1px solid var(--border);border-radius:8px;
+  background:var(--act);border:1px solid var(--act);border-radius:8px;
   padding:17px 16px;box-shadow:none;margin:22px 0 8px;}
 .cta-note{text-align:center;font-size:.76rem;color:var(--mid);}
 .note{font-size:.76rem;color:var(--mid);margin-top:10px;}
