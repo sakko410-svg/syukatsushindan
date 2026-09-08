@@ -858,8 +858,13 @@ console.log('[lint] 2色の意味');
   const hexes = [...new Set((quiet.match(/#[0-9a-f]{6}/gi) || []).map(x => x.toLowerCase()))];
   const isGray = h => { const [r, g, b] = [1, 3, 5].map(i => parseInt(h.substr(i, 2), 16));
     return Math.max(r, g, b) - Math.min(r, g, b) <= 14; };
+  // 許可するのは 2色（--info / --act）と、その hover、A側の薄い地、
+  // 白、そして他社ブランド色だけ。
+  // ★LINE は #06C755 ではなく #0B8043（濃い側）。面を塗るのをやめた結果、
+  //   ブランド色が文字になり、#06C755 では白地で 2.26:1 しか無かったため。
+  //   ブランドの識別は保ちつつ AA（5.02:1）を満たす値に落としてある。
   const allow = new Set([m ? m[1].toLowerCase() : '', m ? m[2].toLowerCase() : '',
-                         '#8c3527', '#eceee9', '#06c755', '#ffffff']);
+                         '#8c3527', '#eceee9', '#0b8043', '#ffffff']);
   const extra = hexes.filter(h => !isGray(h) && !allow.has(h));
   check(extra.length === 0,
     `QUIET RESTYLE に3色目が無い（2色＋hover＋無彩色＋LINE緑のみ）: ${extra.join(', ') || 'なし'}`);

@@ -1610,7 +1610,11 @@ body::before{
   --ink-field:#f2f2f3;      /* 「暗い面」をやめた。下の 4. で文字色を直す */
 
   --navy:#1b1b1f;  --ink:#1b1b1f;
-  --mid:#4c4f55;   --light:#8e8e93;
+  --mid:#4c4f55;
+  /* --light は地が紺だった頃の値（#8E8E93）のままで、明るい地 #F2F2F3 の上では
+     2.91:1 しかなかった（.ftr-copy / .r-tog などが AA 不適合）。
+     #6E6E73 なら地の上で 4.53:1、白の上で 5.07:1。 */
+  --light:#6e6e73;
   --border:#e3e3e6; --border2:#d6d6da;
 
   /* ★★ 色は2つ。それぞれに意味を持たせる（オーナー判断 2026-09-08）。
@@ -1840,7 +1844,10 @@ body::after,body::before{content:none;}
    ★見分けはつくが、押される率は下がりうる。戻すならこのブロックを消せばよい。 */
 .sh{background:var(--w)!important;border:1px solid var(--border2)!important;font-weight:700;}
 .sh-x{color:#000!important;}
-.sh-ln{color:#06c755!important;}
+/* ★LINE のブランド色 #06C755 は白地で 2.26:1 しか無く、文字にすると読めない。
+   面を塗るのをやめた以上そのままでは使えないので、濃い側（5.02:1）に落とす。
+   ブランドの識別は保てる。 */
+.sh-ln{color:#0b8043!important;}
 .sh-cp{color:var(--gun)!important;}
 .result-hero .sh-x{border-color:var(--border2)!important;}
 
@@ -1881,6 +1888,19 @@ body::after,body::before{content:none;}
   background:var(--paper2)!important;color:var(--mid)!important;
   border:1px solid var(--border)!important;font-weight:600;letter-spacing:.12em;
 }
+
+/* --- 17. 面を明るくしたことで壊れた文字色の後始末 -----------------------
+   「暗い面」をやめたぶん、暗い地の上で読ませる前提の色が残っていた。
+   実画面を機械的に走査して見つけた4件（1件はオーナー指摘）。 */
+
+/* ① ヒーローのバッジ。地が --info（濃い青）になったのに文字が墨のままで
+   1.70:1 しかなかった。白抜きにして 10.07:1。 */
+.hero-badge{background:var(--info);color:#fff;border:1px solid var(--info);}
+.hero-badge::before{background:#fff;}
+
+/* ③ アコーディオンの▼。--light を濃くしたので 5.15:1 になる（上の :root）。
+   操作の手がかりなので、記号でも本文と同じ基準で読めるようにしておく。 */
+.r-tog{color:var(--light);}
 </style>
 </head>
 <body data-screen="screen-title">
