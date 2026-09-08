@@ -1997,6 +1997,60 @@ body::after,body::before{content:none;}
   object-position:50% 100%!important;background:var(--paper2);}
 .tp-img,.compat-cbox img,.sb-img{object-fit:contain!important;background:var(--paper2);}
 .hero-char{object-fit:contain!important;}
+
+/* ============================================================================
+   PREVIEW — 16タイプ一覧に系統ごとの地色を入れる
+   ----------------------------------------------------------------------------
+   オーナー要望（16Personalities の帯を参照）。
+   ★地色はキャラクターの4色を極端に薄めた値である。
+     文字にもボタンにも使わない。「差し色は2色」の規則は
+     指す言葉・押す場所の話であって、面の地色はその外にある。
+     ただし彩度を上げたら規則の内側に入ってしまうので、
+     e2e が「地色は白から十分に近い（十分に淡い）」ことを見る。
+   ★系統名（リーダー等）を背景に大きく敷く。読ませる文字ではないので
+     aria-hidden。書体の規則では系統名はゴシックのままである。
+   ============================================================================ */
+#type-section{padding:0!important;background:var(--off)!important;}
+#type-section>.wrap{max-width:none;padding:0;}
+#type-section .sec-lbl,#type-section .sec-title,#type-section .sec-sub{
+  max-width:480px;margin-left:auto;margin-right:auto;padding-left:16px;padding-right:16px;}
+#type-section .sec-lbl{padding-top:40px;}
+#type-overview{margin-top:22px;}
+
+.cat-band{position:relative;overflow:hidden;padding:26px 0 30px;margin:0;}
+.cat-inner{position:relative;z-index:1;max-width:480px;margin:0 auto;padding:0 16px;}
+@media(min-width:768px){.cat-inner{max-width:896px;}}
+/* 系統名は「1行目のキャラの背後」に置く。46% だと札の文字行に重なって
+   両方が読みにくくなった。参照（16Personalities）でも大きな文字が
+   重なるのは絵の側だけである。 */
+.cat-ghost{
+  position:absolute;left:50%;top:30%;transform:translate(-50%,-50%);
+  font-size:clamp(66px,18vw,160px);font-weight:900;letter-spacing:.06em;
+  color:#fff;opacity:.85;line-height:1;white-space:nowrap;pointer-events:none;
+  z-index:0;
+}
+/* 地色。キャラの4色を薄めたもの（彩度は落として明度を上げてある） */
+.band-HA{background:#f7ecea;}   /* 赤系 */
+.band-HB{background:#eaf1e9;}   /* 緑系 */
+.band-DA{background:#e9eef6;}   /* 青系 */
+.band-DB{background:#f7f2e4;}   /* 黄系 */
+/* 札の箱そのものを外す。白い箱が並ぶと帯が背景に見えず、
+   背後の系統名も読めない。地色の上にキャラと文字を直に置く（参照と同じ）。
+   押せることは focus とホバーで示す。 */
+#type-overview .tc{background:transparent;border:none;box-shadow:none;padding:4px 2px 10px;}
+#type-overview .tc img{background:transparent;border:none;}
+#type-overview .tc:hover{background:rgba(255,255,255,.42);}
+#type-overview .tc:focus-visible{outline:2px solid var(--navy);outline-offset:2px;}
+#type-overview .tc .tc-code{margin-top:2px;}
+/* 札の下端に敷いていた 4px の色帯（.tc::after）。箱を外したので、
+   線だけが宙に浮いて別の要素に見える。帯の地色が同じ役目を果たすので消す。 */
+#type-overview .tc::after{content:none;}
+/* 系統のピルは帯の中では要らない（背後の大きな文字が同じことを言っている）が、
+   読み上げと絞り込みの手がかりとして残す。地に馴染ませる。 */
+#type-overview .tc-pill{background:rgba(255,255,255,.72)!important;border-color:rgba(27,27,31,.10)!important;}
+#type-overview .tc-line{background:rgba(27,27,31,.10);}
+/* CTA は帯の外（地は --off のまま） */
+#type-section .wrap>div:last-child{max-width:480px;margin:0 auto;padding:30px 16px 40px;}
 </style>
 </head>
 <body data-screen="screen-title">
@@ -2681,7 +2735,11 @@ function buildTypeOverview(){
   const cats=[['HA','リーダー','pa','var(--info)',['HALS','HALG','HAWS','HAWG']],['HB','サポート','pb','var(--info)',['HBLS','HBLG','HBWS','HBWG']],['DA','推進','pc','var(--info)',['DALS','DALG','DAWS','DAWG']],['DB','分析','pd','var(--info)',['DBLS','DBLG','DBWS','DBWG']]];
   let h='';
   cats.forEach(([cat,lbl,pill,col,codes])=>{
-    h+=`<div id="type-cat-${cat}" style="margin-bottom:20px;"><div class="type-cat-hd"><div class="tc-pill ${pill}">${cat}系 — ${lbl}</div><div class="tc-line"></div></div><div class="type-grid">`;
+    /* ★系統ごとの地色（プレビュー）。16Personalities の帯を参考にした構成。
+       band-<cat> が全幅の淡い面、.cat-ghost がその背後に敷く大きな系統名。
+       地色はキャラの4色（赤・緑・青・黄）を極端に薄めた値で、
+       文字にもボタンにも使わない。差し色2色の規則の外にある「面」である。 */
+    h+=`<div id="type-cat-${cat}" class="cat-band band-${cat}"><div class="cat-ghost" aria-hidden="true">${lbl}</div><div class="cat-inner"><div class="type-cat-hd"><div class="tc-pill ${pill}">${cat}系 — ${lbl}</div><div class="tc-line"></div></div><div class="type-grid">`;
     codes.forEach(code=>{
       const t=TD[code];
       /* <div onclick> だとタブ順に載らず、キーボードだけの人は16枚を1枚も
@@ -2690,7 +2748,7 @@ function buildTypeOverview(){
          中身（画像・コード・名前）はそのまま入れられる。 */
       h+=`<button type="button" class="tc" data-code="${code}" aria-label="${esc(code)} ${esc(t.name)} のタイプ紹介を開く" onclick="openTypePeek('${code}',this)"><div class="tc-sil" style="background-image:url('images/chars/sm/${codeImg(code)}.webp');"></div><img src="images/chars/${codeImg(code)}.webp" alt=""><div class="tc-code" style="color:${col};">${code}</div><div class="tc-name">${t.name}</div></button>`;
     });
-    h+=`</div></div>`;
+    h+=`</div></div></div>`;
   });
   const el=document.getElementById('type-overview');
   if(el)el.innerHTML=h;
