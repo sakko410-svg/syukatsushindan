@@ -1979,6 +1979,24 @@ body::after,body::before{content:none;}
   content:'/' attr(data-total);
   font-size:.6rem;font-weight:700;color:var(--mid);margin-top:1px;
 }
+
+/* ============================================================================
+   PREVIEW — キャラクター差し替え（紙細工・ローポリ）
+   ----------------------------------------------------------------------------
+   ★これは検討用のプレビューであって、本採用ではない。
+     ブランチ preview/newchars でのみ有効。main には入れないこと。
+
+   新しい素材は 2〜3頭身で、実体の横／縦が 0.62〜0.74（現行は 0.32〜0.55）。
+   現行の枠（2:3）に入れると頭の上が大きく空くので、4:5 に詰める。
+   一覧の札も、切り抜き（object-fit:cover ＋ --head の実測値）ではなく
+   全身を収める（contain）に変える。ずんぐりした体型は切ると成立しない。
+   ============================================================================ */
+.char-frame{aspect-ratio:4/5;width:min(74vw,300px);}
+.res-char{object-fit:contain!important;object-position:50% 100%!important;}
+.tc img{height:auto!important;aspect-ratio:4/5;object-fit:contain!important;
+  object-position:50% 100%!important;background:var(--paper2);}
+.tp-img,.compat-cbox img,.sb-img{object-fit:contain!important;background:var(--paper2);}
+.hero-char{object-fit:contain!important;}
 </style>
 </head>
 <body data-screen="screen-title">
