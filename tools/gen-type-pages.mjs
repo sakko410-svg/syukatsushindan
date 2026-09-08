@@ -284,7 +284,7 @@ a:focus-visible{outline:3px solid #edc74c;outline-offset:4px;}
     </section>
 
     <a class="cta" href="../index.html?ref=type">20問で自分のタイプを調べる →</a>
-    <p class="cta-note">約3分 ／ 登録不要 ／ メールアドレス不要 ／ 無料</p>
+    <p class="cta-note">20問・約3分</p>
 
   </div>
 </main>

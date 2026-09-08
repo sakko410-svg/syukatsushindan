@@ -176,10 +176,16 @@ function build(){
    'screen-extra','extra-page-label','extra-count','extra-list','extra-next','extra-back','extra-warning',
    /* LP埋め込み質問。診断画面と同じ部品を lq- 接頭辞で持つ */
    'lp-quiz','lq-list','lq-prog-seg','lq-done','lq-continue','lq-remain',
-   'cta-grid','cta-drawer'
+   'cta-grid','cta-drawer',
+   /* 属性入力（#screen-profile）。20問完走後に必ず通る画面なので、
+      ここに置かないと通しのテストが結果画面へ到達しない。 */
+   'screen-profile','pf-stance','pf-sex','pf-warn','pf-submit',
+   'pf-year','pf-year-field','pf-year-label',
+   'pf-ind','pf-ind-field','pf-ind-label',
+   'pf-job','pf-job-field','pf-job-label'
   ].forEach(mk);
 
-  const screens = ['screen-title','screen-quiz','screen-loading','screen-result','screen-extra'].map(i=>byId.get(i));
+  const screens = ['screen-title','screen-quiz','screen-profile','screen-loading','screen-result','screen-extra'].map(i=>byId.get(i));
   screens[0].classList.add('active');
   const heroInner = new El('div'); heroInner.classList.add('hero-inner');
   const footer = new El('footer'); footer.classList.add('ftr');

@@ -583,13 +583,39 @@ console.log('[lint] サブタイプの説明');
   check(/\.sub-note\{/.test(html), '.sub-note のスタイルが定義されている');
 }
 
-// --- 自社で個人情報を取得しない設計（仕様 L-1 / 受け入れ基準）---
-console.log('[lint] 個人情報を取得しない設計');
+// --- 連絡先を取得しない設計 -----------------------------------------------
+// 旧「<form>/<input> が0件」から書き換えた。属性入力（#screen-profile）が
+// 入ったため0件では守れない。仕様 diagnosis-experience-revamp.md §D-4 が
+// 「funnel の受け入れ基準『フォーム要素0件』は D-4 により更新される」と
+// 予告している変更である。
+//
+// ★守る線は「連絡先を取らない」に移った。ここが崩れると
+//   privacy.html 2.「氏名・メールアドレス・電話番号・住所・学校名・学部名を
+//   一切取得しません」が虚偽記載になる。
+console.log('[lint] 連絡先を取得しない設計');
 for (const p of PAGES) {
-  const s = read(p);
+  const raw = read(p);
+  const s = raw.replace(/<!--[\s\S]*?-->/g, '').replace(/\/\*[\s\S]*?\*\//g, '');
+
+  // <form> は使わない。送信先が無く、Enter の誤送信とブラウザの自動入力
+  // （住所・氏名・メール）を誘発する理由がない（§D-4）。
   const forms = (s.match(/<form\b/g) || []).length;
-  const inputs = (s.match(/<input\b/g) || []).length;
-  check(forms === 0 && inputs === 0, `${p} に <form>/<input> が0件（form:${forms} input:${inputs}）`);
+  check(forms === 0, `${p} に <form> が0件（実際: ${forms}）`);
+
+  // <input> は種類で見る。連絡先を受け取る型が1つでもあれば落とす。
+  const inputs = [...s.matchAll(/<input\b[^>]*>/g)].map(m => m[0]);
+  const bad = inputs.filter(t => /type=["'](email|tel|password|url)["']/.test(t)
+                             || /\bname=["'][^"']*(mail|tel|phone|addr|name)/i.test(t)
+                             || /autocomplete=["'][^"']*(email|tel|name|address)/i.test(t));
+  check(bad.length === 0, `${p} に連絡先を受け取る <input> が無い（<input> 全体: ${inputs.length}件）${bad.length ? ` → ${bad.join(' / ')}` : ''}`);
+
+  // 画面に連絡先の入力を求める語が出ていないこと。
+  // ★「会員登録」単体は入れない。privacy.html の「会員登録の仕組みはなく」という
+  //   否定文まで拾ってしまう。求めている形の語だけを見る。
+  const askWords = ['メールアドレスを入力', '電話番号を入力', 'お名前を入力',
+                    '会員登録する', '登録してください', 'ご登録ください'];
+  const hit = askWords.filter(w => s.includes(w));
+  check(hit.length === 0, `${p} が連絡先の入力を求めていない${hit.length ? ` → ${hit.join(', ')}` : ''}`);
 }
 
 // --- 送客リンクの体裁（掲載が入った瞬間に効く。0件のいまも規約違反を作り込ませない）---
@@ -783,6 +809,56 @@ console.log('[lint] あなたが働きやすい職場');
   // 入口の約束が結果画面の主役と揃っていること（U-2）。
   check(html.includes('あなたが働きやすい職場と、その見分け方まで。'),
         `.hero-sub が職場を約束している（職種ではない）`);
+}
+
+// --- 撤回した主張が戻っていないこと ---------------------------------------
+// .hero-trust「登録不要 ｜ メールアドレス不要 ｜ 無料」は 2026-09-08 の
+// オーナー判断で削除した。今後 登録や個人情報の取得を行う可能性があり、
+// 書いてあるとその時点で撤回することになるため、先に約束しない。
+// design/conversion-structure-and-pc-grid.md S-6 が置いた1行なので、
+// 記録しておかないと次に読む人が仕様どおりに戻してしまう。
+console.log('[lint] 撤回した主張');
+{
+  for (const f of ['index.html', ...fs.readdirSync(path.join(ROOT, 't')).filter(x => x.endsWith('.html')).map(x => `t/${x}`)]) {
+    const body = read(f).replace(/<!--[\s\S]*?-->/g, '');
+    check(!body.includes('登録不要'), `${f} に「登録不要」が戻っていない`);
+    check(!body.includes('メールアドレス不要'), `${f} に「メールアドレス不要」が戻っていない`);
+  }
+  check(!read('index.html').includes('class="hero-trust"'), `.hero-trust が復活していない`);
+}
+
+// --- 属性入力（#screen-profile）-------------------------------------------
+// docs/specs/diagnosis-experience-revamp.md §D と、その【部分撤回 2026-09-08】。
+// 必須は「立場」と「卒業年度」の2つだけ。性別・業界・職種は任意。
+console.log('[lint] 属性入力');
+{
+  const pf = html.slice(html.indexOf('<div id="screen-profile"'), html.indexOf('<!-- LOADING -->'));
+  check(pf.length > 0, `#screen-profile がある`);
+
+  // ★性別を送客に一切使わない。守れないなら取らない、が取得の条件だった（D-L3）。
+  //   実装で担保していることを、実装のソースで見る。
+  const oa = html.slice(html.indexOf('function orderedAgents'), html.indexOf('function agentUrl'));
+  const au = html.slice(html.indexOf('function agentUrl'), html.indexOf('function onAgentClick'));
+  check(!/profile|\bsex\b/.test(oa), `orderedAgents() が profile / sex を参照していない`);
+  check(!/profile|\bsex\b/.test(au), `agentUrl() が profile / sex を参照していない`);
+
+  // 連絡先・学歴を聞かない。privacy.html 2. がそう書いている。
+  const banned = ['メールアドレスを', '電話番号を', '大学名', '学部'];
+  const hit = banned.filter(w => pf.includes(w) && !pf.includes(w + 'はうかがいません'));
+  check(hit.length === 0, `属性入力が連絡先・学歴を聞いていない${hit.length ? ` → ${hit.join(', ')}` : ''}`);
+
+  // 年度をハードコードしない。固定にすると毎年陳腐化する（未決6 はこれで解消）。
+  check(!/\b2[0-9]卒/.test(pf), `年度を HTML に書き込んでいない（現在日から生成する）`);
+  check(/function gradBaseYear/.test(html), `年度の基準年を出す関数がある`);
+
+  // ポリシーと実装が食い違わないこと。片方だけ動かすと虚偽記載になる。
+  const pv = read('privacy.html');
+  for (const w of ['立場', '卒業年度', '性別', '業界', '職種']) {
+    check(pv.includes(w), `privacy.html が「${w}」の取得を書いている`);
+  }
+  check(/端末内（ブラウザの localStorage）にのみ保存/.test(pv),
+        `privacy.html が「端末内にのみ保存」と書いている（サーバー保存を足すときは同時に直す）`);
+  check(/提供することはありません/.test(pv), `privacy.html が提携先へ提供しないと書いている`);
 }
 
 // --- sitemap.xml / robots.txt -------------------------------------------

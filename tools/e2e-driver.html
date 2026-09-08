@@ -44,7 +44,20 @@ async function runQuiz(w,d,av,last){
     for(const pos of posOf(d,'q')) w.pick(dot(d,'q',pos,av[pos]));
     if(p<3){ w.nextPage(); await sleep(80); }
   }
-  if(last!==false){ w.nextPage(); await sleep(80); }
+  if(last!==false){ w.nextPage(); await sleep(80); await passProfile(w,d); }
+}
+/* 任意の追加9問をスキップし、属性入力（#screen-profile）を通す。
+   必須は「立場」と「卒業年度」の2つ（仕様 §D-1 の【部分撤回 2026-09-08】）。
+   ★ここを通さないと結果画面に到達しないので、通しの検査すべてに効く。
+     必須が実際に効いていること自体は、専用ブロックで別に見ている。 */
+async function passProfile(w,d){
+  if(d.body.dataset.screen==='screen-extra'){w.skipExtra();await sleep(80);}
+  if(d.body.dataset.screen!=='screen-profile')return;
+  const st=d.querySelector('#pf-stance .pf-chip');
+  if(st){st.click(); await sleep(60);}
+  const yr=d.querySelector('#pf-year .pf-chip');
+  if(yr){yr.click(); await sleep(60);}
+  w.pfSubmit(); await sleep(80);
 }
 // LP の5問を埋めて診断画面（Q6-10）まで進める。診断画面側だけを試したいときの下ごしらえ。
 // かつての startFresh('e2e') の置き換え —— Q1 は LP にしか無いので、
@@ -131,7 +144,11 @@ try{
   chk(!!d.querySelector('.ftr a[href="privacy.html"]'),'フッターに privacy.html へのリンクがある');
   chk(getComputedStyle(d.querySelector('.ftr')).display!=='none','LPではフッターが表示されている');
   chk(d.querySelectorAll('.drawer a[href^="privacy.html"]').length===2,'ドロワーに運営情報リンク2件');
-  chk(d.querySelectorAll('form,input[type=email]').length===0,'フォーム要素0件');
+  /* 旧「フォーム要素0件」から書き換えた。属性入力が入ったため0件では守れない
+     （仕様 §D-4 が予告している変更）。守る線は「連絡先を取らない」に移った。 */
+  chk(d.querySelectorAll('form').length===0,'<form> は使っていない');
+  chk(d.querySelectorAll('input[type=email],input[type=tel],input[type=password]').length===0,
+      '連絡先を受け取る入力欄が0件');
   chk(!/SPI|診断者数|希少度|しかいない|12,847/.test(d.body.innerText),'LP本文に SPI/診断者数/希少度 が無い');
   chk(/あなたが働きやすい職場と、その見分け方まで。/.test(d.body.innerText),'hero-sub が職場を約束している（workplace-fit U-2）');
 
@@ -211,6 +228,11 @@ try{
       w.nextPage();
       await sleep(80);
     }
+    /* 20問完走 → 追加9問をスキップ → #screen-profile → ローディング → 結果。
+       属性入力は必須2項目（立場・卒業年度）を通らないと結果へ進めない。
+       ★ここで値を選ぶこと自体が「必須ゲートが実際に効いている」ことの検査になる。
+         選ばずに pfSubmit() を呼んでも進まないことは、下の専用ブロックで見る。 */
+    await passProfile(w,d);
     const prevRc=d.querySelector('.res-code');   // 前の回のノード（初回は null）
     /* ★.res-code は2段階で決まるので、待ち方を2段階にする。
        (1) showResult() が #screen-result を innerHTML ごと差し替える
@@ -249,6 +271,81 @@ try{
       const rh=d.getElementById('screen-result').innerHTML;
       chk(rh.indexOf('最適な')<0 && rh.indexOf('あなた専用')<0 && rh.indexOf('内定率')<0,'禁止語（最適な/あなた専用/内定率）0件');
       chk(getComputedStyle(d.querySelector('.ftr')).display!=='none','結果画面ではフッター表示');
+
+      /* --- 属性入力（#screen-profile）---
+         docs/specs/diagnosis-experience-revamp.md §D の受け入れ基準と、
+         その【部分撤回 2026-09-08】（必須は立場と卒業年度の2つだけ）。 */
+      {
+        const pf=d.getElementById('screen-profile');
+        chk(!!pf,'#screen-profile が存在する');
+        chk(pf.querySelectorAll('form').length===0,'属性入力に <form> を使っていない');
+        chk(pf.querySelectorAll('input').length===0,'属性入力に <input> が1つも無い（全部チップ＝キーボードを開かせない）');
+        const t=pf.innerText||pf.textContent;
+        chk(!/メールアドレス|電話番号|お名前|大学|学部/.test(t.replace(/メールアドレス・電話番号はうかがいません/,'')),
+            '属性入力が連絡先・大学・学部を聞いていない');
+        chk(!/スキップ/.test(t),'「スキップ」の副リンクが無い（§D-1）');
+        const sb=d.getElementById('pf-submit');
+        chk(sb&&!sb.hasAttribute('disabled'),'送信ボタンに disabled が付いていない（押せないボタンは理由を説明できない）');
+        chk(sb&&sb.textContent.trim()==='結果を見る →','ボタン文言が入力状態で変わらない: '+(sb?sb.textContent.trim():'-'));
+        chk(/★の2つだけ選んでください/.test(t),'どれが必須かが見出し直下に書いてある');
+      }
+
+      /* --- 必須が実際に効いているか / 年度が現在日から出ているか ---
+         通しの検査は passProfile() で必ず値を入れて通すので、
+         「選ばなくても進めてしまう」状態でも気づけない。ここで別に見る。 */
+      {
+        await load('index.html'); w=f.contentWindow; d=f.contentDocument; await sleep(80);
+        await runQuiz(w,d,inOrder(w,ansFor('HALS')),false);
+        w.nextPage(); await sleep(120);
+        chk(d.body.dataset.screen==='screen-extra','20問完走の次は追加の指標: '+d.body.dataset.screen);
+        w.skipExtra(); await sleep(80);
+        chk(d.body.dataset.screen==='screen-profile','追加をスキップすると属性入力: '+d.body.dataset.screen);
+
+        w.pfSubmit(); await sleep(120);
+        chk(d.body.dataset.screen==='screen-profile','立場も年度も未選択なら進まない');
+        chk(/立場を選んで/.test(d.getElementById('pf-warn').textContent),'進まない理由が画面に出る: '+d.getElementById('pf-warn').textContent);
+
+        d.querySelector('#pf-stance .pf-chip').click(); await sleep(60);
+        w.pfSubmit(); await sleep(120);
+        chk(d.body.dataset.screen==='screen-profile','立場だけでは進まない');
+        chk(/卒業年度を選んで/.test(d.getElementById('pf-warn').textContent),'足りない項目が名指しされる: '+d.getElementById('pf-warn').textContent);
+
+        /* 年度は現在日から自動生成する。固定の6択だと毎年陳腐化するため。
+           いまの大学4年生が卒業する年 g = (月>=4) ? 年+1 : 年。
+           新卒は g / g+1 / g+2以降 / g-1以前（既卒）の4つ。 */
+        const now=new Date(), g=(now.getMonth()+1>=4?now.getFullYear()+1:now.getFullYear());
+        const L=n=>String(n%100).padStart(2,'0')+'卒';
+        const ys=[...d.querySelectorAll('#pf-year .pf-chip')].map(x=>x.textContent);
+        chk(ys.length===4&&ys[0]===L(g)&&ys[1]===L(g+1)&&ys[2]===L(g+2)+'以降'&&ys[3]===L(g-1)+'以前（既卒）',
+            '新卒の年度が現在日から出ている: '+ys.join(' / '));
+        chk(/既卒/.test(ys[3]),'就職浪人（既卒）の受け皿がある: '+ys[3]);
+
+        /* 中途へ切り替えると年度も見出しも変わる。年度の選択は無効になる。 */
+        d.querySelectorAll('#pf-stance .pf-chip')[1].click(); await sleep(80);
+        const ys2=[...d.querySelectorAll('#pf-year .pf-chip')].map(x=>x.textContent);
+        chk(ys2.length===5&&ys2[0]===L(g-1),'中途は過去の卒業年度になる: '+ys2.join(' / '));
+        chk(d.getElementById('pf-ind-label').textContent==='経験した業界'
+          &&d.getElementById('pf-job-label').textContent==='経験した職種',
+            '中途は「経験した」、新卒は「希望の」で聞く');
+        chk(d.querySelectorAll('#pf-year .pf-chip.on').length===0,'立場を変えると年度の選択は無効になる');
+
+        /* 業界・職種は複数選択できる。 */
+        const ic=[...d.querySelectorAll('#pf-ind .pf-chip')];
+        ic[0].click(); await sleep(50); ic[2].click(); await sleep(80);
+        chk(d.querySelectorAll('#pf-ind .pf-chip.on').length===2,'業界は複数選べる: '+d.querySelectorAll('#pf-ind .pf-chip.on').length+'個');
+        chk(ic[0].getAttribute('role')==='checkbox','複数選択のチップは role="checkbox"');
+        chk(d.querySelector('#pf-year .pf-chip').getAttribute('role')==='radio','単一選択のチップは role="radio"');
+
+        /* 性別を送客に一切渡さない（仕様 D-L3。守れないなら取らない、が条件だった）。 */
+        d.querySelector('#pf-sex .pf-chip').click(); await sleep(60);
+        d.querySelector('#pf-year .pf-chip').click(); await sleep(60);
+        w.pfSubmit(); await sleep(2600);
+        chk(d.body.dataset.screen==='screen-result','必須2つを選べば結果へ進む: '+d.body.dataset.screen);
+        const src=w.eval('String(orderedAgents)+String(agentUrl)');
+        chk(!/profile|\bsex\b/.test(src),'orderedAgents / agentUrl が性別を参照していない');
+        const rh=d.getElementById('screen-result').innerHTML;
+        chk(!/sex=|gender/i.test(rh),'結果画面の出力に性別が混ざっていない');
+      }
 
       /* --- あなたが働きやすい職場（workplace-fit.md §6 / §10 A-4・A-5）--- */
       const envPh=[...d.querySelectorAll('.r-ph')].find(x=>x.textContent.includes('あなたが働きやすい職場'));
@@ -1275,6 +1372,30 @@ try{
     chk(on[3]!==off[3]&&on[-3]!==off[-3],'選択すると色が変わる: A '+off[3]+'→'+on[3]+' / B '+off[-3]+'→'+on[-3]);
     chk(on[3]!==on[-3],'選択時もA側とB側で色が違う: '+on[3]+' vs '+on[-3]);
     chk(on[3]===on[1]&&on[-3]===on[-1],'選択時の同じ側は同色（強さは大きさで示す）: A '+on[3]+' / B '+on[-3]);
+
+    /* --- 選択マーク（✓）が丸に追従すること ---
+       ✓ は font-size 固定だった（実測 12.48px）。丸は 36/30/25px と変わるので、
+       小さい丸では縁に届きそうなほど詰まり、大きい丸では中央に浮いて見えた
+       （オーナー指摘）。直径に対する比率を一定にした。
+       丸の寸法は3箇所（既定・≤360px・RETRO）にあるので、比率で見る。 */
+    {
+      [3,2,1].forEach(v=>dot(d,'q',6,v).classList.add('sel'));
+      const rat=[3,2,1].map(v=>{
+        const sd=dot(d,'q',6,v).querySelector('.sd');
+        const dia=sd.getBoundingClientRect().width;   /* w は iframe の window */
+        const cs=w.getComputedStyle(sd);
+        /* cqw はコンテナの「コンテンツ幅」の1%。.sd には2pxの枠があるので、
+           外径ではなく枠の内側で割らないと比が揃わない。 */
+        const inner=dia-parseFloat(cs.borderLeftWidth)-parseFloat(cs.borderRightWidth);
+        const f=parseFloat(w.getComputedStyle(sd,'::after').fontSize);
+        return {v,w:Math.round(dia),f:+f.toFixed(2),r:+(f/inner).toFixed(3)};
+      });
+      [3,2,1].forEach(v=>dot(d,'q',6,v).classList.remove('sel'));
+      const rs=[...new Set(rat.map(x=>x.r))];
+      chk(rs.length===1,'✓ の大きさが丸に比例する（枠の内側基準）: '
+        +rat.map(x=>'±'+x.v+' 丸'+x.w+'px→✓'+x.f+'px(×'+x.r+')').join(' / '));
+      chk(rat[0].f!==rat[2].f,'固定サイズに戻っていない（丸ごとに変わる）: '+rat[0].f+' vs '+rat[2].f);
+    }
     // aria-label も A / B に対応する（読み上げと画面表示が食い違わない）
     const labs=[...d.querySelectorAll('#q-list .q-card[data-pos="6"] .sdw')].map(x=>x.getAttribute('aria-label'));
     chk(labs.slice(0,3).every(x=>x.indexOf('A')>=0&&x.indexOf('B')<0)
@@ -1566,25 +1687,21 @@ try{
      S-9 PC の地を --paper2 に
      幅の選び方: 320/390 はスマホ（2列のまま）。767/768 は境界。1024/1440 は PC。 */
   {
-    /* --- S-6: 信頼の1行。幅に依らず1行あり、押せるものは増えていない --- */
+    /* --- S-6 は撤回された。.hero-trust（登録不要 ｜ メールアドレス不要 ｜ 無料）は
+           2026-09-08 のオーナー判断で削除。理由は2つ:
+             ・今後、登録や個人情報の取得を行う可能性がある。書いてあると
+               その時点で撤回する必要が生じる。先に約束しない
+             ・書いてあってもユーザーの心理的プラスはそこまで働かない
+           「あること」を守っていた5件を「戻っていないこと」に反転させた。
+           同じ主張は t/*.html の .cta-note と meta description からも外してある。 */
     f.style.width='390px'; f.style.height='844px';
     await load('index.html'); w=f.contentWindow; d=f.contentDocument; await sleep(700);
     {
-      const tr=d.querySelector('.hero .hero-trust');
-      const sub=d.querySelector('.hero .hero-sub');
-      chk(!!tr,'.hero-trust がヒーローにある（S-6）');
-      chk(!!tr&&sub.nextElementSibling===tr,'.hero-trust は .hero-sub の直下');
-      chk(!!tr&&/登録不要/.test(tr.textContent)&&/メールアドレス不要/.test(tr.textContent)&&/無料/.test(tr.textContent),
-          '3つとも書かれている: '+(tr?tr.textContent:'なし'));
-      /* 3つとも今日の実装で事実であること（入力欄が1つも無い）を DOM 側でも見る。
-         #screen-profile 等で入力欄が入った日に、この行が嘘になるのを止める。 */
-      chk(d.querySelectorAll('form,input,textarea,select').length===0,
-          '「登録不要／メールアドレス不要」が事実である（入力欄が0件）');
-      chk(!!tr&&tr.querySelectorAll('button,a').length===0,'.hero-trust に押せるものを増やしていない');
-      chk(!!tr&&[...tr.querySelectorAll('span')].every(s=>s.getAttribute('aria-hidden')==='true'),
-          '区切りの ｜ は読み上げから外してある（「たてぼう」と読まれない）');
-      const c=getComputedStyle(tr).color;
-      chk(c==='rgb(195, 203, 221)','.hero-trust の文字色は #c3cbdd（--ink-field 上で 9.81:1）: '+c);
+      chk(!d.querySelector('.hero-trust'),'.hero-trust が復活していない（S-6 は撤回）');
+      const hero=d.querySelector('.hero').innerText;
+      chk(!/登録不要|メールアドレス不要/.test(hero),'ヒーローに「登録不要／メールアドレス不要」が無い');
+      const head=d.head.innerHTML;
+      chk(!/登録不要/.test(head),'meta description / og:description に「登録不要」が無い');
     }
 
     /* --- 幅ごとの検査 --- */

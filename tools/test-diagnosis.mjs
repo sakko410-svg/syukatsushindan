@@ -454,7 +454,33 @@ console.log('[test] 1画面5問・診断画面は3ページ（Q6 から始まる
   check(L.__byId.get('screen-extra').classList.contains('active'), '基本20問の後に独立した追加質問へ進む');
   L.skipExtra();
   L.__timers.splice(0).forEach(fn => fn());
-  check(L.__byId.get('screen-result').classList.contains('active'), '追加質問をスキップして基本の結果へ進む');
+  check(L.__byId.get('screen-profile').classList.contains('active'),
+    '追加質問をスキップすると属性入力へ進む');
+  check(!L.__byId.get('screen-result').classList.contains('active'),
+    '属性入力の段階では結果画面はまだ出ていない');
+
+  L.pfSubmit();
+  L.__timers.splice(0).forEach(fn => fn());
+  check(L.__byId.get('screen-profile').classList.contains('active'),
+    '必須2項目が未選択なら結果へ進まない');
+  check(/立場を選んで/.test(L.__byId.get('pf-warn').textContent),
+    `進まない理由が画面に出る: ${L.__byId.get('pf-warn').textContent}`);
+
+  L.pfPick('pf-stance', 'shinsotsu');
+  L.pfSubmit();
+  L.__timers.splice(0).forEach(fn => fn());
+  check(L.__byId.get('screen-profile').classList.contains('active'), '立場だけでは進まない');
+
+  /* 年度は現在日から自動生成する。テストが年をまたいでも壊れないよう、
+     ハードコードせず gradBaseYear() から作った値を使う。 */
+  const g = L.__eval('gradBaseYear()');
+  L.pfPick('pf-year', String(g % 100));
+  L.pfSubmit();
+  L.__timers.splice(0).forEach(fn => fn());
+  check(L.__byId.get('screen-result').classList.contains('active'),
+    '必須2項目を選ぶと結果へ進む');
+  check(L.__eval('profile.sex') === null && L.__eval('profile.inds').length === 0,
+    '性別・業界を未選択のままでも進める（任意）');
 }
 
 // ---- (6b) 進捗は4群のまま。群0＝LPの5問、群1-3＝診断画面（§B-5）----
@@ -818,7 +844,14 @@ console.log('[test] 追加9問は独立した自己評価・役割志向');
   R.skipExtra();
   check(!R.buildExtraMetrics('quiz').includes('role="meter"'),'スキップした補足指標は表示しない');
   R.startExtra();R.extraNext();R.__timers.splice(0).forEach(fn=>fn());
-  check(R.__byId.get('screen-result').classList.contains('active'),'追加9問完了から結果へ到達');
+  check(R.__byId.get('screen-profile').classList.contains('active'),'追加9問完了から属性入力へ到達');
+  R.pfSubmit();
+  check(R.__byId.get('screen-profile').classList.contains('active'),'追加回答済みでも必須属性が空なら進まない');
+  R.pfPick('pf-stance','chuto');
+  R.pfPick('pf-year',R.__eval("yearChoices('chuto')[0].v"));
+  R.pfSubmit();R.__timers.splice(0).forEach(fn=>fn());
+  check(R.__byId.get('screen-result').classList.contains('active'),'追加9問と属性入力を経て結果へ到達');
+  check(R.getCode()===base.code&&R.getSubCode()===base.sub&&R.__eval('JSON.stringify(scores)')===base.scores,'追加質問・属性入力の統合後も元の4軸とタイプは不変');
   check(R.__byId.get('screen-result').innerHTML.includes('role="meter"'),'結果に追加パラメーターを表示');
   R.startFresh('test');
   check(R.__eval('extraAnswers.length')===0,'新規診断では追加回答も初期化');
