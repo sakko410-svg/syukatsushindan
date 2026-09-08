@@ -1414,6 +1414,17 @@ body{overflow-x:clip;}
    基準は 6px 超なので 64px を採る。 */
 .cont-banner{margin-top:64px;}
 
+/* --- 一覧 → 詳細ページの副導線（.tp-more）-------------------------------
+   主CTA（.tp-cta「20問で確かめる」）の下に置く控えめなリンク。
+   ボタンを2つ並べると、一覧を見に来た人の行き先が分かれる。
+   下線付きのテキストリンクにして、主従をはっきりさせる。 */
+.tp-more{
+  display:block;margin-top:11px;text-align:center;
+  font-size:.76rem;font-weight:700;color:var(--cat-ink,#123c9b);
+  text-decoration:underline;text-underline-offset:3px;
+}
+.tp-more:hover{color:var(--navy);}
+
 /* --- 属性入力（#screen-profile）-------------------------------------------
    docs/specs/diagnosis-experience-revamp.md §D-4。
    背景は紺（--ink-field）。診断 → 属性 → ローディング → 結果 の暗い流れを保つ。
@@ -3134,7 +3145,16 @@ function openTypePeek(code,el){
     /* 共有バナーの .sb-cta と同じ文字列だったが、指している状況が違う
        （こちらは16タイプ一覧を眺めている人）。今見ているカードとの関係を戻す
        （design/diagnosis-experience-revamp.md W-9 / wording-audit.md T-2）。 */
-    +'<button type="button" class="btn rpl tp-cta" onclick="addRipple(event,this);continueOrStart(&quot;peek&quot;)">このタイプかどうか、20問で確かめる →</button>';
+    +'<button type="button" class="btn rpl tp-cta" onclick="addRipple(event,this);continueOrStart(&quot;peek&quot;)">このタイプかどうか、20問で確かめる →</button>'
+    /* 一覧から詳細ページへの唯一の導線（2026-09-08・オーナー要望）。
+       t/<CODE>.html には、結果画面が出す静的な説明がすべて載っている
+       （どんなタイプ／強み／人との関わり方／消耗しやすいところ／
+         伸ばすとしたら／力を発揮しやすい仕事／相性がよい組み合わせ）。
+       ★紹介パネル（.type-peek）は残す。あれは「一覧を離れずに見比べる」ための
+         もので、詳細ページの「1つを深く読む」とは用途が違う（C-6）。
+       ★主CTAは診断のまま。ここを詳細ページにすると、一覧を見に来た人の
+         行き先が診断から逸れる。詳細は副導線として下に置く。 */
+    +`<a class="tp-more" href="t/${esc(code)}.html">このタイプの説明をぜんぶ読む →</a>`;
   grid.insertBefore(box,rowEnd?rowEnd.nextSibling:null);
   track('type_peek',{type_code:code});
   if(box.scrollIntoView)box.scrollIntoView({block:'nearest',behavior:'smooth'});

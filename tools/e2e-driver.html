@@ -706,6 +706,30 @@ try{
     chk(/20問・約3分/.test(d.querySelector('.hero-sub').textContent)&&/働きやすい職場/.test(d.querySelector('.hero-sub').textContent),
         '3ステップが伝えていた内容は .hero-sub に残っている（3つめは職種→職場に変更・U-2）: '+d.querySelector('.hero-sub').textContent);
 
+    /* --- 一覧 → 詳細ページの導線（2026-09-08）---
+       以前は t/*.html への内部リンクが0本で、16枚は sitemap からしか
+       発見できなかった。紹介パネルに副導線を置いた。 */
+    {
+      d.getElementById('type-section').scrollIntoView();
+      await sleep(150);
+      d.querySelector('.tc').click();
+      await sleep(300);
+      const pk=d.querySelector('.type-peek');
+      chk(!!pk,'カードを押すと紹介パネルが開く（C-6 の挙動を変えていない）');
+      const more=pk&&pk.querySelector('.tp-more');
+      chk(!!more,'紹介パネルに詳細ページへのリンクがある');
+      chk(!!more&&/^t\/[A-Z]{4}\.html$/.test(more.getAttribute('href')),
+          '詳細ページを指している: '+(more?more.getAttribute('href'):'-'));
+      const cta=pk&&pk.querySelector('.tp-cta');
+      chk(!!cta&&/20問で確かめる/.test(cta.textContent),
+          '主CTAは診断のまま（一覧の行き先を詳細ページに奪わせない）');
+      /* 主従がついていること。ボタンを2つ並べると行き先が分かれる。 */
+      chk(!!more&&w.getComputedStyle(more).textDecorationLine==='underline',
+          '詳細リンクは下線付きのテキスト（ボタンにしない）');
+      if(pk)w.closeTypePeek();
+      await sleep(100);
+    }
+
     chk(d.querySelectorAll('#lq-list .q-card').length===5,'LPにも5問並ぶ: '+d.querySelectorAll('#lq-list .q-card').length);
     chk(posOf(d,'lq').join(',')==='0,1,2,3,4','LPは出題位置 0-4（Q1-5）: '+posOf(d,'lq').join(','));
     chk([...d.querySelectorAll('#lq-list .q-badge')].map(x=>x.textContent).join(',')==='Q1,Q2,Q3,Q4,Q5','LPの番号は Q1〜Q5');

@@ -743,6 +743,28 @@ console.log('[lint] タイプページと og:image');
   const wrongOg = pages.filter(p => !p.html.includes(`images/ogp/${p.code}.png`));
   check(wrongOg.length === 0, `各ページが自分の og:image を指す${wrongOg.length ? ` → ${wrongOg.map(p => p.code).join(', ')}` : ''}`);
 
+  // ★結果画面が出す「タイプ固有の静的な説明」が、詳細ページにも全部あること。
+  //   片方だけ足すと、同じタイプの説明が2箇所で食い違う。
+  //   スコアに依存するもの（4軸・判定理由・サブタイプ・ENV）は対象外
+  //   ——診断していない人のスコアは存在しないため。
+  {
+    const need = [['per', 'どんなタイプ？'], ['str', '強み'], ['com', '人との関わり方'],
+                  ['sts', '消耗しやすいところ'], ['grw', '伸ばすとしたら'],
+                  ['jobs', '力を発揮しやすい仕事'], ['good', '相性がよい組み合わせ']];
+    const miss = [];
+    for (const p2 of pages) for (const [, h] of need) if (!p2.html.includes(`<h2>${h}</h2>`)) miss.push(`${p2.code}:${h}`);
+    check(miss.length === 0, `t/*.html に結果画面と同じ説明が全部ある（${need.length}項目×16枚）${miss.length ? ` → 欠け: ${miss.slice(0, 4).join(', ')}` : ''}`);
+
+    // 未決のまま16ページへ増やさないもの（wording-audit 未決3 / weighted 未決2）。
+    const bad = pages.filter(p2 => p2.html.includes('注意が必要なタイプ'));
+    check(bad.length === 0, `t/*.html に「注意が必要なタイプ」を載せていない（パネル自体が未決）`);
+  }
+
+  // 一覧から詳細ページへ辿れること。以前は内部リンクが0本で、
+  // 16枚は sitemap からしか発見できなかった。
+  check(/class="tp-more" href="t\/\$\{esc\(code\)\}\.html"/.test(html),
+        `16タイプ一覧の紹介パネルから t/<CODE>.html へのリンクがある`);
+
   // shareUrl() が t/ を指していること（?type=&ref=share のままだと16枚が使われない）
   check(/function shareUrl\(code\)\{return SITE_BASE\+'t\/'/.test(html),
         `shareUrl() が t/<CODE>.html を返す（16枚の og:image が使われる経路）`);
