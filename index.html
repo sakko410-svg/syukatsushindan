@@ -1371,6 +1371,45 @@ body{overflow-x:clip;}
   color:var(--mid);margin-top:2px;
 }
 
+/* --- 属性入力（#screen-profile）-------------------------------------------
+   docs/specs/diagnosis-experience-revamp.md §D-4。
+   背景は紺（--ink-field）。診断 → 属性 → ローディング → 結果 の暗い流れを保つ。
+   チップは新規のビジュアルを作らず、既存の .job-tag / .ind-sm と同じ作法
+   （クリーム地・紺枠・硬い矩形の影）で組む。 */
+.pf-wrap{min-height:100svh;background:var(--ink-field);padding:80px 16px 56px;}
+.pf-inner{max-width:448px;margin:0 auto;}
+.pf-head{margin-bottom:24px;}
+.pf-title{font-family:var(--disp);font-size:1.5rem;font-weight:900;color:var(--paper);letter-spacing:var(--ls-disp);margin-bottom:10px;}
+.pf-desc{font-size:.82rem;color:#c3cbdd;line-height:1.7;}
+/* ★どれが必須かを読ませる。押しても進まない理由が分からない画面にしない。
+   赤字は使わない（エラーではないため）。 */
+.pf-need{margin-top:10px;font-size:.76rem;font-weight:700;color:var(--must);}
+.pf-field{margin-bottom:20px;}
+.pf-label{display:flex;align-items:center;gap:6px;font-size:.8rem;font-weight:900;color:var(--paper);margin-bottom:9px;}
+.pf-req{color:var(--must);}
+.pf-opt{font-size:.68rem;font-weight:700;color:#9aa6c0;}
+.pf-chips{display:flex;flex-wrap:wrap;gap:7px;}
+.pf-chip{
+  font-family:inherit;font-size:.78rem;font-weight:700;color:var(--navy);
+  background:var(--paper);border:var(--bd) solid var(--navy);border-radius:var(--r-1);
+  padding:8px 13px;cursor:pointer;box-shadow:2px 2px 0 rgba(15,23,42,.3);
+  transition:transform .12s,box-shadow .12s,background .12s;
+  /* 24px 以上（WCAG 2.5.8）。文字が短くても潰れないようにする。 */
+  min-height:36px;
+}
+.pf-chip:hover{background:var(--paper2);}
+.pf-chip.on{background:var(--blue2);color:#fff;box-shadow:2px 2px 0 var(--navy);}
+.pf-chip:active{transform:translate(2px,2px);box-shadow:0 0 0 var(--navy);}
+.pf-hint{margin-top:8px;font-size:.7rem;color:#9aa6c0;line-height:1.6;}
+/* 未選択のまま押されたときだけ出す。既定は場所を取らない。 */
+.pf-warn{min-height:0;font-size:.78rem;font-weight:700;color:var(--must);margin-bottom:10px;}
+.pf-warn.on{min-height:1.4em;}
+#pf-submit{width:100%;margin-top:6px;}
+.pf-legal{margin-top:14px;font-size:.7rem;color:#9aa6c0;line-height:1.7;text-align:center;}
+.pf-legal a{color:var(--must);text-decoration:underline;}
+/* 読み上げにだけ「（必須）」を渡す。★は装飾なので aria-hidden にしてある。 */
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0;}
+
 /* --- 選択マーク（✓）の大きさを丸に合わせる -------------------------------
    ✓ は font-size:.78rem 固定で、6段階すべて同じ大きさだった（実測 12.48px）。
    一方 丸は 36 / 30 / 25px と変わるので、いちばん小さい丸では縁に届きそうな
@@ -1561,9 +1600,17 @@ body::before{
            3つとも今日の実装で事実である（入力欄が1つも無いことを tools/lint.mjs が
            機械的に守っている。「個人情報を取得しない設計」の節）。
            ｜ は読み上げで「たてぼう」になるので aria-hidden で外す。
-           ★#screen-profile（卒業年度・ニックネーム）が実装されたら必ず再点検すること。
-             「登録不要」「メールアドレス不要」は引き続き真だが、
-             「一切取得しない」と読ませてはならない。 -->
+           ★再点検した（2026-09-08・#screen-profile の実装時）。この3語は維持する。
+             ・登録不要        … 会員登録の仕組みは無い。真
+             ・メールアドレス不要 … メール欄は存在しない。真
+             ・無料            … 真
+             属性入力（立場・卒業年度が必須／性別・業界・職種は任意）は入ったが、
+             氏名・メールアドレス・電話番号・住所・学校名・学部名は取得しないので
+             3語とも事実のまま。lint の「連絡先を取得しない設計」がこれを守っている。
+             ★ただし「必須フォームがあるのに登録不要と書いてある」と読まれないかは、
+               公開後に実機で確かめること（design/conversion-structure-and-pc-grid.md
+               §303 が同じ再点検を求めている）。読まれ方の問題であって、
+               事実の問題ではない。 -->
       <p class="hero-trust">登録不要 <span aria-hidden="true">｜</span> メールアドレス不要 <span aria-hidden="true">｜</span> 無料</p>
       <div class="cont-banner" id="cont-banner" style="display:none;" onclick="continueDiag()">
         <div class="cont-body"><span class="cont-title">前回の途中から続ける</span><span class="cont-sub" id="cont-sub">20問中?問に回答済み</span></div>
@@ -1655,6 +1702,56 @@ body::before{
         <div class="q-remain" id="q-remain" role="status" aria-live="polite">あと5問</div>
         <button class="btn rpl" id="q-next" onclick="addRipple(event,this);nextPage()">次へ →</button>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- PROFILE（属性入力・20問完走後）
+     docs/specs/diagnosis-experience-revamp.md §D-4 とその【部分撤回 2026-09-08】。
+     ★連絡先の欄を作らない。氏名・メールアドレス・電話番号・住所・学校名・学部名は
+       この画面に存在しない（privacy.html 2. がそう書いている）。
+     ★<form> は使わない。送信先が無く、Enter による意図しない送信や
+       ブラウザの自動入力（住所・氏名・メール）を誘発する理由がない。
+     ★チップは JS が組み立てる。年度は現在日から自動生成するため
+       （4月1日に繰り上がる）、HTML に年を書き込めない。 -->
+<div id="screen-profile" class="screen">
+  <div class="pf-wrap">
+    <div class="pf-inner">
+      <div class="pf-head">
+        <div class="pf-title">あと少しだけ。</div>
+        <div class="pf-desc">診断は終わりました。合う情報をお出しするために、教えてください。</div>
+        <div class="pf-need">★の2つだけ選んでください。ほかは任意です。</div>
+      </div>
+
+      <div class="pf-field">
+        <div class="pf-label"><span class="pf-req" aria-hidden="true">★</span>いまの立場<span class="sr-only">（必須）</span></div>
+        <div class="pf-chips" id="pf-stance" role="radiogroup" aria-label="いまの立場（必須）"></div>
+      </div>
+
+      <div class="pf-field" id="pf-year-field" hidden>
+        <div class="pf-label"><span class="pf-req" aria-hidden="true">★</span><span id="pf-year-label">卒業年度</span><span class="sr-only">（必須）</span></div>
+        <div class="pf-chips" id="pf-year" role="radiogroup" aria-label="卒業年度（必須）"></div>
+      </div>
+
+      <div class="pf-field" id="pf-ind-field" hidden>
+        <div class="pf-label"><span id="pf-ind-label">業界</span><span class="pf-opt">任意・複数可</span></div>
+        <div class="pf-chips" id="pf-ind" role="group" aria-label="業界（任意・複数選択できます）"></div>
+      </div>
+
+      <div class="pf-field" id="pf-job-field" hidden>
+        <div class="pf-label"><span id="pf-job-label">職種</span><span class="pf-opt">任意・複数可</span></div>
+        <div class="pf-chips" id="pf-job" role="group" aria-label="職種（任意・複数選択できます）"></div>
+      </div>
+
+      <div class="pf-field">
+        <div class="pf-label">性別<span class="pf-opt">任意</span></div>
+        <div class="pf-chips" id="pf-sex" role="radiogroup" aria-label="性別（任意）"></div>
+        <div class="pf-hint">個人を特定しない集計にのみ使います。提携先の選定や表示順には使いません。</div>
+      </div>
+
+      <div class="pf-warn" id="pf-warn" role="status" aria-live="polite"></div>
+      <button class="btn rpl" id="pf-submit" onclick="addRipple(event,this);pfSubmit()">結果を見る →</button>
+      <p class="pf-legal">氏名・メールアドレス・電話番号はうかがいません。取り扱いは<a href="privacy.html">プライバシーポリシー</a>をご覧ください。</p>
     </div>
   </div>
 </div>
@@ -2094,6 +2191,14 @@ window.addEventListener('DOMContentLoaded',()=>{
   document.addEventListener('click',e=>{
     const d=document.getElementById('drawer'),b=document.getElementById('ham');
     if(d.classList.contains('open')&&!d.contains(e.target)&&!b.contains(e.target))closeDrawer();
+  });
+  /* 属性入力のチップ。onclick を1つずつ書かずに委譲で拾う
+     （チップは JS が組み立て直すので、個別のリスナだと付け直しが要る）。 */
+  document.addEventListener('click',e=>{
+    const c=e.target.closest&&e.target.closest('.pf-chip');
+    if(!c)return;
+    const g=c.parentElement&&c.parentElement.id;
+    if(g)pfPick(g,c.dataset.v);
   });
 });
 
@@ -2537,7 +2642,10 @@ function nextPage(){
   if(curPage>=PAGE_COUNT-1){
     saveProgress();
     track('quiz_complete',{type_code:getCode(),duration_sec:quizStartedAt?Math.round((Date.now()-quizStartedAt)/1000):0});
-    showLoading();
+    /* 20問完走 → 属性入力 → ローディング → 結果（仕様 §D-5）。
+       ★属性を聞く正当性は「20問答えた直後」にしかない。?type= の直接来訪や
+         type-peek からはこの画面に来ない（それらは showResult を直接呼ぶ）。 */
+    showProfile();
     return;
   }
   curPage++;
@@ -2617,11 +2725,157 @@ function getSubCode(){
   return sub===getCode()?null:sub;
 }
 
+/* =========================================================================
+   PROFILE — 属性入力（20問完走後・docs/specs/diagnosis-experience-revamp.md §D）
+   -------------------------------------------------------------------------
+   必須は「立場」と「卒業年度」の2つだけ（同 §D-1 の【部分撤回 2026-09-08】）。
+   性別・業界・職種は任意。氏名・メール・電話・学校名は取得しない。
+
+   ★年度は現在日から自動生成する。固定の6択にすると毎年陳腐化するため
+     （同 未決事項6 はこれで解消）。日本の学年は4月始まり・3月卒業なので、
+     いまの大学4年生が卒業する年 g は
+       g = (月 >= 4) ? 年 + 1 : 年
+     4月1日に一斉に繰り上がる。
+   ★性別を送客に一切使わない。orderedAgents() にも agentUrl() にも渡さない
+     （同 §D-7 D-L3。守れないなら取らない、が取得の条件だった）。
+     lint と e2e がこれを機械で見ている。
+   ★値は端末（localStorage）にのみ保存する。privacy.html 5. がそう書いている。
+     サーバーへ送る実装を足すときは、必ずポリシーを同時に直すこと。
+   ========================================================================= */
+const PROFILE_KEY='cq_pf1';
+let profile={stance:null,year:null,sex:null,inds:[],jobs:[]};
+
+/* いまの大学4年生が卒業する年（西暦）。テストから日付を差し込めるようにしておく。 */
+function gradBaseYear(now){
+  const d=now||new Date();
+  return d.getMonth()+1>=4 ? d.getFullYear()+1 : d.getFullYear();
+}
+const yLabel=y=>String(y%100).padStart(2,'0')+'卒';
+
+/* 立場ごとの年度の選択肢。value は西暦の下2桁 + 接尾（'-' = 以前 / '+' = 以降）。
+   新卒の3つは 大学4年（修士2）／大学3年（修士1）／大学2年以降 に対応する。
+   4つ目の既卒は、卒業済みで就活を続けている人（就職浪人）の受け皿。
+   3つだけだと中途を選ばせることになり、「経験した業界・職種」を答えられない。 */
+function yearChoices(stance,now){
+  const g=gradBaseYear(now);
+  if(stance==='shinsotsu')return [
+    {v:String(g%100),      t:yLabel(g)},
+    {v:String((g+1)%100),  t:yLabel(g+1)},
+    {v:String((g+2)%100)+'+',t:yLabel(g+2)+'以降'},
+    {v:String((g-1)%100)+'-',t:yLabel(g-1)+'以前（既卒）'},
+  ];
+  return [
+    {v:String((g-1)%100),  t:yLabel(g-1)},
+    {v:String((g-2)%100),  t:yLabel(g-2)},
+    {v:String((g-3)%100),  t:yLabel(g-3)},
+    {v:String((g-4)%100),  t:yLabel(g-4)},
+    {v:String((g-5)%100)+'-',t:yLabel(g-5)+'以前'},
+  ];
+}
+
+const PF_STANCE=[{v:'shinsotsu',t:'新卒（就活中）'},{v:'chuto',t:'中途（社会人）'}];
+const PF_SEX=[{v:'f',t:'女性'},{v:'m',t:'男性'},{v:'o',t:'その他'},{v:'n',t:'答えない'}];
+/* 業界は結果画面の「業界別の職種例」（CD のキー）と同じ語彙を使う。
+   別の言い方を作ると、同じものを2つの言葉で呼ぶことになる（wording-audit P-5）。
+   ★職種の粒度は暫定。提携先が何で絞るかを聞いてから確定する。
+     ここ1箇所を書き換えれば画面に反映される。 */
+const PF_IND=Object.keys(CD).map(k=>({v:k,t:k})).concat([{v:'other',t:'その他'}]);
+const PF_JOB=['営業','企画・マーケ','エンジニア・技術','コンサル','クリエイティブ','事務・管理','その他']
+  .map(t=>({v:t,t}));
+
+function pfChip(o,sel,multi){
+  return `<button type="button" class="pf-chip${sel?' on':''}" data-v="${esc(o.v)}"`
+       + ` role="${multi?'checkbox':'radio'}" aria-checked="${sel?'true':'false'}">${esc(o.t)}</button>`;
+}
+function pfRender(){
+  const g=(id,list,cur,multi)=>{
+    const el=document.getElementById(id);
+    if(!el)return;
+    el.innerHTML=list.map(o=>pfChip(o,multi?cur.indexOf(o.v)>=0:cur===o.v,multi)).join('');
+  };
+  g('pf-stance',PF_STANCE,profile.stance,false);
+  g('pf-sex',PF_SEX,profile.sex,false);
+  const on=!!profile.stance, chuto=profile.stance==='chuto';
+  document.getElementById('pf-year-field').hidden=!on;
+  document.getElementById('pf-ind-field').hidden=!on;
+  document.getElementById('pf-job-field').hidden=!on;
+  if(on){
+    document.getElementById('pf-year-label').textContent='卒業年度';
+    document.getElementById('pf-ind-label').textContent=chuto?'経験した業界':'希望の業界';
+    document.getElementById('pf-job-label').textContent=chuto?'経験した職種':'希望の職種';
+    g('pf-year',yearChoices(profile.stance),profile.year,false);
+    g('pf-ind',PF_IND,profile.inds,true);
+    g('pf-job',PF_JOB,profile.jobs,true);
+  }
+}
+/* チップの見た目だけを更新する。単一選択は兄弟を消してから付ける。
+   ★グループ全体を組み直さない。innerHTML を作り直すと押したチップが
+     別のノードに差し替わり、フォーカスが飛ぶ。連続で押したときに
+     2つ目が効かない不具合も起きていた（DOM から外れたノードのクリックは
+     document まで上がらないため）。 */
+function pfMark(group,v,on,single){
+  const g=document.getElementById(group);
+  if(!g)return;
+  g.querySelectorAll('.pf-chip').forEach(c=>{
+    if(single&&c.dataset.v!==v){c.classList.remove('on');c.setAttribute('aria-checked','false');}
+  });
+  const el=g.querySelector('.pf-chip[data-v="'+(window.CSS&&CSS.escape?CSS.escape(v):v)+'"]');
+  if(el){el.classList.toggle('on',on);el.setAttribute('aria-checked',on?'true':'false');}
+}
+
+/* チップの操作。単一選択はもう一度押すと解除（任意であることが操作でも分かる）。 */
+function pfPick(group,v){
+  if(group==='pf-stance'){
+    const next=profile.stance===v?null:v;
+    if(next!==profile.stance){profile.stance=next;profile.year=null;}  /* 立場が変われば年度は無効 */
+    pfRender();          /* 立場だけは年度の選択肢と見出しが変わるので組み直す */
+  }
+  else if(group==='pf-year'){profile.year=profile.year===v?null:v;pfMark(group,v,profile.year===v,true);}
+  else if(group==='pf-sex'){ profile.sex =profile.sex===v?null:v; pfMark(group,v,profile.sex===v,true);}
+  else if(group==='pf-ind'||group==='pf-job'){
+    const k=group==='pf-ind'?'inds':'jobs', a=profile[k], i=a.indexOf(v);
+    if(i>=0)a.splice(i,1); else a.push(v);
+    pfMark(group,v,a.indexOf(v)>=0,false);
+  }
+  const w=document.getElementById('pf-warn');
+  if(w&&profile.stance&&profile.year){w.textContent='';w.classList.remove('on');}
+}
+function showProfile(){
+  profile={stance:null,year:null,sex:null,inds:[],jobs:[]};
+  pfRender();
+  const w=document.getElementById('pf-warn');
+  if(w){w.textContent='';w.classList.remove('on');}
+  toScreen('screen-profile');
+  track('profile_view',{});
+}
+/* 「結果を見る →」。disabled は使わない（押せないボタンは理由を説明できない）。
+   未選択なら進まずに、足りない項目へ送って知らせる（requireComplete と同じ作法）。 */
+function pfSubmit(){
+  const miss=!profile.stance?'pf-stance':(!profile.year?'pf-year-field':null);
+  if(miss){
+    const w=document.getElementById('pf-warn');
+    w.textContent=!profile.stance?'いまの立場を選んでください。':'卒業年度を選んでください。';
+    w.classList.add('on');
+    const el=document.getElementById(miss);
+    if(el&&el.scrollIntoView)el.scrollIntoView({block:'center',behavior:'smooth'});
+    return;
+  }
+  try{localStorage.setItem(PROFILE_KEY,JSON.stringify(profile));}catch(e){}
+  /* GA4 へ送るのは選択肢のコード値だけ。自由入力の文字列は存在しない
+     （privacy.html 7. の「送信される情報」と一致させること）。 */
+  track('profile_submit',{stance:profile.stance,grad:profile.year,
+    sex:profile.sex||'none',ind_n:profile.inds.length,job_n:profile.jobs.length});
+  showLoading();
+}
+
 function showLoading(){
   toScreen('screen-loading');
   const bar=document.getElementById('l-bar');
-  bar.style.animation='none';void bar.offsetWidth;bar.style.animation='lbA 3.2s cubic-bezier(.4,0,.6,1) forwards';
-  setTimeout(showResult,3600);
+  /* 3.6s → 1.8s。属性入力ぶん実時間が増えたので、回答後の待ち時間の予算は
+     既に消費されている（仕様 §D-5）。1.8s は「画面が切り替わった」と認識でき、
+     フレーズを1〜2行読める最小値として置いた値。 */
+  bar.style.animation='none';void bar.offsetWidth;bar.style.animation='lbA 1.6s cubic-bezier(.4,0,.6,1) forwards';
+  setTimeout(showResult,1800);
 }
 
 /* launchConfetti() は削除した（仕様 §C-5・オーナー判断）。
@@ -2892,7 +3146,7 @@ function showResult(_unusedSkipIntro=false,source='quiz'){
   const s3=Math.min(100,Math.round(Math.abs(scores[3]/AX_MAX)*100));
   const s4=Math.min(100,Math.round(Math.abs(scores[4]/AX_MAX)*100));
   /* varMsg（回答の散らばりから「診断精度が高い」等を出す3分岐）は削除した。
-     精度は測っていない（privacy.html §6「心理検査としての妥当性・信頼性の検証は
+     精度は測っていない（privacy.html §9「心理検査としての妥当性・信頼性の検証は
      行っていません」）うえ、3分岐すべてが褒め言葉になっていた。
      docs/specs/diagnosis-experience-revamp.md §C-2 / docs/design/wording-audit.md R-1。 */
 

@@ -450,9 +450,39 @@ console.log('[test] 1画面5問・診断画面は3ページ（Q6 から始まる
     `最終ページの文脈表示: ${L.__byId.get('prog-msg').textContent}`);
   check(L.__byId.get('q-next').textContent === '結果を見る →',
     `最終ページのボタンは「結果を見る」: ${L.__byId.get('q-next').textContent}`);
+  /* 20問完走 → 属性入力 → ローディング → 結果（仕様 §D-5）。
+     以前はここで直接 結果へ進んでいた。属性入力を挟むのは意図的な変更で、
+     必須の2項目（立場・卒業年度）を選ぶまで結果へ進まない
+     （同 §D-1 の【部分撤回 2026-09-08】）。 */
   L.nextPage();
   L.__timers.splice(0).forEach(fn => fn());
-  check(L.__byId.get('screen-result').classList.contains('active'), '最終ページの「次へ」で結果へ進む');
+  check(L.__byId.get('screen-profile').classList.contains('active'),
+    '最終ページの「次へ」で属性入力へ進む（結果ではない）');
+  check(!L.__byId.get('screen-result').classList.contains('active'),
+    '属性入力の段階では結果画面はまだ出ていない');
+
+  L.pfSubmit();
+  L.__timers.splice(0).forEach(fn => fn());
+  check(L.__byId.get('screen-profile').classList.contains('active'),
+    '必須2項目が未選択なら結果へ進まない');
+  check(/立場を選んで/.test(L.__byId.get('pf-warn').textContent),
+    `進まない理由が画面に出る: ${L.__byId.get('pf-warn').textContent}`);
+
+  L.pfPick('pf-stance', 'shinsotsu');
+  L.pfSubmit();
+  L.__timers.splice(0).forEach(fn => fn());
+  check(L.__byId.get('screen-profile').classList.contains('active'), '立場だけでは進まない');
+
+  /* 年度は現在日から自動生成する。テストが年をまたいでも壊れないよう、
+     ハードコードせず gradBaseYear() から作った値を使う。 */
+  const g = L.__eval('gradBaseYear()');
+  L.pfPick('pf-year', String(g % 100));
+  L.pfSubmit();
+  L.__timers.splice(0).forEach(fn => fn());
+  check(L.__byId.get('screen-result').classList.contains('active'),
+    '必須2項目を選ぶと結果へ進む');
+  check(L.__eval('profile.sex') === null && L.__eval('profile.inds').length === 0,
+    '性別・業界を未選択のままでも進める（任意）');
 }
 
 // ---- (6b) 進捗は4群のまま。群0＝LPの5問、群1-3＝診断画面（§B-5）----
