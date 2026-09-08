@@ -12,13 +12,13 @@
      同じ値を JS 冒頭の const SITE_BASE にも持たせてある。
      置換対象: 本ブロック内の href/content 5箇所 + SITE_BASE 1箇所。
      ============================================================ -->
-<meta name="description" content="20問・約3分で、あなたの働き方の傾向を4軸16タイプに分類します。登録不要・無料。">
+<meta name="description" content="20問・約3分で、あなたの働き方の傾向を4軸16タイプに分類します。あなたが働きやすい職場と、その見分け方まで。">
 <link rel="canonical" href="https://w-t-n-b.github.io/syukatsushindan/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="就活キャリアタイプ診断">
 <meta property="og:locale" content="ja_JP">
 <meta property="og:title" content="就活キャリアタイプ診断 | 16Types">
-<meta property="og:description" content="20問・約3分で、あなたの働き方の傾向を4軸16タイプに分類します。登録不要・無料。">
+<meta property="og:description" content="20問・約3分で、あなたの働き方の傾向を4軸16タイプに分類します。あなたが働きやすい職場と、その見分け方まで。">
 <meta property="og:url" content="https://w-t-n-b.github.io/syukatsushindan/">
 <meta property="og:image" content="https://w-t-n-b.github.io/syukatsushindan/images/ogp/default.png">
 <meta property="og:image:width" content="1200">
@@ -26,7 +26,7 @@
 <meta property="og:image:alt" content="就活キャリアタイプ診断 16Types">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="就活キャリアタイプ診断 | 16Types">
-<meta name="twitter:description" content="20問・約3分で、あなたの働き方の傾向を4軸16タイプに分類します。登録不要・無料。">
+<meta name="twitter:description" content="20問・約3分で、あなたの働き方の傾向を4軸16タイプに分類します。あなたが働きやすい職場と、その見分け方まで。">
 <meta name="twitter:image" content="https://w-t-n-b.github.io/syukatsushindan/images/ogp/default.png">
 <!-- タイプ別OGP は t/<CODE>.html 16枚が持つ（tools/gen-type-pages.mjs が生成）。
      このページ自身は「タイプが決まっていない面」なので default.png のままでよい。
@@ -1057,7 +1057,6 @@ body[data-screen="screen-loading"] .ftr{display:none;}
    だが、この実装は既に .hero-sub{margin-bottom:0} なので、借りる元が無い。
    実効の間隔だけ合わせて 24−14＝10px を上に取り、下は .hero の
    padding-bottom:40px に任せる（上の .hero-sub と同じ考え方。新しい値を作らない）。 */
-.hero-trust{font-size:12px;line-height:1.7;letter-spacing:.06em;color:#c3cbdd;margin:10px 0 0;}
 .cont-banner{margin-top:28px;margin-bottom:0;}
 
 /* --- C-6: 16タイプ一覧のタップ先。結果全文ではなくタイプ紹介を出す --------
@@ -1371,6 +1370,20 @@ body{overflow-x:clip;}
   color:var(--mid);margin-top:2px;
 }
 
+/* --- .hero-trust を消したぶんの余白を戻す ---------------------------------
+   あの1行は 12px × line-height 1.7 ＋ margin-top 10px で約30px を占めていた。
+   消すと復帰バナー（.cont-banner）がそのぶん上へ詰まり、浮遊キャラ（.hc）と
+   重なる。実測: 余裕 +6px → -24px（PC 3幅とも。WCAG 1.4.11 の検査が落ちた）。
+   ★キャラの位置は hero-floating-characters.md が根拠を持って決めた値なので
+     動かさない。減ったのは文字であって、版面の間隔ではない。空けた高さを戻す。
+   ★この余白は復帰バナーが出る人にしか発生しない（既定は display:none で、
+     非表示要素の margin は版面に効かない）。初回訪問の見え方は変わらない。
+   実測（PC 3幅とも同じ。余裕は「バナー上端 − 影6px − .hc の下端」）:
+     margin-top  32px → 余裕 -16 / 14 / 11 / -15   ← 重なる
+     margin-top  64px → 余裕  16 / 46 / 43 /  17   ← 全部クリア
+   基準は 6px 超なので 64px を採る。 */
+.cont-banner{margin-top:64px;}
+
 /* --- 属性入力（#screen-profile）-------------------------------------------
    docs/specs/diagnosis-experience-revamp.md §D-4。
    背景は紺（--ink-field）。診断 → 属性 → ローディング → 結果 の暗い流れを保つ。
@@ -1595,23 +1608,17 @@ body::before{
                （同 §5-3。弱めるのは動詞側で行い、名詞に「例」を足さない）。
            51字 → 50字。390px で3行のまま。 -->
       <p class="hero-sub">20問・約3分でわかるキャリアタイプ診断。<br>あなたが働きやすい職場と、その見分け方まで。</p>
-      <!-- 着地3秒で就活生が最も知りたいこと（「登録させられるのか。電話は来るのか」）に
-           答える1行（design/conversion-structure-and-pc-grid.md S-6 / §4-1）。
-           3つとも今日の実装で事実である（入力欄が1つも無いことを tools/lint.mjs が
-           機械的に守っている。「個人情報を取得しない設計」の節）。
-           ｜ は読み上げで「たてぼう」になるので aria-hidden で外す。
-           ★再点検した（2026-09-08・#screen-profile の実装時）。この3語は維持する。
-             ・登録不要        … 会員登録の仕組みは無い。真
-             ・メールアドレス不要 … メール欄は存在しない。真
-             ・無料            … 真
-             属性入力（立場・卒業年度が必須／性別・業界・職種は任意）は入ったが、
-             氏名・メールアドレス・電話番号・住所・学校名・学部名は取得しないので
-             3語とも事実のまま。lint の「連絡先を取得しない設計」がこれを守っている。
-             ★ただし「必須フォームがあるのに登録不要と書いてある」と読まれないかは、
-               公開後に実機で確かめること（design/conversion-structure-and-pc-grid.md
-               §303 が同じ再点検を求めている）。読まれ方の問題であって、
-               事実の問題ではない。 -->
-      <p class="hero-trust">登録不要 <span aria-hidden="true">｜</span> メールアドレス不要 <span aria-hidden="true">｜</span> 無料</p>
+      <!-- .hero-trust（「登録不要 ｜ メールアドレス不要 ｜ 無料」）は削除した
+           （2026-09-08・オーナー判断）。
+           元は design/conversion-structure-and-pc-grid.md S-6 が「着地3秒で
+           就活生が最も知りたいこと（登録させられるのか・電話は来るのか）に
+           答える1行」として置いたもの。
+           削除の理由は2つ:
+             ・今後、登録や個人情報の取得を行う可能性がある。書いてあると
+               その時点で撤回する必要が生じる。先に約束しない。
+             ・書いてあってもユーザーの心理的プラスはそこまで働かない。
+           ★戻さないこと。e2e が「この行が復活していない」ことを見ている。
+             同じ主張は t/*.html の .cta-note からも外した。 -->
       <div class="cont-banner" id="cont-banner" style="display:none;" onclick="continueDiag()">
         <div class="cont-body"><span class="cont-title">前回の途中から続ける</span><span class="cont-sub" id="cont-sub">20問中?問に回答済み</span></div>
         <span class="cont-arrow">→</span>

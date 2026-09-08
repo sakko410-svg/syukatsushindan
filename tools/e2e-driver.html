@@ -1684,25 +1684,21 @@ try{
      S-9 PC の地を --paper2 に
      幅の選び方: 320/390 はスマホ（2列のまま）。767/768 は境界。1024/1440 は PC。 */
   {
-    /* --- S-6: 信頼の1行。幅に依らず1行あり、押せるものは増えていない --- */
+    /* --- S-6 は撤回された。.hero-trust（登録不要 ｜ メールアドレス不要 ｜ 無料）は
+           2026-09-08 のオーナー判断で削除。理由は2つ:
+             ・今後、登録や個人情報の取得を行う可能性がある。書いてあると
+               その時点で撤回する必要が生じる。先に約束しない
+             ・書いてあってもユーザーの心理的プラスはそこまで働かない
+           「あること」を守っていた5件を「戻っていないこと」に反転させた。
+           同じ主張は t/*.html の .cta-note と meta description からも外してある。 */
     f.style.width='390px'; f.style.height='844px';
     await load('index.html'); w=f.contentWindow; d=f.contentDocument; await sleep(700);
     {
-      const tr=d.querySelector('.hero .hero-trust');
-      const sub=d.querySelector('.hero .hero-sub');
-      chk(!!tr,'.hero-trust がヒーローにある（S-6）');
-      chk(!!tr&&sub.nextElementSibling===tr,'.hero-trust は .hero-sub の直下');
-      chk(!!tr&&/登録不要/.test(tr.textContent)&&/メールアドレス不要/.test(tr.textContent)&&/無料/.test(tr.textContent),
-          '3つとも書かれている: '+(tr?tr.textContent:'なし'));
-      /* 3つとも今日の実装で事実であること（入力欄が1つも無い）を DOM 側でも見る。
-         #screen-profile 等で入力欄が入った日に、この行が嘘になるのを止める。 */
-      chk(d.querySelectorAll('form,input,textarea,select').length===0,
-          '「登録不要／メールアドレス不要」が事実である（入力欄が0件）');
-      chk(!!tr&&tr.querySelectorAll('button,a').length===0,'.hero-trust に押せるものを増やしていない');
-      chk(!!tr&&[...tr.querySelectorAll('span')].every(s=>s.getAttribute('aria-hidden')==='true'),
-          '区切りの ｜ は読み上げから外してある（「たてぼう」と読まれない）');
-      const c=getComputedStyle(tr).color;
-      chk(c==='rgb(195, 203, 221)','.hero-trust の文字色は #c3cbdd（--ink-field 上で 9.81:1）: '+c);
+      chk(!d.querySelector('.hero-trust'),'.hero-trust が復活していない（S-6 は撤回）');
+      const hero=d.querySelector('.hero').innerText;
+      chk(!/登録不要|メールアドレス不要/.test(hero),'ヒーローに「登録不要／メールアドレス不要」が無い');
+      const head=d.head.innerHTML;
+      chk(!/登録不要/.test(head),'meta description / og:description に「登録不要」が無い');
     }
 
     /* --- 幅ごとの検査 --- */

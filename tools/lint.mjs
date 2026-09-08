@@ -811,6 +811,22 @@ console.log('[lint] あなたが働きやすい職場');
         `.hero-sub が職場を約束している（職種ではない）`);
 }
 
+// --- 撤回した主張が戻っていないこと ---------------------------------------
+// .hero-trust「登録不要 ｜ メールアドレス不要 ｜ 無料」は 2026-09-08 の
+// オーナー判断で削除した。今後 登録や個人情報の取得を行う可能性があり、
+// 書いてあるとその時点で撤回することになるため、先に約束しない。
+// design/conversion-structure-and-pc-grid.md S-6 が置いた1行なので、
+// 記録しておかないと次に読む人が仕様どおりに戻してしまう。
+console.log('[lint] 撤回した主張');
+{
+  for (const f of ['index.html', ...fs.readdirSync(path.join(ROOT, 't')).filter(x => x.endsWith('.html')).map(x => `t/${x}`)]) {
+    const body = read(f).replace(/<!--[\s\S]*?-->/g, '');
+    check(!body.includes('登録不要'), `${f} に「登録不要」が戻っていない`);
+    check(!body.includes('メールアドレス不要'), `${f} に「メールアドレス不要」が戻っていない`);
+  }
+  check(!read('index.html').includes('class="hero-trust"'), `.hero-trust が復活していない`);
+}
+
 // --- 属性入力（#screen-profile）-------------------------------------------
 // docs/specs/diagnosis-experience-revamp.md §D と、その【部分撤回 2026-09-08】。
 // 必須は「立場」と「卒業年度」の2つだけ。性別・業界・職種は任意。
