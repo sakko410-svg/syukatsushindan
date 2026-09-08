@@ -1370,6 +1370,36 @@ body{overflow-x:clip;}
   color:var(--mid);margin-top:2px;
 }
 
+/* --- Xシェアボタンの輪郭（WCAG 1.4.11 非テキストコントラスト）------------
+   結果ヒーローは紺地（--ink-field）。.sh-x は X のブランド色である黒で塗って
+   あり、枠も影も紺系なので、面・枠・影のどれも地から浮かない。実測:
+     面 rgb(0,0,0) / 地 rgb(19,32,67)      1.32:1
+     集中線の上 rgb(32,44,77)              1.53:1
+   基準は 3:1。白い文字だけが手がかりで、ボタンの「形」が見えていなかった。
+   ★黒は X のブランド色なので変えない。枠だけクリームにして輪郭を作る。
+   ★.result-hero に限る。結果本文にある2つ目のシェアブロックは白い面の上で、
+     黒い面がそのまま輪郭になっている。そこでクリームの枠にすると逆に消える。
+   隣の .sh-ln（緑 7.08:1）と .sh-cp（淡い青 13.59:1）は面で足りているので触らない。 */
+.result-hero .sh-x{border-color:var(--paper);}
+
+/* --- <div onclick> を <button> にしたぶんのリセット ------------------------
+   .tc（16タイプのカード）と .r-ph（結果のアコーディオン見出し）を
+   <button> に変えた（WCAG 2.1.1 Level A。<div> はタブ順に載らないので、
+   キーボードだけの人は1枚も開けなかった）。
+
+   ブラウザ既定のボタン様式が強いので、見た目を元に戻す。実測した崩れ:
+     .tc   書体が Arial 13.3px になる（サイトの書体を継がない）
+     .r-ph 幅が 132px に縮む（<div> のときは版面いっぱいだった）
+   ★背景・枠・影は既存の .tc / .r-ph の規則がそのまま効くので触らない。
+     ここで background:none などを書くと、末尾の上書きで既存の見た目を壊す。 */
+.tc,.r-ph{
+  font-family:inherit;font-size:inherit;font-weight:inherit;color:inherit;
+  letter-spacing:inherit;line-height:inherit;
+  appearance:none;-webkit-appearance:none;
+}
+.tc{width:100%;text-align:center;}      /* 元の .tc は text-align:center（158行） */
+.r-ph{width:100%;text-align:left;}      /* 元は <div> なので版面いっぱい・左揃え */
+
 /* --- .hero-trust を消したぶんの余白を戻す ---------------------------------
    あの1行は 12px × line-height 1.7 ＋ margin-top 10px で約30px を占めていた。
    消すと復帰バナー（.cont-banner）がそのぶん上へ詰まり、浮遊キャラ（.hc）と
@@ -1565,7 +1595,10 @@ body::before{
 
 <header class="hdr" id="hdr">
   <div class="hdr-logo" onclick="gotoTop()"><div class="hdr-dot"></div>Career<span>Type</span></div>
-  <button class="ham" id="ham" onclick="toggleDrawer()"><div class="ham-l"></div><div class="ham-l"></div><div class="ham-l"></div></button>
+  <!-- 中身は横線3本の <div> だけなので、名前が無いと読み上げは「ボタン」としか
+       言わない。そこから先（プライバシーポリシー・運営者情報）に到達できなくなる
+       （WCAG 4.1.2 Level A）。名前と開閉状態を持たせる。 -->
+  <button class="ham" id="ham" aria-label="メニューを開く" aria-expanded="false" aria-controls="drawer" onclick="toggleDrawer()"><div class="ham-l" aria-hidden="true"></div><div class="ham-l" aria-hidden="true"></div><div class="ham-l" aria-hidden="true"></div></button>
 </header>
 
 <nav class="drawer" id="drawer">
@@ -2226,7 +2259,11 @@ function buildTypeOverview(){
     h+=`<div id="type-cat-${cat}" style="margin-bottom:20px;"><div class="type-cat-hd"><div class="tc-pill ${pill}">${cat}系 — ${lbl}</div><div class="tc-line"></div></div><div class="type-grid">`;
     codes.forEach(code=>{
       const t=TD[code];
-      h+=`<div class="tc" data-code="${code}" tabindex="-1" onclick="openTypePeek('${code}',this)"><div class="tc-sil" style="background-image:url('images/chars/sm/${codeImg(code)}.webp');"></div><img src="images/chars/${codeImg(code)}.webp" alt=""><div class="tc-code" style="color:${col};">${code}</div><div class="tc-name">${t.name}</div></div>`;
+      /* <div onclick> だとタブ順に載らず、キーボードだけの人は16枚を1枚も
+         開けない（WCAG 2.1.1 Level A）。<button> にすれば Enter / Space の
+         両方が効き、読み上げにも「ボタン」として渡る。
+         中身（画像・コード・名前）はそのまま入れられる。 */
+      h+=`<button type="button" class="tc" data-code="${code}" aria-label="${esc(code)} ${esc(t.name)} のタイプ紹介を開く" onclick="openTypePeek('${code}',this)"><div class="tc-sil" style="background-image:url('images/chars/sm/${codeImg(code)}.webp');"></div><img src="images/chars/${codeImg(code)}.webp" alt=""><div class="tc-code" style="color:${col};">${code}</div><div class="tc-name">${t.name}</div></button>`;
     });
     h+=`</div></div>`;
   });
@@ -2376,8 +2413,16 @@ function lqContinue(){
   goToQuizPage(firstIncompletePage());
 }
 
-function toggleDrawer(){document.getElementById('ham').classList.toggle('open');document.getElementById('drawer').classList.toggle('open');}
-function closeDrawer(){document.getElementById('ham').classList.remove('open');document.getElementById('drawer').classList.remove('open');}
+/* 開閉のたびに aria-expanded と名前を合わせる。見た目（×に変わる）と
+   読み上げが食い違わないようにするため。 */
+function syncHam(open){
+  const h=document.getElementById('ham');
+  if(!h)return;
+  h.setAttribute('aria-expanded',open?'true':'false');
+  h.setAttribute('aria-label',open?'メニューを閉じる':'メニューを開く');
+}
+function toggleDrawer(){const h=document.getElementById('ham');h.classList.toggle('open');document.getElementById('drawer').classList.toggle('open');syncHam(h.classList.contains('open'));}
+function closeDrawer(){document.getElementById('ham').classList.remove('open');document.getElementById('drawer').classList.remove('open');syncHam(false);}
 
 /* =========================================================================
    質問カードの組み立て — 1画面5問（仕様 quiz-five-per-page.md §A / §B）
@@ -3013,7 +3058,13 @@ function buildAxisViz(sc){
   return h;
 }
 
-function toggleAcc(head){head.classList.toggle('aopen');head.nextElementSibling.classList.toggle('aopen');}
+/* 見出しは <button>（WCAG 2.1.1 Level A）。開閉状態を aria-expanded で伝える。
+   見た目の .aopen だけだと、読み上げでは開いているのか閉じているのか分からない。 */
+function toggleAcc(head){
+  const open=head.classList.toggle('aopen');
+  head.nextElementSibling.classList.toggle('aopen');
+  head.setAttribute('aria-expanded',open?'true':'false');
+}
 
 /* 結果画面の相性キャラは非対話にした。従来はここから scores を捏造して
    結果全文を出していた（C-6）。診断済みの人に「20問で確かめる →」を出すのは
@@ -3162,7 +3213,7 @@ function showResult(_unusedSkipIntro=false,source='quiz'){
      docs/design/wording-audit.md R-7。パネル自体を置くかは未決（オーナー判断3）。 */
   function compatSec(codes,cls,title){
     if(!codes?.length)return'';
-    let h=`<div class="r-panel fade-in"><div class="r-ph" onclick="toggleAcc(this)"><div class="r-pt">${title}</div><span class="r-tog">▼</span></div><div class="r-pb">`;
+    let h=`<div class="r-panel fade-in"><button type="button" class="r-ph" aria-expanded="false" onclick="toggleAcc(this)"><div class="r-pt">${title}</div><span class="r-tog">▼</span></button><div class="r-pb">`;
     codes.forEach(c=>{
       const ct=TD[c],gr=cls==='good'?t.gR:t.bR;
       h+=`<div class="compat-item"><div class="compat-chars"><div class="compat-cbox">${cImg(code,54)}<span class="code" style="color:var(--blue2);">${code}</span></div><span class="compat-vs">⇔</span><div class="compat-cbox">${cImg(c,54)}<span class="code" style="color:var(--blue2);">${c}</span></div><div class="compat-info"><span class="cm-badge cm-${cls}">${cls==='good'?'相性が良い':'すれ違いやすい'}</span><div class="compat-name">${ct.name}</div><div class="compat-tag">${ct.tag}</div></div></div><div class="compat-angles"><div class="ca"><span class="ca-lbl">チームで</span><div class="ca-txt">${gr.team}</div></div><div class="ca"><span class="ca-lbl">先輩なら</span><div class="ca-txt">${gr.senpai}</div></div><div class="ca"><span class="ca-lbl">就活仲間なら</span><div class="ca-txt">${gr.friend}</div></div></div></div>`;
@@ -3176,7 +3227,7 @@ function showResult(_unusedSkipIntro=false,source='quiz'){
     /* .sub-head「あなたのサブタイプ」は、3行上のパネル見出し「サブタイプ」の
        言い直しだったので削除した（wording-audit.md R-14）。
        .sub-note は主語のねじれを直した（R-15）。 */
-    subH=`<div class="r-panel fade-in"><div class="r-ph" onclick="toggleAcc(this)"><div class="r-pt">サブタイプ</div><span class="r-tog">▼</span></div><div class="r-pb"><div class="subtype-card"><div class="sub-note">4つの軸のうち、いちばん差が小さかった1つが逆に出ていれば、こちらのタイプでした。それだけ僅差だったということなので、こちらの傾向も併せて見ると、自分の振れ幅がつかめます。</div><div class="sub-inner"><img class="sub-img" src="images/chars/sm/${codeImg(subCode)}.webp" alt=""><div><div class="sub-code">${subCode}</div><div class="sub-name">${st.name}</div><div class="sub-tag">${st.tag}</div><span class="sub-pct">2番目に近いタイプ</span></div></div></div></div></div>`;
+    subH=`<div class="r-panel fade-in"><button type="button" class="r-ph" aria-expanded="false" onclick="toggleAcc(this)"><div class="r-pt">サブタイプ</div><span class="r-tog">▼</span></button><div class="r-pb"><div class="subtype-card"><div class="sub-note">4つの軸のうち、いちばん差が小さかった1つが逆に出ていれば、こちらのタイプでした。それだけ僅差だったということなので、こちらの傾向も併せて見ると、自分の振れ幅がつかめます。</div><div class="sub-inner"><img class="sub-img" src="images/chars/sm/${codeImg(subCode)}.webp" alt=""><div><div class="sub-code">${subCode}</div><div class="sub-name">${st.name}</div><div class="sub-tag">${st.tag}</div><span class="sub-pct">2番目に近いタイプ</span></div></div></div></div></div>`;
   }
 
   const indChips=Object.keys(CD).map(ind=>`<div class="ind-sm${selectedIndustries.includes(ind)?' sel':''}" onclick="toggleIndSm(this,'${ind}')">${ind}</div>`).join('');
@@ -3229,13 +3280,13 @@ function showResult(_unusedSkipIntro=false,source='quiz'){
     <div class="wrap" style="padding-top:20px;">
       <div class="narration fade-in">${t.desc}</div>
       <div class="reason-box fade-in"><div class="rb-title">判定理由</div><div class="rb-text">${r.h} ${r.a} ${rl}</div><div class="rb-tags"><span class="rbt rbt1">${h?AX[1].l:AX[1].r} ${s1}%</span><span class="rbt rbt2">${a?AX[2].l:AX[2].r} ${s2}%</span><span class="rbt rbt3">${l?AX[3].l:AX[3].r} ${s3}%</span><span class="rbt rbt4">${s?AX[4].l:AX[4].r} ${s4}%</span></div></div>
-      <div class="r-panel fade-in"><div class="r-ph aopen" onclick="toggleAcc(this)"><div class="r-pt">診断スコア</div><span class="r-tog" style="transform:rotate(180deg);">▼</span></div><div class="r-pb aopen">${buildAxisViz(scores)}</div></div>
+      <div class="r-panel fade-in"><button type="button" class="r-ph aopen" aria-expanded="true" onclick="toggleAcc(this)"><div class="r-pt">診断スコア</div><span class="r-tog" style="transform:rotate(180deg);">▼</span></button><div class="r-pb aopen">${buildAxisViz(scores)}</div></div>
       ${subH}
-      <div class="r-panel fade-in"><div class="r-ph aopen" onclick="toggleAcc(this)"><div class="r-pt">性格タイプ詳細</div><span class="r-tog" style="transform:rotate(180deg);">▼</span></div><div class="r-pb aopen"><div class="body-txt" style="margin-bottom:16px;">${t.per}</div><div class="d-sec"><div class="d-lbl ls">強み</div><div class="body-txt">${t.str}</div></div><div class="d-sec"><div class="d-lbl lc">コミュニケーション</div><div class="body-txt">${t.com}</div></div><div class="d-sec"><div class="d-lbl lg">成長のヒント</div><div class="body-txt">${t.grw}</div></div></div></div>
-      <div class="r-panel fade-in"><div class="r-ph aopen" onclick="toggleAcc(this)"><div class="r-pt">向いている職種</div><span class="r-tog" style="transform:rotate(180deg);">▼</span></div><div class="r-pb aopen"><div class="job-tags">${t.jobs.map(j=>`<div class="job-tag">${j}</div>`).join('')}</div><div class="body-txt">${t.why}</div></div></div>
-      <div class="r-panel fade-in"><div class="r-ph" onclick="toggleAcc(this)"><div class="r-pt">業界別の職種例</div><span class="r-tog">▼</span></div><div class="r-pb"><p class="ind-lbl">気になる業界を選ぶと絞り込めます</p><div class="ind-grid-sm">${indChips}</div><p class="co-note">※タイプの傾向に近い職種の例です。掲載順に優劣はなく、特定の企業の採用基準や選考とは関係ありません。</p><div id="company-list">${buildCoHTML(inds)}</div></div></div>
+      <div class="r-panel fade-in"><button type="button" class="r-ph aopen" aria-expanded="true" onclick="toggleAcc(this)"><div class="r-pt">性格タイプ詳細</div><span class="r-tog" style="transform:rotate(180deg);">▼</span></button><div class="r-pb aopen"><div class="body-txt" style="margin-bottom:16px;">${t.per}</div><div class="d-sec"><div class="d-lbl ls">強み</div><div class="body-txt">${t.str}</div></div><div class="d-sec"><div class="d-lbl lc">コミュニケーション</div><div class="body-txt">${t.com}</div></div><div class="d-sec"><div class="d-lbl lg">成長のヒント</div><div class="body-txt">${t.grw}</div></div></div></div>
+      <div class="r-panel fade-in"><button type="button" class="r-ph aopen" aria-expanded="true" onclick="toggleAcc(this)"><div class="r-pt">向いている職種</div><span class="r-tog" style="transform:rotate(180deg);">▼</span></button><div class="r-pb aopen"><div class="job-tags">${t.jobs.map(j=>`<div class="job-tag">${j}</div>`).join('')}</div><div class="body-txt">${t.why}</div></div></div>
+      <div class="r-panel fade-in"><button type="button" class="r-ph" aria-expanded="false" onclick="toggleAcc(this)"><div class="r-pt">業界別の職種例</div><span class="r-tog">▼</span></button><div class="r-pb"><p class="ind-lbl">気になる業界を選ぶと絞り込めます</p><div class="ind-grid-sm">${indChips}</div><p class="co-note">※タイプの傾向に近い職種の例です。掲載順に優劣はなく、特定の企業の採用基準や選考とは関係ありません。</p><div id="company-list">${buildCoHTML(inds)}</div></div></div>
 
-      <div class="r-panel fade-in"><div class="r-ph aopen" onclick="toggleAcc(this)"><div class="r-pt">あなたが働きやすい職場</div><span class="r-tog" style="transform:rotate(180deg);">▼</span></div><div class="r-pb aopen">${buildEnvHTML()}<div class="d-sec"><div class="d-lbl lt">消耗しやすいところ</div><div class="body-txt">${t.sts}</div></div></div></div>
+      <div class="r-panel fade-in"><button type="button" class="r-ph aopen" aria-expanded="true" onclick="toggleAcc(this)"><div class="r-pt">あなたが働きやすい職場</div><span class="r-tog" style="transform:rotate(180deg);">▼</span></button><div class="r-pb aopen">${buildEnvHTML()}<div class="d-sec"><div class="d-lbl lt">消耗しやすいところ</div><div class="body-txt">${t.sts}</div></div></div></div>
 
       ${buildAgentBlock('primary',cat,code,source)}
       ${compatSec(t.good,'good','相性の良いタイプ')}
