@@ -1895,8 +1895,19 @@ body::after,body::before{content:none;}
 
 /* ① ヒーローのバッジ。地が --info（濃い青）になったのに文字が墨のままで
    1.70:1 しかなかった。白抜きにして 10.07:1。 */
-.hero-badge{background:var(--info);color:#fff;border:1px solid var(--info);}
-.hero-badge::before{background:#fff;}
+/* 白抜きは同じウェイトでも太く見える（明るい面が暗い面に食い込む＝ irradiation）。
+   ★暗い地の上では、明るい地の上より1段細く組む必要がある。
+   ここは 900（表示用書体の既定）＋ 字間 .2em のまま白抜きにしたので、
+   和文の画がつぶれていた。600 まで落とし、字間も詰める。 */
+.hero-badge{
+  background:var(--info);color:#fff;border:1px solid var(--info);
+  font-weight:600;font-size:.8rem;letter-spacing:.1em;padding:9px 16px;
+}
+.hero-badge::before{background:#fff;width:7px;height:7px;}
+/* ★同じ理由で、小さい白抜きの和文は太らせない。
+   14px 未満で白抜きにするものは 600 まで（.friend-btn が 12.8px の 700 だった）。
+   e2e「白抜きの和文」がこの規則を全画面で見張る。 */
+.friend-btn{font-weight:600;}
 
 /* ③ アコーディオンの▼。--light を濃くしたので 5.15:1 になる（上の :root）。
    操作の手がかりなので、記号でも本文と同じ基準で読めるようにしておく。 */
