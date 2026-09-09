@@ -821,6 +821,56 @@ console.log('[lint] タイプページと og:image');
         `shareUrl() が t/<CODE>.html を返す（16枚の og:image が使われる経路）`);
 }
 
+// --- 外部へ通信する先が、privacy.html に全部書いてあること -------------------
+// ★実際に漏れた。Google Fonts を読んでいるのに §7 は GA4 しか挙げておらず、
+//   「下記の情報が Google LLC へ送信されます」が GA4 だけを指す書き方になっていた。
+//   電気通信事業法の外部送信規律が求めるのは通知または公表なので、
+//   通信先が増えたらポリシーも増やす必要がある。
+//   ★index.html に外部ドメインを足したら、ここが落ちる。落ちたら
+//     privacy.html §7 に「送信先 / 送信される情報 / 利用目的 / 停止方法 /
+//     提供事業者のポリシー」の5行を足すこと。
+console.log('[lint] 外部への通信先とポリシーの一致');
+{
+  const priv = read('privacy.html');
+  const hosts = new Set();
+  for (const f of ['index.html', 'privacy.html']) {
+    const src = read(f);
+    for (const m of src.matchAll(/https?:\/\/([a-z0-9.-]+)/gi)) hosts.add(m[1].toLowerCase());
+  }
+  // 自サイト・リンク先として案内しているだけの参照先は通信を起こさないので除く
+  const SELF = /(^|\.)w-t-n-b\.github\.io$/;
+  const LINK_ONLY = new Set([
+    'policies.google.com', 'business.safety.google', 'tools.google.com',
+    'developers.google.com', 'www.ppc.go.jp', 'twitter.com', 'x.com',
+    'social-plugins.line.me', 'line.me', 'schema.org', 'www.w3.org',
+    // ★AGENTS[].url は「押したら移動する先」であって、ページを開いただけでは
+    //   通信しない。外部送信の記載が要るのは読み込みを起こす先だけ。
+    //   遷移先の扱いは privacy.html §8（外部サイトへのリンク）が受け持つ。
+    'example.com',
+  ]);
+  const loading = [...hosts].filter(h => !SELF.test(h) && !LINK_ONLY.has(h));
+  // 読み込みを起こすホストは、privacy.html 本文で名指しされているか
+  const NAMED = { 'fonts.googleapis.com': 'Google Fonts', 'fonts.gstatic.com': 'Google Fonts',
+                  'www.googletagmanager.com': 'Google アナリティクス' };
+  const undocumented = loading.filter(h => {
+    const label = NAMED[h];
+    return !label || !priv.includes(label);
+  });
+  check(undocumented.length === 0,
+    `外部へ読み込む先がすべて privacy.html に書いてある（未記載: ${undocumented.join(', ') || 'なし'}）`);
+  console.log(`  --   読み込む先: ${loading.sort().join(', ') || 'なし'}`);
+
+  // GA4 と Google Fonts は、表として5項目そろっているか
+  for (const label of ['Google アナリティクス', 'Google Fonts']) {
+    if (!priv.includes(label)) continue;
+    const i = priv.indexOf(label);
+    const seg = priv.slice(i, i + 2600);
+    const ok = ['送信先', '送信される情報', '利用目的', '停止方法', '提供事業者のポリシー']
+      .every(k => seg.includes(k));
+    check(ok, `${label} の外部送信が5項目そろって書かれている`);
+  }
+}
+
 // --- キャラクターの大きさが揃っていること -----------------------------------
 // 素材は1体ずつ別々に生成されており、頭身が揃っていない。
 // 実測（bbox を枠に収める従来の方法）で、実体の高さは 90〜100% とほぼ揃うのに
