@@ -2044,6 +2044,9 @@ body::after,body::before{content:none;}
    落ちた（基準 3:1）。透明度を下げて地に沈める。 */
 .hc-1{--hc-a:.16;}
 .hc-4{--hc-a:.14;}
+/* PC で出る2体（.hc-2 / .hc-3）も同じ理由で下げる。
+   実測で見出し2行目が 2.70:1 まで落ちていた（基準 3:1）。 */
+.hc-2,.hc-3{--hc-a:.13;}
 .res-char{object-fit:contain!important;object-position:50% 100%!important;}
 .tc img{height:auto!important;aspect-ratio:3/4;object-fit:contain!important;
   object-position:50% 100%!important;background:var(--paper2);}

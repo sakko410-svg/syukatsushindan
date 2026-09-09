@@ -10,10 +10,13 @@
 #   c4 のめり込みビルダー）だけ「小さい人」に見える。
 #   逆に頭で揃えると、その2体が他より 1.5倍の背丈になって収まらない。
 #
-#   よって sqrt(頭幅 × 実体高) を揃える。頭だけ・高さだけの中間で、
-#   実測でばらつきは 頭 2.07→1.46倍 / 高さ 1.11→1.46倍 になる。
-#   ★残るばらつきは素材そのものの頭身差であり、ここでは消せない。
+#   3案（A 背丈で揃える / B 中間 / C 頭で揃える）を並べて比べた。
+#   ★オーナーの判断は A（背丈で揃える）。一覧では16枚が同じ高さに並ぶほうが
+#     整列して見え、ヒーローの並びも自然になる。
+#     頭の大きさは 2.13倍ばらつくが、絵柄の個性として許容する。
+#   ★このばらつきは素材そのものの頭身差であり、変換では消せない。
 #     完全に揃えるなら描き直しが要る。
+#     方針を変えるときは下の NORMALIZE を触る（0=背丈 / 0.5=中間 / 1=頭）。
 #
 # 使い方: python3 tools/gen-chars.py <元画像のフォルダ>
 #   出力: images/chars/*.webp（480x640）と images/chars/sm/*.webp（320x427）
@@ -69,7 +72,9 @@ def main(src_dir):
     if len(figs) != 16:
         raise SystemExit(f"16体そろっていない（{len(figs)}体）")
 
-    metric = {k: math.sqrt(h * im.size[1]) for k, (im, h) in figs.items()}
+    NORMALIZE = 0.0     # 0 = 背丈で揃える（採用）/ 0.5 = 中間 / 1 = 頭で揃える
+    metric = {k: (h ** NORMALIZE) * (im.size[1] ** (1 - NORMALIZE))
+              for k, (im, h) in figs.items()}
     target = statistics.median(metric.values())
     # 揃えたあとの最大寸法を求め、そこから全体の倍率を決める（枠にちょうど収まるように）
     sized = {k: (im.size[0] * target / metric[k], im.size[1] * target / metric[k])
@@ -93,8 +98,9 @@ def main(src_dir):
     hs = [v["head"] for v in report.values()]
     ht = [v["h"] for v in report.values()]
     print(f"16体を変換した（{FRAMES[0][0]}x{FRAMES[0][1]} と {FRAMES[1][0]}x{FRAMES[1][1]}）")
-    print(f"  頭幅のばらつき : {max(hs)/min(hs):.2f}倍")
-    print(f"  高さのばらつき : {max(ht)/min(ht):.2f}倍")
+    print(f"  正規化 NORMALIZE={NORMALIZE}（0=背丈 / 1=頭）")
+    print(f"  背丈のばらつき : {max(ht)/min(ht):.2f}倍  ← 揃える対象")
+    print(f"  頭幅のばらつき : {max(hs)/min(hs):.2f}倍  ← 素材の頭身差。記録のみ")
     json.dump(report, open(os.path.join(root, "images/chars/scale.json"), "w"), indent=1)
 
 if __name__ == "__main__":
