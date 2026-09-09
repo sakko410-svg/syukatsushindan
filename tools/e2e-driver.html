@@ -1437,7 +1437,11 @@ try{
        隣り合う区切りごとに測り直す。守っている性質は同じで、
        「どの2つの塊のあいだにも 120px を超える死に領域を作らない」。 */
     const ax=d.querySelector('#axis-section .sec-lbl').getBoundingClientRect().top;
-    const axBot=d.querySelector('#axis-section .ax-note').getBoundingClientRect().bottom;
+    /* 節の下端は最後のカードで測る。以前は末尾の1文（.ax-note）で測っていたが、
+       2×2のカードへ組み直したときに消えた（例外で止まった）。
+       構造の一部である「最後のカード」を見るほうが、文言の増減に強い。 */
+    const axCards=[...d.querySelectorAll('#axis-section .ax-card')];
+    const axBot=axCards[axCards.length-1].getBoundingClientRect().bottom;
     const nx=d.querySelector('#type-section .sec-lbl').getBoundingClientRect().top;
     chk(Math.round(lqTop-sb)<=120,'ヒーロー本文→LP埋め込み質問 の間隔('+vw+'px): '+Math.round(lqTop-sb)+'px');
     chk(Math.round(ax-lqBot)<=120,'LP埋め込み質問→軸の説明 の間隔('+vw+'px): '+Math.round(ax-lqBot)+'px');

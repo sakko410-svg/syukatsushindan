@@ -2132,27 +2132,71 @@ body::after,body::before{content:none;}
 .band-DA{background:#eaeef7;}
 .band-DB{background:#fbf6e8;}
 
-/* --- 25. 4つの軸の説明（LP）------------------------------------------------
-   ★書体の規則どおり、ここは全部ゴシック。軸の名前は「指す言葉」ではない
-     （誰か一人を特定しない）。
-   ★色は使わない。番号は無彩色の細字で、面は白のまま。
-     ここで色を足すと、赤＝押す場所 という規則の希少さが薄まる。 */
-#axis-section{background:var(--w);padding:44px 0 48px;}
-.ax-list{list-style:none;margin:24px 0 0;padding:0;display:grid;gap:2px;
-  background:var(--border);border:1px solid var(--border);}
-.ax-item{background:var(--w);display:flex;gap:16px;padding:20px 18px;align-items:flex-start;}
-.ax-no{font-family:var(--gothic);font-size:.72rem;font-weight:700;letter-spacing:.14em;
-  color:var(--light);padding-top:3px;flex:none;font-variant-numeric:tabular-nums;}
-.ax-t{font-size:1rem;font-weight:700;letter-spacing:-.01em;color:var(--navy);margin:0 0 6px;}
-.ax-d{font-size:.875rem;line-height:1.9;color:var(--mid);margin:0;}
-.ax-note{margin-top:16px;font-size:.8rem;color:var(--light);text-align:center;}
+/* --- 25. 4つの軸（LP）------------------------------------------------------
+   オーナー指示（夜キャラ診断の「4つの軸」節を参照）。
+   2×2のカード。小さなピル → 二極を大きく → 欧文の副題 → 説明、の順。
+   ★★ここは C-4（質問中に軸名を開示しない）と正面から関わる。
+     C-4 の理由は社会的望ましさバイアスで、名指しされていたのが
+     まさに「攻め / 支え」「自走型 / 育成型」だった。それを大きく出す。
+     ★だから置き場所は Q1-5 の後ろのまま動かさない。
+     ★各カードに「どちらが優れているという話ではない」を1文ずつ入れる。
+       参照元（沼/塩・S/M）は就活の規範と無関係なので裸で出せるが、
+       こちらは「攻めの方が評価される」と読まれうる。言葉で打ち消す。
+   ★色は使わない。二極は墨で、区別は書体（明朝）と字間で付ける。
+     ここで青赤を使うと、青＝分かったこと / 赤＝押す場所 の規則が崩れる。 */
+#axis-section{background:var(--w);padding:48px 0 52px;}
+#axis-section .sec-title em{font-style:normal;font-family:var(--mincho);font-weight:600;}
+.ax-grid{display:grid;gap:2px;margin-top:26px;background:var(--border);
+  border:1px solid var(--border);}
+.ax-card{background:var(--w);padding:22px 20px 24px;}
+.ax-pill{display:inline-block;font-size:.62rem;font-weight:700;letter-spacing:.16em;
+  color:var(--light);border:1px solid var(--border);border-radius:99px;padding:3px 11px;}
+.ax-poles{margin:14px 0 0;display:flex;align-items:baseline;gap:10px;
+  font-family:var(--mincho);color:var(--navy);}
+.ax-p1,.ax-p2{font-size:1.9rem;font-weight:600;letter-spacing:.06em;}
+.ax-sl{font-size:1.2rem;color:var(--light);}
+.ax-sub{margin:10px 0 0;font-size:.82rem;color:var(--light);font-style:italic;}
+.ax-d{margin:12px 0 0;font-size:.85rem;line-height:1.95;color:var(--mid);}
 @media(min-width:768px){
   #axis-section .wrap{max-width:760px;}
-  .ax-list{grid-template-columns:1fr 1fr;}
-  .ax-t{font-size:1.06rem;}
+  .ax-grid{grid-template-columns:1fr 1fr;}
+  .ax-p1,.ax-p2{font-size:2.1rem;}
 }
-@media(min-width:1024px){
-  #axis-section .wrap{max-width:860px;}
+@media(min-width:1024px){#axis-section .wrap{max-width:860px;}}
+
+/* --- 26. 設問の区切りをシームレスにする ------------------------------------
+   オーナー指示（16Personalities の設問一覧を参照）。
+   いまは1問ずつが枠付きの札で、設問部に地色、その下に選択肢という3層だった。
+   札の輪郭を全部外し、設問どうしの区切りを毛髪線1本にする。
+   ★「面をやめて線だけにする」のは QUIET RESTYLE と同じ判断であり、
+     ここだけレトロの名残（枠＋地色）が生きていた。 */
+#lq-list .q-card,#q-list .q-card{
+  background:transparent;border:none;box-shadow:none;border-radius:0;
+  margin-bottom:0;padding:26px 0 30px;
+  border-bottom:1px solid var(--border);
+}
+#lq-list .q-card:last-child,#q-list .q-card:last-child{border-bottom:none;}
+#lq-list .q-top,#q-list .q-top{
+  background:transparent;border-bottom:none;padding:0 4px 14px;
+}
+/* 選択肢と目盛を包んでいた面も外す。
+   ★左右の padding は 0 にする。4px でも入れると、320px で目盛（.spec-track）が
+     カードを 4px はみ出す。目盛はもともと版面いっぱいに広がる作りで、
+     余白を足すぶんの逃げ場が無い。文字側の字下げは .opt-line が持っている。 */
+#lq-list .q-card>div:nth-child(2),#q-list .q-card>div:nth-child(2){
+  background:transparent;padding:0;
+}
+@media(min-width:768px){
+  #lq-list .q-card,#q-list .q-card{padding:32px 0 36px;}
+  #lq-list .q-top,#q-list .q-top{padding:0 6px 18px;}
+  #lq-list .q-card>div:nth-child(2),#q-list .q-card>div:nth-child(2){padding:0;}
+}
+
+/* 360px 以下で目盛を左右 -6px はみ出させていた（784-792行）。
+   札に枠と padding があった頃、その内側の余白を食って丸を大きく見せるための
+   逃げだった。枠を外したいまは、はみ出す先が無く 300px > 288px で溢れる。 */
+@media(max-width:360px){
+  #lq-list .spec-track,#q-list .spec-track{margin-left:0;margin-right:0;}
 }
 </style>
 </head>
@@ -2294,40 +2338,34 @@ body::after,body::before{content:none;}
        ============================================================ -->
   <div id="axis-section">
     <div class="wrap">
-      <div class="sec-lbl">What you get</div>
-      <div class="sec-title">4つのことが分かります</div>
-      <p class="sec-sub">20問の答えから、働き方の傾向を4つの面で見ます。</p>
-      <ol class="ax-list">
-        <li class="ax-item">
-          <span class="ax-no" aria-hidden="true">01</span>
-          <div>
-            <h3 class="ax-t">人と関わる量</h3>
-            <p class="ax-d">人と話す時間が多いほど力が出るのか、一人で集中できる時間があるほうがいいのか。</p>
-          </div>
-        </li>
-        <li class="ax-item">
-          <span class="ax-no" aria-hidden="true">02</span>
-          <div>
-            <h3 class="ax-t">評価のされ方</h3>
-            <p class="ax-d">目標がはっきりしていて前に出られる場所か、個人の数字よりチームの成果で見られる場所か。</p>
-          </div>
-        </li>
-        <li class="ax-item">
-          <span class="ax-no" aria-hidden="true">03</span>
-          <div>
-            <h3 class="ax-t">仕事にかける時間</h3>
-            <p class="ax-d">勤務時間が読めるほうが力が続くのか、打ち込める仕事があるほうが力が出るのか。</p>
-          </div>
-        </li>
-        <li class="ax-item">
-          <span class="ax-no" aria-hidden="true">04</span>
-          <div>
-            <h3 class="ax-t">任され方</h3>
-            <p class="ax-d">早くから任せてもらえる場所で伸びるのか、最初に教われる時間があるほうが立ち上がりが速いのか。</p>
-          </div>
-        </li>
-      </ol>
-      <p class="ax-note">どちらが良いという話ではありません。合う場所が違うだけです。</p>
+      <div class="sec-lbl">02 ・ 4つの軸</div>
+      <div class="sec-title">4つの軸から、<em>あなたの働き方</em>を紐解く。</div>
+      <div class="ax-grid">
+        <article class="ax-card">
+          <div class="ax-pill">AXIS 01 ・ PEOPLE</div>
+          <div class="ax-poles"><span class="ax-p1">対人</span><span class="ax-sl">/</span><span class="ax-p2">対課題</span></div>
+          <p class="ax-sub">Taijin or Taikadai — 人と関わる量</p>
+          <p class="ax-d">人と話す時間が多いほど力が出るのか、一人で集中できる時間があるほうがいいのか。<br>どちらが優れているという話ではなく、力の出る場所が違うだけ。</p>
+        </article>
+        <article class="ax-card">
+          <div class="ax-pill">AXIS 02 ・ STANCE</div>
+          <div class="ax-poles"><span class="ax-p1">攻め</span><span class="ax-sl">/</span><span class="ax-p2">支え</span></div>
+          <p class="ax-sub">Seme or Sasae — 評価のされ方</p>
+          <p class="ax-d">目標がはっきりしていて前に出られる場所か、個人の数字よりチームの成果で見られる場所か。<br>前に出る人と、支える人。どちらが欠けても仕事は回らない。</p>
+        </article>
+        <article class="ax-card">
+          <div class="ax-pill">AXIS 03 ・ TIME</div>
+          <div class="ax-poles"><span class="ax-p1">ライフ</span><span class="ax-sl">/</span><span class="ax-p2">ワーク</span></div>
+          <p class="ax-sub">Life or Work — 仕事にかける時間</p>
+          <p class="ax-d">勤務時間が読めるほうが力が続くのか、打ち込める仕事があるほうが力が出るのか。<br>続け方の違いであって、熱意の量の話ではない。</p>
+        </article>
+        <article class="ax-card">
+          <div class="ax-pill">AXIS 04 ・ GROWTH</div>
+          <div class="ax-poles"><span class="ax-p1">自走</span><span class="ax-sl">/</span><span class="ax-p2">育成</span></div>
+          <p class="ax-sub">Jisou or Ikusei — 任され方</p>
+          <p class="ax-d">早くから任せてもらえる場所で伸びるのか、最初に教われる時間があるほうが立ち上がりが速いのか。<br>伸び方の違いであって、能力の高低ではない。</p>
+        </article>
+      </div>
     </div>
   </div>
 
