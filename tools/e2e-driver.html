@@ -1432,9 +1432,16 @@ try{
        同じ「LP埋め込み質問の始まり」を #lp-quiz 自身の上端で測る。 */
     const lqTop=d.querySelector('#lp-quiz').getBoundingClientRect().top;
     const lqBot=d.querySelector('#lp-quiz .q-nav').getBoundingClientRect().bottom;
+    /* ★Q1-5 と 16タイプ一覧のあいだに「4つの軸の説明」が入った（2026-09-08）。
+       直後どうしを測ると、あいだの節の高さぶんが「空白帯」に見えてしまう。
+       隣り合う区切りごとに測り直す。守っている性質は同じで、
+       「どの2つの塊のあいだにも 120px を超える死に領域を作らない」。 */
+    const ax=d.querySelector('#axis-section .sec-lbl').getBoundingClientRect().top;
+    const axBot=d.querySelector('#axis-section .ax-note').getBoundingClientRect().bottom;
     const nx=d.querySelector('#type-section .sec-lbl').getBoundingClientRect().top;
     chk(Math.round(lqTop-sb)<=120,'ヒーロー本文→LP埋め込み質問 の間隔('+vw+'px): '+Math.round(lqTop-sb)+'px');
-    chk(Math.round(nx-lqBot)<=120,'LP埋め込み質問→全16タイプ の間隔('+vw+'px): '+Math.round(nx-lqBot)+'px');
+    chk(Math.round(ax-lqBot)<=120,'LP埋め込み質問→軸の説明 の間隔('+vw+'px): '+Math.round(ax-lqBot)+'px');
+    chk(Math.round(nx-axBot)<=120,'軸の説明→全16タイプ の間隔('+vw+'px): '+Math.round(nx-axBot)+'px');
   }
   f.style.width='390px';
 

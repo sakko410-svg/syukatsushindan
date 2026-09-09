@@ -2131,6 +2131,29 @@ body::after,body::before{content:none;}
 .band-HB{background:#ecf0ec;}
 .band-DA{background:#eaeef7;}
 .band-DB{background:#fbf6e8;}
+
+/* --- 25. 4つの軸の説明（LP）------------------------------------------------
+   ★書体の規則どおり、ここは全部ゴシック。軸の名前は「指す言葉」ではない
+     （誰か一人を特定しない）。
+   ★色は使わない。番号は無彩色の細字で、面は白のまま。
+     ここで色を足すと、赤＝押す場所 という規則の希少さが薄まる。 */
+#axis-section{background:var(--w);padding:44px 0 48px;}
+.ax-list{list-style:none;margin:24px 0 0;padding:0;display:grid;gap:2px;
+  background:var(--border);border:1px solid var(--border);}
+.ax-item{background:var(--w);display:flex;gap:16px;padding:20px 18px;align-items:flex-start;}
+.ax-no{font-family:var(--gothic);font-size:.72rem;font-weight:700;letter-spacing:.14em;
+  color:var(--light);padding-top:3px;flex:none;font-variant-numeric:tabular-nums;}
+.ax-t{font-size:1rem;font-weight:700;letter-spacing:-.01em;color:var(--navy);margin:0 0 6px;}
+.ax-d{font-size:.875rem;line-height:1.9;color:var(--mid);margin:0;}
+.ax-note{margin-top:16px;font-size:.8rem;color:var(--light);text-align:center;}
+@media(min-width:768px){
+  #axis-section .wrap{max-width:760px;}
+  .ax-list{grid-template-columns:1fr 1fr;}
+  .ax-t{font-size:1.06rem;}
+}
+@media(min-width:1024px){
+  #axis-section .wrap{max-width:860px;}
+}
 </style>
 </head>
 <body data-screen="screen-title">
@@ -2253,6 +2276,58 @@ body::after,body::before{content:none;}
           <button class="btn rpl" id="lq-continue" onclick="addRipple(event,this);lqContinue()">次へ →</button>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       4つの軸の説明（2026-09-08・オーナー要望）
+       ★置き場所は「Q1-5 の後ろ」。前に置いてはいけない。
+         仕様 C-4 が「質問中に何の軸を測っているかを開示しない」と決めており、
+         理由は社会的望ましさバイアスである。就活生は「主体性がある方が良い」
+         という規範を内面化しているので、「攻め ⇄ 支え」を先に見せると
+         答えが引っ張られる。設問カードのラベルほど直接ではないが、
+         同じページの上に置けば同じことが起きる。
+       ★見出しは軸名（対人 / 攻め …）ではなく、ENV と同じ職場の言葉
+         （人と関わる量 / 評価のされ方 …）を使う。判定の名前ではなく
+         「何が分かるか」を言う面なので、そちらが正しい。
+         軸名そのものは結果画面の「診断スコア」で出す。
+       ============================================================ -->
+  <div id="axis-section">
+    <div class="wrap">
+      <div class="sec-lbl">What you get</div>
+      <div class="sec-title">4つのことが分かります</div>
+      <p class="sec-sub">20問の答えから、働き方の傾向を4つの面で見ます。</p>
+      <ol class="ax-list">
+        <li class="ax-item">
+          <span class="ax-no" aria-hidden="true">01</span>
+          <div>
+            <h3 class="ax-t">人と関わる量</h3>
+            <p class="ax-d">人と話す時間が多いほど力が出るのか、一人で集中できる時間があるほうがいいのか。</p>
+          </div>
+        </li>
+        <li class="ax-item">
+          <span class="ax-no" aria-hidden="true">02</span>
+          <div>
+            <h3 class="ax-t">評価のされ方</h3>
+            <p class="ax-d">目標がはっきりしていて前に出られる場所か、個人の数字よりチームの成果で見られる場所か。</p>
+          </div>
+        </li>
+        <li class="ax-item">
+          <span class="ax-no" aria-hidden="true">03</span>
+          <div>
+            <h3 class="ax-t">仕事にかける時間</h3>
+            <p class="ax-d">勤務時間が読めるほうが力が続くのか、打ち込める仕事があるほうが力が出るのか。</p>
+          </div>
+        </li>
+        <li class="ax-item">
+          <span class="ax-no" aria-hidden="true">04</span>
+          <div>
+            <h3 class="ax-t">任され方</h3>
+            <p class="ax-d">早くから任せてもらえる場所で伸びるのか、最初に教われる時間があるほうが立ち上がりが速いのか。</p>
+          </div>
+        </li>
+      </ol>
+      <p class="ax-note">どちらが良いという話ではありません。合う場所が違うだけです。</p>
     </div>
   </div>
 

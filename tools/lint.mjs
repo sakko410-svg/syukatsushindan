@@ -821,6 +821,36 @@ console.log('[lint] タイプページと og:image');
         `shareUrl() が t/<CODE>.html を返す（16枚の og:image が使われる経路）`);
 }
 
+// --- 4つの軸の説明（LP）-----------------------------------------------------
+// ★C-4「質問中に何の軸を測っているかを開示しない」との関係をここで固定する。
+//   C-4 の理由は社会的望ましさバイアス。就活生は「主体性がある方が良い」という
+//   規範を内面化しているので、「攻め ⇄ 支え」を回答前に見せると答えが引っ張られる。
+//   よってこの節は (1) Q1-5 より後ろに置き、(2) 軸名そのものを出さない。
+//   見出しは ENV と同じ職場の言葉（人と関わる量 / 評価のされ方 …）にする。
+console.log('[lint] 4つの軸の説明');
+{
+  check(/id="axis-section"/.test(html), 'LP に軸の説明の節がある');
+  const iQuiz = html.indexOf('id="lp-quiz-sec"');
+  const iAxis = html.indexOf('id="axis-section"');
+  const iTypes = html.indexOf('id="type-section"');
+  check(iQuiz > 0 && iAxis > iQuiz,
+    '軸の説明は Q1-5 より後ろにある（前に置くと答えが引っ張られる。C-4）');
+  check(iAxis > 0 && iTypes > iAxis, '軸の説明は16タイプ一覧より前にある');
+
+  // 節の中に軸名そのものが出ていないこと
+  const seg = html.slice(iAxis, iTypes);
+  const AXIS_WORDS = ['対人', '対課題', '攻め', '支え', 'ライフ重視', 'ワーク重視', '自走型', '育成型'];
+  const leaked = AXIS_WORDS.filter(w => seg.includes(w));
+  check(leaked.length === 0,
+    `軸名そのものは出さない（漏れ: ${leaked.join(', ') || 'なし'}）`);
+  // 職場の言葉で書かれていること（ENV の見出しと同じ4つ）
+  for (const w of ['人と関わる量', '評価のされ方', '仕事にかける時間', '任され方']) {
+    check(seg.includes(w), `「${w}」を見出しにしている（ENV と同じ語）`);
+  }
+  check(/どちらが良いという話ではありません/.test(seg),
+    '優劣の話ではないと明示している（4軸に良し悪しは無い）');
+}
+
 // --- 外部へ通信する先が、privacy.html に全部書いてあること -------------------
 // ★実際に漏れた。Google Fonts を読んでいるのに §7 は GA4 しか挙げておらず、
 //   「下記の情報が Google LLC へ送信されます」が GA4 だけを指す書き方になっていた。
