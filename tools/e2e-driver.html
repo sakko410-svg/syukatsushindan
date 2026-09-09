@@ -794,7 +794,13 @@ try{
 
     chk(d.querySelectorAll('#lq-list .q-card').length===5,'LPにも5問並ぶ: '+d.querySelectorAll('#lq-list .q-card').length);
     chk(posOf(d,'lq').join(',')==='0,1,2,3,4','LPは出題位置 0-4（Q1-5）: '+posOf(d,'lq').join(','));
-    chk([...d.querySelectorAll('#lq-list .q-badge')].map(x=>x.textContent).join(',')==='Q1,Q2,Q3,Q4,Q5','LPの番号は Q1〜Q5');
+    /* ★番号は画面に出さなくなった（右下の環と役割が重なっていた）。
+       読み上げには残す。20個続く画面で、音声だけで位置を掴む手がかりが要る。 */
+    chk([...d.querySelectorAll('#lq-list .q-badge')].map(x=>x.textContent).join(',')
+        ==='1問目,2問目,3問目,4問目,5問目','LPの番号は読み上げにだけ残っている');
+    chk([...d.querySelectorAll('#lq-list .q-badge')].every(x=>{
+          const r=x.getBoundingClientRect(); return r.width<=2&&r.height<=2;}),
+        '番号は画面に出ていない（.sr-only）');
     chk(!d.getElementById('lq-done').classList.contains('on'),'開いた直後は .lq-done 非表示');
     /* LP は平常時に残数を出さない（オーナー判断）。要素は残すが display:none。
        未回答のまま「次へ」を押したときの警告文の器としてだけ使う（下の 457 行）。 */
