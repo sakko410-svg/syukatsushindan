@@ -2241,14 +2241,28 @@ body::after,body::before{content:none;}
 .hero-title em{animation:quietEnter 1s .28s both;}
 .hero-sub{animation:quietEnter .9s .35s both;}
 @keyframes quietEnter{from{opacity:0;translate:0 12px;}to{opacity:1;translate:0 0;}}
-.hero-cast{animation:quietEnter 1.4s .2s both;}
+.hero-cast{animation:none;}
+.hero .hc{animation:heroAssemble 1.1s var(--assemble-delay,.3s) cubic-bezier(.2,.8,.2,1) both,hcFloat 13s 1.8s ease-in-out infinite;}
+.hero .hc-1{--assemble-delay:.35s;--assemble-x:-32px;}
+.hero .hc-2{--assemble-delay:.65s;--assemble-x:-18px;}
+.hero .hc-3{--assemble-delay:1s;--assemble-x:18px;}
+.hero .hc-4{--assemble-delay:1.3s;--assemble-x:32px;}
+@keyframes heroAssemble{from{opacity:0;translate:var(--assemble-x,0) 18px;scale:.95;}to{opacity:var(--hc-a,.16);translate:0 0;scale:1;}}
+.hero-title{animation:quietEnter 1s .7s both;}
+.hero-title em{animation:quietEnter 1s 1.05s both;}
+.hero-sub{animation:quietEnter .9s 1.5s both;}
+.hero-inner{transition:translate .5s ease-out;}
 .hero .hc{--hc-y:-12px;}
 .quiet-host{position:relative;isolation:isolate;}
 .quiet-host>.wrap,.quiet-host>.quiz-inner,.quiet-host>.pf-inner{position:relative;z-index:1;}
 .quiet-cast{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0;}
 .quiet-character{position:absolute;width:130px;height:195px;object-fit:contain;opacity:.12;animation:quietFloat 12s ease-in-out infinite;animation-play-state:paused;}
-.quiet-character:first-child{left:max(8px,calc(50% - 460px));top:80px;rotate:-7deg;}
-.quiet-character:last-child{right:max(8px,calc(50% - 460px));top:58%;rotate:7deg;animation-delay:-6s;animation-duration:15s;}
+.quiet-character{visibility:hidden;}
+.quiet-character:nth-child(1){rotate:-9deg;}
+.quiet-character:nth-child(2){rotate:6deg;animation-delay:-4s;animation-duration:15s;}
+.quiet-character:nth-child(3){rotate:11deg;animation-delay:-8s;animation-duration:17s;}
+.quiet-character:nth-child(4){rotate:-5deg;animation-delay:-2s;animation-duration:14s;}
+.quiet-host.quiet-band{padding-top:132px!important;}
 .quiet-cast.is-in-view .quiet-character{animation-play-state:running;}
 @keyframes quietFloat{0%,100%{translate:0 0;}50%{translate:5px -14px;}}
 .quiet-reveal{animation:quietEnter .7s cubic-bezier(.2,.7,.2,1) both;}
@@ -2259,15 +2273,13 @@ body::after,body::before{content:none;}
 .quiet-paused *, .quiet-paused .hc{animation-play-state:paused!important;}
 @media(max-width:900px){
   /* At narrow widths reserve existing section padding, never the reading column. */
-  #lp-quiz-sec.quiet-host,#axis-section.quiet-host,#type-section.quiet-host{padding-top:88px!important;}
   .quiet-character{width:65px;height:78px;opacity:.13;}
-  .quiet-character:first-child{left:16px;top:4px;}
-  .quiet-character:last-child{right:16px;top:4px;}
   .quiz-bg>.quiet-cast,.pf-wrap>.quiet-cast{display:none;}
 }
 @media(prefers-reduced-motion:reduce){
   .hero-inner>.hero-badge,.hero-title,.hero-title em,.hero-sub,.hero-cast,.quiet-character,.quiet-reveal,.sdw.sel .sd{animation:none!important;translate:none!important;opacity:1;}
   .quiet-character{opacity:.12;}.tc{transition:none;}
+  .hero .hc{animation:none!important;translate:none;scale:none;}.hero-inner{transition:none;translate:none!important;}
 }
 </style>
 </head>
@@ -4314,10 +4326,45 @@ function renderSharedBanner(code){
     const host=document.querySelector(selector);if(!host)continue;
     host.classList.add('quiet-host');
     const cast=document.createElement('div');cast.className='quiet-cast';cast.setAttribute('aria-hidden','true');
-    for(const code of [left,right]){
+    for(const code of [left,right,'c4','d3']){
       const img=new Image(130,195);img.className='quiet-character';img.alt='';img.loading='lazy';img.decoding='async';img.src=cv('images/chars/sm/'+code+'.webp');cast.appendChild(img);
     }
     host.appendChild(cast);
+  }
+  const arrange=()=>{
+    document.querySelectorAll('.quiet-host').forEach(host=>{
+      const cast=host.querySelector('.quiet-cast'),content=host.querySelector('.wrap,.quiz-inner,.pf-inner');
+      if(!cast||!content)return;
+      const bounds=host.getBoundingClientRect(),body=content.getBoundingClientRect();
+      const gutter=Math.min(body.left-bounds.left,bounds.right-body.right)-20;
+      const band=gutter<90;
+      const isForm=host.matches('.quiz-bg,.pf-wrap');
+      host.classList.toggle('quiet-band',band&&!isForm);
+      cast.style.display=band&&isForm?'none':'';
+      cast.querySelectorAll('.quiet-character').forEach((img,i)=>{
+        const w=band?Math.min(58,bounds.width/6):Math.min(115,gutter-16);
+        img.style.width=w+'px';img.style.height=(w*1.5)+'px';
+        img.style.left=(band?bounds.width*(.06+i*.235):i%2?bounds.width-w-12:12)+'px';
+        img.style.top=(band?[4,23,9,29][i]:[90,host.offsetHeight*.3,host.offsetHeight*.6,host.offsetHeight*.83][i])+'px';
+        img.style.visibility='visible';
+      });
+    });
+  };
+  const schedule=()=>requestAnimationFrame(arrange);
+  if(typeof requestAnimationFrame==='function'){
+    schedule();window.addEventListener('resize',schedule,{passive:true});
+    if(typeof ResizeObserver==='function'){
+      const sizes=new ResizeObserver(schedule);document.querySelectorAll('.quiet-host').forEach(el=>sizes.observe(el));
+    }
+  }
+  const hero=document.querySelector('.hero');
+  if(hero&&matchMedia('(hover:hover) and (pointer:fine)').matches){
+    hero.addEventListener('pointermove',e=>{
+      if(reduced.matches)return;
+      const b=hero.getBoundingClientRect();
+      hero.querySelectorAll('.hc').forEach((el,i)=>{el.style.marginLeft=((e.clientX-b.left)/b.width-.5)*(i+1)*3+'px';});
+    },{passive:true});
+    hero.addEventListener('pointerleave',()=>hero.querySelectorAll('.hc').forEach(el=>el.style.marginLeft='0px'));
   }
   if(typeof IntersectionObserver==='function'){
     const floats=new IntersectionObserver(entries=>entries.forEach(entry=>entry.target.classList.toggle('is-in-view',entry.isIntersecting)),{threshold:0});
