@@ -22,7 +22,7 @@
 #   出力: images/chars/*.webp（480x640）と images/chars/sm/*.webp（320x427）
 # ============================================================================
 from PIL import Image
-import os, sys, statistics, math, unicodedata, json
+import os, sys, statistics, math, unicodedata, json, hashlib
 
 NAME2IMG = {
  "オンオフのエース":"a1","あったかリーダー":"a2","全力キャプテン":"a3","熱血プレイヤー":"a4",
@@ -101,7 +101,17 @@ def main(src_dir):
     print(f"  正規化 NORMALIZE={NORMALIZE}（0=背丈 / 1=頭）")
     print(f"  背丈のばらつき : {max(ht)/min(ht):.2f}倍  ← 揃える対象")
     print(f"  頭幅のばらつき : {max(hs)/min(hs):.2f}倍  ← 素材の頭身差。記録のみ")
+    # ★焼いた中身の指紋。index.html の ASSET_V と突き合わせる。
+    #   ファイル名（a1.webp …）は変わらないので、中身だけ差し替えると
+    #   ブラウザは古い画像を出し続ける。実際にそれで「サイズがばらついて見える」
+    #   という報告が上がった（画面の実測は揃っていたのに、見えていたのは旧版）。
+    h = hashlib.sha256()
+    for key in sorted(figs):
+        h.update(open(os.path.join(root, FRAMES[0][2], key + ".webp"), "rb").read())
+    ver = h.hexdigest()[:8]
+    report["_v"] = ver
     json.dump(report, open(os.path.join(root, "images/chars/scale.json"), "w"), indent=1)
+    print(f"  指紋 {ver}  ★index.html の ASSET_V をこの値にすること（make check が突き合わせる）")
 
 if __name__ == "__main__":
     main(sys.argv[1] if len(sys.argv) > 1 else

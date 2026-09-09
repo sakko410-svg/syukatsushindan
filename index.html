@@ -2144,7 +2144,7 @@ body::after,body::before{content:none;}
 <div id="screen-title" class="screen active">
   <div class="hero">
     <div class="hero-orb o1"></div><div class="hero-orb o2"></div><div class="hero-orb o3"></div>
-    <img class="hero-sil" src="images/chars/a3.webp" alt="" aria-hidden="true">
+    <img class="hero-sil" src="images/chars/a3.webp?v=b01c3987" alt="" aria-hidden="true">
     <div class="hero-inner">
       <div class="hero-badge">就活キャリアタイプ診断</div>
       <!-- 320px では1行に収まらない（実測で9文字ぶんの幅しかない）。何もしないと
@@ -2353,6 +2353,14 @@ body::after,body::before{content:none;}
    この1行と、<head> の SITE BASE ブロック内の5箇所を書き換えれば全部追従する。
    末尾のスラッシュは必須。 */
 const SITE_BASE='https://w-t-n-b.github.io/syukatsushindan/';
+/* ★キャラクター画像の指紋。ファイル名（a1.webp …）は変わらないので、
+   中身だけ差し替えるとブラウザは古い画像を出し続ける。実際にそれで
+   「サイズがばらついて見える」という報告が上がった（画面の実測は揃っていたのに、
+   見えていたのは旧版だった）。URL に ?v= を付けて別物として扱わせる。
+   ★焼き直したら（make chars）この値を更新すること。
+     images/chars/scale.json の _v と一致しているかを lint が見る。 */
+const ASSET_V='b01c3987';
+const cv=u=>u+'?v='+ASSET_V;
 
 /* GA4 測定ID（2026-09-08 投入）。
    ★空文字に戻せば gtag.js を読み込まず、外部送信が完全に止まる。この性質は
@@ -2801,7 +2809,7 @@ function buildTypeOverview(){
          開けない（WCAG 2.1.1 Level A）。<button> にすれば Enter / Space の
          両方が効き、読み上げにも「ボタン」として渡る。
          中身（画像・コード・名前）はそのまま入れられる。 */
-      h+=`<button type="button" class="tc" data-code="${code}" aria-label="${esc(code)} ${esc(t.name)} のタイプ紹介を開く" onclick="openTypePeek('${code}',this)"><div class="tc-sil" style="background-image:url('images/chars/sm/${codeImg(code)}.webp');"></div><img src="images/chars/${codeImg(code)}.webp" alt=""><div class="tc-code" style="color:${col};">${code}</div><div class="tc-name">${t.name}</div></button>`;
+      h+=`<button type="button" class="tc" data-code="${code}" aria-label="${esc(code)} ${esc(t.name)} のタイプ紹介を開く" onclick="openTypePeek('${code}',this)"><div class="tc-sil" style="background-image:url('images/chars/sm/${codeImg(code)}.webp');"></div><img src="${cv('images/chars/'+codeImg(code)+'.webp')}" alt=""><div class="tc-code" style="color:${col};">${code}</div><div class="tc-name">${t.name}</div></button>`;
     });
     h+=`</div></div></div>`;
   });
@@ -3619,7 +3627,7 @@ function toggleAcc(head){
 /* 結果画面の相性キャラは非対話にした。従来はここから scores を捏造して
    結果全文を出していた（C-6）。診断済みの人に「20問で確かめる →」を出すのは
    不整合なので、結果画面にはタイプ紹介の展開先を作らない（UI仕様 §11 A-3）。 */
-function cImg(code,sz=54){return `<img src="images/chars/sm/${codeImg(code)}.webp" alt="" style="width:${sz}px;height:${sz}px;object-fit:contain;">`;}
+function cImg(code,sz=54){return `<img src="${cv('images/chars/sm/'+codeImg(code)+'.webp')}" alt="" style="width:${sz}px;height:${sz}px;object-fit:contain;">`;}
 
 /* =========================================================================
    C-6 タイプ紹介（.type-peek）
@@ -3666,7 +3674,7 @@ function openTypePeek(code,el){
   box.setAttribute('aria-label',t.name+' の紹介');
   box.innerHTML='<button type="button" class="tp-close" aria-label="閉じる" onclick="closeTypePeek()">✕</button>'
     +'<div class="tp-inner">'
-    +`<img class="tp-img" src="images/chars/${codeImg(code)}.webp" alt="">`
+    +`<img class="tp-img" src="${cv('images/chars/'+codeImg(code)+'.webp')}" alt="">`
     +`<div class="tp-txt"><div class="tp-code">${esc(code)}</div><div class="tp-name">${esc(t.name)}</div><div class="tp-tag">${esc(t.tag)}</div></div>`
     +'</div>'
     +`<div class="tp-str"><span class="tp-str-lbl">強み</span><div class="tp-str-txt">${esc(firstSentence(t.str))}</div></div>`
@@ -3793,10 +3801,10 @@ function showResult(_unusedSkipIntro=false,source='quiz'){
   <div class="result-wrap">
     <div class="result-hero">
       <div class="ro ro1"></div><div class="ro ro2"></div>
-      <img class="result-sil" src="images/chars/${codeImg(code)}.webp" alt="" aria-hidden="true">
+      <img class="result-sil" src="${cv('images/chars/'+codeImg(code)+'.webp')}" alt="" aria-hidden="true">
       <div class="result-inner">
         <div class="res-announce">Career Type Result</div>
-        <div class="char-frame"><img class="res-char" src="images/chars/${codeImg(code)}.webp" alt=""></div>
+        <div class="char-frame"><img class="res-char" src="${cv('images/chars/'+codeImg(code)+'.webp')}" alt=""></div>
         <div class="res-code" id="res-code-el">----</div>
         <div class="res-type-name">${t.name}</div>
         <div class="res-tagline">${t.tag}</div>
@@ -4013,7 +4021,7 @@ function renderSharedBanner(code){
   el.className='shared-banner';
   el.innerHTML='<div class="sb-lbl">友達から届いた診断結果</div>'
     +'<div class="sb-body">'
-    +`<img class="sb-img" src="images/chars/${codeImg(code)}.webp" alt="">`
+    +`<img class="sb-img" src="${cv('images/chars/'+codeImg(code)+'.webp')}" alt="">`
     +`<div class="sb-txt"><span class="sb-code">${esc(code)}</span><span class="sb-name">${esc(t.name)}</span><span class="sb-tag">${esc(t.tag)}</span></div>`
     +'</div>'
     +'<button class="sb-cta" onclick="continueOrStart(&quot;shared&quot;)">自分のタイプを診断する →</button>';
@@ -4057,7 +4065,7 @@ function renderSharedBanner(code){
   for(const [code,slot] of pick){
     const im=new Image(400,600);
     im.className='hc hc-'+slot;
-    im.src='images/chars/sm/'+code+'.webp';
+    im.src=cv('images/chars/sm/'+code+'.webp');
     im.alt=''; im.loading='lazy'; im.decoding='async';
     box.appendChild(im);
   }

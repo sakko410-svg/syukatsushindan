@@ -50,8 +50,13 @@ console.log('[lint] 画像');
   // JS のテンプレート文字列（images/chars/${codeImg(code)}.webp）は、
   // 16タイプぶんの実ファイル名に展開してから存在を確かめる。
   const IMG_NAMES = ['a1','a2','a3','a4','b1','b2','b3','b4','c1','c2','c3','c4','d1','d2','d3','d4'];
+  // ★キャッシュ破りを入れたので、画像URLは cv('images/chars/…') の形でも書かれる。
+  //   src="images/…" だけを拾っていると、キャラ画像16体×2種が検査から丸ごと
+  //   抜け落ちる（実際に 33件 → 17件 に減った）。両方の書き方を拾う。
   const raw = new Set(
     [...html.matchAll(/(?:src=|url\()['"]?(images\/[^"')\s]+)/g)].map(m => m[1])
+      .concat([...html.matchAll(/cv\(\s*'(images\/[^']*)'\s*\+\s*([A-Za-z(). ]+)\s*\+\s*'([^']*)'/g)]
+        .map(m => m[1] + '${x}' + m[3]))
   );
   const resolved = new Set();
   for (const r of raw) {
@@ -64,7 +69,10 @@ console.log('[lint] 画像');
       resolved.add(r);
     }
   }
-  const missing = [...resolved].filter(r => !fs.existsSync(path.join(ROOT, r)));
+  // ★?v=（キャッシュ破り）はファイル名の一部ではないので、存在確認の前に落とす。
+  const missing = [...resolved]
+    .map(r => r.split('?')[0])
+    .filter(r => !fs.existsSync(path.join(ROOT, r)));
   check(missing.length === 0,
     `参照している画像 ${resolved.size} 件がすべて存在する（テンプレート展開込み）${missing.length ? ' → 欠落: ' + missing.join(', ') : ''}`);
 
@@ -828,7 +836,7 @@ console.log('[lint] キャラクターの大きさ');
     console.log('  --   images/chars/scale.json が無い（旧素材のまま。差し替えたら make chars）');
   } else {
     const rec = JSON.parse(fs.readFileSync(f, 'utf8'));
-    const codes = Object.keys(rec);
+    const codes = Object.keys(rec).filter(k => k !== '_v');
     check(codes.length === 16, `16体ぶんの記録がある（${codes.length}体）`);
     const spread = k => {
       const v = codes.map(c => rec[c][k]);
@@ -838,6 +846,18 @@ console.log('[lint] キャラクターの大きさ');
     // ★揃えるのは背丈（オーナー判断 A）。一覧では16枚が同じ高さに並ぶほうが
     //   整列して見え、ヒーローの並びも自然になる。
     check(ht <= 1.05, `背丈が揃っている（ばらつき ${ht.toFixed(2)}倍 ≦ 1.05倍）`);
+    // ★焼き直したのに ASSET_V を上げ忘れると、戻ってきた人には古い絵が出続ける。
+    //   ファイル名が変わらないのでブラウザは差し替えに気づけない。
+    //   実際にそれで「サイズがばらついて見える」という報告が上がった
+    //   （画面の実測は揃っていたのに、見えていたのはキャッシュの旧版だった）。
+    const av = (html.match(/const ASSET_V='([0-9a-f]+)'/) || [])[1];
+    check(!!av, 'index.html に ASSET_V がある');
+    check(av === rec._v,
+      `ASSET_V が焼いた中身と一致する（index.html ${av} / scale.json ${rec._v}）`);
+    check(/const cv=u=>u\+'\?v='\+ASSET_V/.test(html), '画像URLに ?v= を付ける関数がある');
+    const bare = (html.match(/src="images\/chars\/[^"?]*\.webp"/g) || []);
+    check(bare.length === 0,
+      `?v= の付いていないキャラ画像が無い（${bare.join(', ') || 'なし'}）`);
     // ★頭の大きさは揃わない。素材そのものの頭身差であり、変換では消せない。
     //   ここで落としても直しようがないので、記録として出すだけにする。
     //   絵柄の個性として許容すると決めた（3案 A/B/C を比較したうえでの判断）。
