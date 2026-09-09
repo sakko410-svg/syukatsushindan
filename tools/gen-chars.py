@@ -72,9 +72,24 @@ def main(src_dir):
     if len(figs) != 16:
         raise SystemExit(f"16体そろっていない（{len(figs)}体）")
 
-    NORMALIZE = 0.0     # 0 = 背丈で揃える（採用）/ 0.5 = 中間 / 1 = 頭で揃える
+    NORMALIZE = 0.0     # 0 = 背丈で揃える / 0.5 = 中間 / 1 = 頭で揃える
     metric = {k: (h ** NORMALIZE) * (im.size[1] ** (1 - NORMALIZE))
               for k, (im, h) in figs.items()}
+
+    # ★ここから先は目で合わせる。
+    #   外形（bbox）を揃えても見た目は揃わない。同じ外形でも、しゃがんだ体
+    #   （c4 のめり込みビルダー）や跳んだ体（a4 熱血プレイヤー）は、立った体より
+    #   身体そのものが小さく写る。これは素材の描かれ方の差であって、
+    #   計算で求まる量ではない。だから1体ずつ手で当てる。
+    #   ★数値を変えたら make chars を回し、ASSET_V を更新すること。
+    #     1.0 が基準。大きくすると拡大、小さくすると縮小。
+    MANUAL = {
+        "a1": 1.00, "a2": 1.16, "a3": 0.96, "a4": 1.20,
+        "b1": 1.06, "b2": 1.06, "b3": 1.00, "b4": 1.02,
+        "c1": 1.00, "c2": 1.00, "c3": 1.02, "c4": 1.42,
+        "d1": 1.02, "d2": 1.02, "d3": 1.02, "d4": 1.10,
+    }
+    metric = {k: v / MANUAL.get(k, 1.0) for k, v in metric.items()}
     target = statistics.median(metric.values())
     # 揃えたあとの最大寸法を求め、そこから全体の倍率を決める（枠にちょうど収まるように）
     sized = {k: (im.size[0] * target / metric[k], im.size[1] * target / metric[k])
