@@ -2316,6 +2316,41 @@ body::after,body::before{content:none;}
  .stage-char,.stage-char img,.hero-title,.hero-title em,.hero-start{animation:none!important;transform:none;clip-path:none;opacity:1;}
  .stage-char img{opacity:.75;}
 }
+/* Original typographic hero: large words, small particles, staggered ink reveals. */
+.hero{padding:265px 24px 260px;min-height:max(980px,100svh);background:#fff;}
+.hero-inner{max-width:850px;}
+.hero-badge{font-size:12px;letter-spacing:.18em;background:none;border:0;box-shadow:none;padding:0;margin-bottom:22px;}
+.hero-title.type-composition{font-family:var(--jp-disp);font-weight:900;color:#12151d;animation:none;line-height:1;letter-spacing:-.075em;text-shadow:none;margin:0 auto 30px;max-width:720px;text-align:left;}
+.type-prelude{display:block;font-size:clamp(18px,2.3vw,25px);letter-spacing:.08em;font-weight:700;margin:0 0 22px 5px;animation:inkRise .8s .1s both;}
+.type-row{display:flex;align-items:center;justify-content:center;gap:12px;}
+.type-row-last{margin-top:10px;justify-content:flex-start;padding-left:7%;}
+.type-mass{display:inline-flex;font-size:clamp(100px,12vw,160px);line-height:1.12;letter-spacing:-.075em;white-space:nowrap;}
+.type-mass>span{display:inline-block;animation:inkRise 1s cubic-bezier(.16,1,.3,1) both;}
+.type-self{color:#1837a6;}.type-self>span:first-child{animation-delay:.3s;}.type-self>span:nth-child(2){animation-delay:.47s;}
+.type-know>span:first-child{animation-delay:.65s;}.type-know>span:nth-child(2){animation-delay:.8s;}.type-know>span:nth-child(3){animation-delay:.95s;}
+.type-aside{font-size:clamp(35px,5vw,62px);line-height:1.15;letter-spacing:-.03em;display:flex;flex-direction:column;align-items:center;animation:inkRise .9s .2s both;}
+.type-aside>span{font-family:serif;font-size:.65em;font-weight:400;margin-top:8px;}
+.type-particle{font-family:serif;font-size:clamp(30px,5vw,55px);align-self:flex-end;padding-bottom:14px;animation:inkRise .8s .55s both;}
+.type-period{font-size:60px;align-self:flex-end;margin-left:-8px;animation:inkRise .8s 1.05s both;}
+.type-note{font-family:var(--lat);font-size:16px;font-weight:700;letter-spacing:.09em;line-height:1.2;border-left:2px solid #1837a6;padding-left:14px;rotate:-5deg;animation:inkRise .8s 1.2s both;}
+@keyframes inkRise{from{opacity:0;transform:translateY(45px) rotate(5deg);clip-path:inset(100% 0 0);}to{opacity:1;transform:none;clip-path:inset(0);}}
+.hero-sub{color:#505765;font-size:14px;line-height:1.9;margin-bottom:14px;}
+.hero-start{border-radius:0;background:#1837a6;padding:16px 34px;letter-spacing:.08em;font-weight:700;}
+.stage-char{height:155px;width:115px;}.stage-char img{opacity:.6;}
+.stage-char:nth-child(1){top:80px;left:12%;}.stage-char:nth-child(2){top:60px;left:37%;}.stage-char:nth-child(3){top:88px;right:25%;}.stage-char:nth-child(4){top:70px;right:5%;}
+.stage-char:nth-child(5){bottom:64px;left:8%;}.stage-char:nth-child(6){bottom:35px;left:32%;}.stage-char:nth-child(7){bottom:75px;right:26%;}.stage-char:nth-child(8){bottom:45px;right:5%;}
+@media(max-width:767px){
+ .hero{padding:240px 16px 250px;min-height:max(900px,100svh);}
+ .hero-title.type-composition{max-width:420px;}.hero-badge{font-size:12px;margin-bottom:18px;}
+ .type-prelude{font-size:17px;margin-bottom:18px;letter-spacing:.04em;}
+ .type-mass{font-size:clamp(70px,21vw,125px);}.type-aside{font-size:clamp(28px,8vw,40px);}
+ .type-row{gap:7px;}.type-row-last{padding-left:2%;margin-top:6px;}
+ .type-particle{font-size:30px;padding-bottom:10px;}.type-period{font-size:32px;margin-left:-4px;}
+ .type-note{font-size:11px;padding-left:7px;letter-spacing:.01em;}
+ .stage-char{width:25%;height:118px;}.stage-char:nth-child(1){left:2%;top:83px;}.stage-char:nth-child(2){left:35%;top:65px;}.stage-char:nth-child(3){right:2%;top:105px;}
+ .stage-char:nth-child(5){left:2%;bottom:68px;}.stage-char:nth-child(6){left:35%;bottom:35px;}.stage-char:nth-child(7){right:2%;bottom:85px;}
+}
+@media(prefers-reduced-motion:reduce){.type-composition *{animation:none!important;clip-path:none!important;transform:none!important;}}
 </style>
 </head>
 <body data-screen="screen-title">
@@ -2360,7 +2395,11 @@ body::after,body::before{content:none;}
       <!-- 320px では1行に収まらない（実測で9文字ぶんの幅しかない）。何もしないと
            「キャリアタ／イプ、」と語の途中で割れるので、語だけ折り返させない。
            390px 以上では1行のままなので見え方は変わらない。 -->
-      <h1 class="hero-title">あなたの<span style="white-space:nowrap;">キャリアタイプ</span>、<em>16Typesから見つける。</em></h1>
+      <h1 class="hero-title type-composition" aria-label="会社に合わせる前に、本当の自分を知ろう。">
+        <span class="type-prelude" aria-hidden="true">会社に合わせる前に、</span>
+        <span class="type-row" aria-hidden="true"><span class="type-aside">本当<span>の</span></span><span class="type-mass type-self"><span>自</span><span>分</span></span><span class="type-particle">を</span></span>
+        <span class="type-row type-row-last" aria-hidden="true"><span class="type-mass type-know"><span>知</span><span>ろ</span><span>う</span></span><span class="type-period">。</span><span class="type-note">FIND<br>YOUR<br>OWN WAY.</span></span>
+      </h1>
       <!-- 入口の約束と結果画面の主役を揃える（workplace-fit.md U-2）。
            旧「あなたに向いている職種の例と、探し方のヒントまで。」は
            (a) 職種を約束していたが思想の主題は職場であり（同 §1 / §3）、
