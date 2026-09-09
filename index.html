@@ -1644,8 +1644,10 @@ body::before{
      （赤345-20° / 緑75-165° / 青200-250° / 黄38-62°、彩度0.5以上）で取る。 */
   --info:#124296;  /* 青系。分かったこと。白抜き 9.35:1 */
   --act:#ba1e1e;   /* 赤系。これから動くところ。白抜き 6.38:1 */
-  /* 系統の色。帯など「押さない面」にだけ使う。文字は載せない */
-  --cat-ha:#ba1e1e; --cat-hb:#1e361e; --cat-da:#124296; --cat-db:#f6c61e;
+  /* ★系統4色のトークン（--cat-ha 等）は、4色の帯を消したときに一緒に消した。
+     使い先が無い変数を残すと「まだどこかで使っている」と読めてしまう。
+     採り直した値そのものは docs の判断記録に残してある。
+     16タイプ一覧の地色（.band-HA 等）は、その4色を白へ寄せた実値で持つ。 */
   --sumi:var(--info);  /* 構造色は青に寄せる（線・塗り・図版） */
   --gun:var(--info);   /* 旧名。情報側の別名として残す */
 
@@ -2089,8 +2091,10 @@ body::after,body::before{content:none;}
 /* 系統名は「1行目のキャラの背後」に置く。46% だと札の文字行に重なって
    両方が読みにくくなった。参照（16Personalities）でも大きな文字が
    重なるのは絵の側だけである。 */
+/* ★キャラの頭と重なっていたので上げた（オーナー指摘）。
+   ピルと横線を外したぶん帯の上に余白ができ、そこへ収まる。 */
 .cat-ghost{
-  position:absolute;left:50%;top:30%;transform:translate(-50%,-50%);
+  position:absolute;left:50%;top:13%;transform:translate(-50%,-50%);
   font-size:clamp(66px,18vw,160px);font-weight:900;letter-spacing:.06em;
   color:#fff;opacity:.85;line-height:1;white-space:nowrap;pointer-events:none;
   z-index:0;
@@ -2108,24 +2112,29 @@ body::after,body::before{content:none;}
 /* 札の下端に敷いていた 4px の色帯（.tc::after）。箱を外したので、
    線だけが宙に浮いて別の要素に見える。帯の地色が同じ役目を果たすので消す。 */
 #type-overview .tc::after{content:none;}
-/* 系統のピルは帯の中では要らない（背後の大きな文字が同じことを言っている）が、
-   読み上げと絞り込みの手がかりとして残す。地に馴染ませる。 */
-#type-overview .tc-pill{background:rgba(255,255,255,.72)!important;border-color:rgba(27,27,31,.10)!important;}
-#type-overview .tc-line{background:rgba(27,27,31,.10);}
+/* ★系統のピルと横線は画面から外した（オーナー判断「ここ無くして良い」）。
+   背後に大きく敷いた系統名が同じことを言っており、二重だった。
+   ★ピルは DOM に残して読み上げにだけ渡す。ドロワーの系統ボタンから
+     scrollToTypes() で飛んでくる先であり、音声だけの人が
+     「どの系統に着いたか」を知る手がかりが他に無い。 */
+#type-overview .type-cat-hd{
+  position:absolute;width:1px;height:1px;padding:0;margin:-1px;
+  overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0;
+}
 /* CTA は帯の外（地は --off のまま） */
 #type-section .wrap>div:last-child{max-width:480px;margin:0 auto;padding:30px 16px 40px;}
 
-/* --- 24. 4色の帯を系統の色にそろえる --------------------------------------
-   オーナー指摘「こういうとこの色は今キャラの色分けで使っている色を使用して」。
-   #lp-quiz-sec::after の7pxの帯が、旧カテゴリ4色（#1a56db / #1d6b4c /
-   #c8412e / #4b4483）のまま残っていた。キャラの色に置き換える。
-   ★この帯は押さない面であり、文字も載らない。だから彩度の高い黄も使える。
-     ボタンとバナーは白抜き文字が載るので、赤と青の2色に限る（--act / --info）。 */
-#lp-quiz-sec::after{
-  background:linear-gradient(90deg,
-    var(--cat-ha) 0 25%, var(--cat-hb) 25% 50%,
-    var(--cat-da) 50% 75%, var(--cat-db) 75% 100%);
-}
+/* --- 24. 4色の帯をやめ、系統の色は一覧の地色だけにする --------------------
+   はじめは帯をキャラの色に置き換えたが、そのあと帯自体を消した
+   （オーナー判断「この帯消しても良い」）。
+   系統の区別は16タイプ一覧の地色が担っており、帯は同じことを2度言っていた。
+   ★ボタンとバナーは白抜き文字が載るので、赤と青の2色に限る（--act / --info）。
+     黄（#F6C61E）は白抜きで 1.61:1 しかなく、押す場所には使えない。 */
+/* ★4色の帯は消した（2026-09-08・オーナー判断「この帯消しても良い」）。
+   もともとカテゴリ4色を並べたもので、.hero::after / .result-hero::after は
+   先に消してあり、ここだけ残っていた。系統の区別は16タイプ一覧の地色が
+   引き継いでいるので、帯が2度目を言う必要はない。 */
+#lp-quiz-sec::after{content:none;}
 /* 一覧の地色も、採り直した系統色から作る（それぞれを白に寄せたもの） */
 .band-HA{background:#f8ecec;}
 .band-HB{background:#ecf0ec;}

@@ -1017,8 +1017,9 @@ console.log('[lint] 2色の意味');
                          //   面の地色と帯はその外にある。文字にもボタンにも使わない
                          //   （e2e が実画面で確かめる）。
                          //   値はキャラクターの絵から採ったもの。
-                         '#ba1e1e', '#1e361e', '#124296', '#f6c61e',   // 系統の色（帯）
-                         '#f8ecec', '#ecf0ec', '#eaeef7', '#fbf6e8',   // その地色
+                         // ★帯は消したので、系統4色そのものは QUIET RESTYLE に出てこない。
+                         //   残るのは16タイプ一覧の地色（4色を白へ寄せた値）だけ。
+                         '#f8ecec', '#ecf0ec', '#eaeef7', '#fbf6e8',   // 系統の地色
                          '#9a1717']);                                  // 押す場所の hover
   const extra = hexes.filter(h => !isGray(h) && !allow.has(h));
   check(extra.length === 0,
