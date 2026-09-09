@@ -2235,6 +2235,40 @@ body::after,body::before{content:none;}
    丸そのもの（.sd）を囲む。 */
 .sdw:focus-visible{outline:none;}
 .sdw:focus-visible .sd{outline:2px solid var(--info);outline-offset:3px;}
+/* Quiet motion: preserves the current layout, palette and diagnosis. */
+.hero-inner>.hero-badge{animation:quietEnter .7s .05s both;}
+.hero-title{animation:quietEnter .9s .14s both;}
+.hero-title em{animation:quietEnter 1s .28s both;}
+.hero-sub{animation:quietEnter .9s .35s both;}
+@keyframes quietEnter{from{opacity:0;translate:0 12px;}to{opacity:1;translate:0 0;}}
+.hero-cast{animation:quietEnter 1.4s .2s both;}
+.hero .hc{--hc-y:-12px;}
+.quiet-host{position:relative;isolation:isolate;}
+.quiet-host>.wrap,.quiet-host>.quiz-inner,.quiet-host>.pf-inner{position:relative;z-index:1;}
+.quiet-cast{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0;}
+.quiet-character{position:absolute;width:130px;height:195px;object-fit:contain;opacity:.12;animation:quietFloat 12s ease-in-out infinite;animation-play-state:paused;}
+.quiet-character:first-child{left:max(8px,calc(50% - 460px));top:80px;rotate:-7deg;}
+.quiet-character:last-child{right:max(8px,calc(50% - 460px));top:58%;rotate:7deg;animation-delay:-6s;animation-duration:15s;}
+.quiet-cast.is-in-view .quiet-character{animation-play-state:running;}
+@keyframes quietFloat{0%,100%{translate:0 0;}50%{translate:5px -14px;}}
+.quiet-reveal{animation:quietEnter .7s cubic-bezier(.2,.7,.2,1) both;}
+.sdw.sel .sd{animation:quietAnswer .24s ease-out;}
+@keyframes quietAnswer{50%{scale:1.1;}to{scale:1;}}
+.tc{transition:transform .25s ease,box-shadow .25s ease;}
+.tc:hover{transform:translateY(-3px);}
+.quiet-paused *, .quiet-paused .hc{animation-play-state:paused!important;}
+@media(max-width:900px){
+  /* At narrow widths reserve existing section padding, never the reading column. */
+  #lp-quiz-sec.quiet-host,#axis-section.quiet-host,#type-section.quiet-host{padding-top:88px!important;}
+  .quiet-character{width:65px;height:78px;opacity:.13;}
+  .quiet-character:first-child{left:16px;top:4px;}
+  .quiet-character:last-child{right:16px;top:4px;}
+  .quiz-bg>.quiet-cast,.pf-wrap>.quiet-cast{display:none;}
+}
+@media(prefers-reduced-motion:reduce){
+  .hero-inner>.hero-badge,.hero-title,.hero-title em,.hero-sub,.hero-cast,.quiet-character,.quiet-reveal,.sdw.sel .sd{animation:none!important;translate:none!important;opacity:1;}
+  .quiet-character{opacity:.12;}.tc{transition:none;}
+}
 </style>
 </head>
 <body data-screen="screen-title">
@@ -4270,6 +4304,37 @@ function renderSharedBanner(code){
     box.appendChild(im);
   }
   hero.insertBefore(box,inner);                            /* 装飾円の後・.hero-inner の前 */
+})();
+/* Decorations only. No scroll interception, no delayed controls, no score access. */
+(function quietMotion(){
+  if(typeof document.querySelectorAll!=='function'||typeof matchMedia!=='function')return;
+  const reduced=matchMedia('(prefers-reduced-motion: reduce)');
+  const placements=[['#lp-quiz-sec','a2','d2'],['#axis-section','b1','c2'],['#type-section','c3','b4'],['.quiz-bg','b3','d1'],['.pf-wrap','a1','b2']];
+  for(const [selector,left,right] of placements){
+    const host=document.querySelector(selector);if(!host)continue;
+    host.classList.add('quiet-host');
+    const cast=document.createElement('div');cast.className='quiet-cast';cast.setAttribute('aria-hidden','true');
+    for(const code of [left,right]){
+      const img=new Image(130,195);img.className='quiet-character';img.alt='';img.loading='lazy';img.decoding='async';img.src=cv('images/chars/sm/'+code+'.webp');cast.appendChild(img);
+    }
+    host.appendChild(cast);
+  }
+  if(typeof IntersectionObserver==='function'){
+    const floats=new IntersectionObserver(entries=>entries.forEach(entry=>entry.target.classList.toggle('is-in-view',entry.isIntersecting)),{threshold:0});
+    document.querySelectorAll('.quiet-cast').forEach(el=>floats.observe(el));
+    const reveal=new IntersectionObserver(entries=>entries.forEach(entry=>{
+      if(entry.isIntersecting){if(!reduced.matches)entry.target.classList.add('quiet-reveal');reveal.unobserve(entry.target);}
+    }),{threshold:.1});
+    const seen=new WeakSet();
+    const watch=()=>document.querySelectorAll('.sec-title,.ax-card,.tc,.r-panel,.pf-field').forEach(el=>{if(!seen.has(el)){seen.add(el);reveal.observe(el);}});
+    const start=()=>{
+      watch();
+      const result=document.getElementById('screen-result');
+      if(result&&typeof MutationObserver==='function')new MutationObserver(watch).observe(result,{childList:true});
+    };
+    if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
+  }
+  document.addEventListener('visibilitychange',()=>document.documentElement.classList.toggle('quiet-paused',document.hidden));
 })();
 </script>
 </body>
