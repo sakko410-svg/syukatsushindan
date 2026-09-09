@@ -384,7 +384,10 @@ console.log('[test] 1画面5問・診断画面は3ページ（Q6 から始まる
   enterQuiz(T);
   check(T.__eval('curPage') === 1, `診断画面はページ1から始まる（${T.__eval('curPage')}）`);
   check(T.__positions('q').join(',') === '5,6,7,8,9', `先頭ページに出るのは出題位置 5-9: ${T.__positions('q').join(',')}`);
-  check(badges(T, 'q') === 'Q6,Q7,Q8,Q9,Q10', `先頭ページは Q6〜Q10: ${badges(T, 'q')}`);
+  // ★番号は画面に出さなくなった（右下の環と役割が重なっていた）。
+  //   読み上げ用に「n問目」として残っているので、出題位置の検査はそこで行う。
+  check(badges(T, 'q') === '6問目,7問目,8問目,9問目,10問目',
+    `先頭ページは6〜10問目: ${badges(T, 'q')}`);
   check(T.document.querySelectorAll('#q-list .q-card').length === 5, 'カードは5枚');
   check(T.document.querySelectorAll('#q-list .spec-track').length === 5,
     '5問ぶんのラジオグループが独立して並ぶ');
@@ -534,7 +537,8 @@ console.log('[test] Q1-5 は LP のみ（2つの入口の解消）');
   const T = load(TARGET, '');
   boot(T);
   check(T.__positions('lq').join(',') === '0,1,2,3,4', `LPに出題位置 0-4 が並ぶ: ${T.__positions('lq').join(',')}`);
-  check(badges(T, 'lq') === 'Q1,Q2,Q3,Q4,Q5', `LPは Q1〜Q5: ${badges(T, 'lq')}`);
+  check(badges(T, 'lq') === '1問目,2問目,3問目,4問目,5問目',
+    `LPは1〜5問目: ${badges(T, 'lq')}`);
   check(T.document.querySelectorAll('#lq-list .q-card').length === 5, 'LPのカードは5枚');
   // LP は平常時に残数を出さない（オーナー判断）。要素は警告文の器として残す。
   check(T.__byId.get('lq-remain').style.display === 'none', 'LPは平常時に残数を出さない');

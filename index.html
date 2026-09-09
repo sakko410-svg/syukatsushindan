@@ -2012,6 +2012,21 @@ body::after,body::before{content:none;}
   #lp-quiz-sec .wrap,#screen-quiz .wrap,.quiz-bg .wrap{max-width:860px;}
   .q-text{font-size:1.55rem;}
 }
+
+/* --- 22. 設問の文字を細くする ---------------------------------------------
+   オーナー指摘「文字が太くてダサい」。24.8px の見出しを 700 で組むと、
+   和文は画が詰まって重くなる。大きくしたぶんウェイトは下げてよい
+   （小さい字ほど太さが要り、大きい字ほど要らない）。 */
+.q-text{font-weight:600;letter-spacing:-.015em;}
+.opt-key{font-weight:600;}
+@media(min-width:768px){
+  .q-text{font-weight:500;letter-spacing:-.02em;}
+}
+/* --- 23. 設問番号を画面から外す -------------------------------------------
+   読み上げには残す（.sr-only）。見た目の番号は右下の環と役割が重なっていた。 */
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;
+  overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0;}
+.q-top{gap:0;}
 </style>
 </head>
 <body data-screen="screen-title">
@@ -2993,7 +3008,11 @@ function buildCard(f,pos){
   /* 軸の手がかりは .q-badge の影の色だけに置く（面積の大きい背景では表現しない）。
      選択肢は枠付きボックスではなくテキスト行。選んだ側の行に .on が付く（§D-1 / §D-2）。 */
   return `<div class="q-card qin" data-ax="${q.ax}" data-pos="${pos}" role="group" aria-labelledby="${idT}">`
-    + `<div class="q-top"><div class="q-badge">Q${pos+1}</div>`
+    /* ★番号（Q1…）は画面に出さない（2026-09-08・オーナー判断「設問番号は必要ない」）。
+       「いま何問目か」は右下の環が示しており、札の番号は同じことを2度言っていた。
+       ただし読み上げには残す。設問が20個続く画面で、音声だけで位置を掴む手がかりが
+       無くなるため。role="group" の外側に、読み上げ専用の見出しとして置く。 */
+    + `<div class="q-top"><div class="q-badge sr-only">${pos+1}問目</div>`
     + `<div class="q-text" id="${idT}" tabindex="-1">${esc(q.t)}</div></div>`
     + `<div class="q-body">`
     + `<div class="choice-list">`
