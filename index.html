@@ -1979,6 +1979,39 @@ body::after,body::before{content:none;}
   content:'/' attr(data-total);
   font-size:.6rem;font-weight:700;color:var(--mid);margin-top:1px;
 }
+
+/* --- 21. PC の設問画面を広げる --------------------------------------------
+   オーナー要望（16Personalities を参照）。あちらは設問が画面いっぱいに広がり、
+   文字も丸も大きい。こちらは 1440px の画面でも柱が 480px・カード 448px・
+   設問 15px のままで、文字だけ大きくしても追いつかなかった。
+   ★版面（柱の幅）から広げる。文字の大きさは版面に従属する。
+   ★スマホ（〜767px）は 20. のままで触らない。片手で読む幅は変わっていない。 */
+@media(min-width:768px){
+  #lp-quiz-sec .wrap,#screen-quiz .wrap,.quiz-bg .wrap{max-width:760px;}
+  .q-text{font-size:1.42rem;line-height:1.6;}
+  .opt-line{font-size:1.06rem;line-height:1.8;}
+  .opt-key{font-size:1.06rem;}
+  .q-top{padding:16px 24px 14px;}
+  .q-card>div:nth-child(2){padding:16px 24px 14px;}
+  .spec-hint{font-size:.9rem;}
+  .q-badge{font-size:.9rem;}
+  /* 目盛も版面に合わせて大きくする。押す的が小さいままだと間延びして見える */
+  .sdw:nth-child(1) .sd,.sdw:nth-child(6) .sd{width:52px;height:52px;}
+  .sdw:nth-child(2) .sd,.sdw:nth-child(5) .sd{width:44px;height:44px;}
+  .sdw:nth-child(3) .sd,.sdw:nth-child(4) .sd{width:36px;height:36px;}
+  .sdw{padding:10px 0;}
+  .sdw.sel .sd::after{font-size:1rem;}
+  /* 設問どうしの間も空ける（16Personalities の余白の取り方に寄せる） */
+  #lq-list .q-card,#q-list .q-card{margin-bottom:22px;}
+  /* 目盛は space-around だと広い版面で左右に散る。中央にまとめて置く。 */
+  .spec-track{justify-content:center;gap:34px;}
+  .spec-track::before{left:auto;right:auto;width:calc(100% - 200px);
+    left:50%;transform:translate(-50%,-50%);}
+}
+@media(min-width:1024px){
+  #lp-quiz-sec .wrap,#screen-quiz .wrap,.quiz-bg .wrap{max-width:860px;}
+  .q-text{font-size:1.55rem;}
+}
 </style>
 </head>
 <body data-screen="screen-title">
