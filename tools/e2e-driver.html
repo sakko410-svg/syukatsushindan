@@ -1623,6 +1623,62 @@ try{
   }
   f.style.width='390px';
 
+  // ---------- O. いま答える1問だけを濃くする ----------
+  // オーナー要望「順番に回答するように、最新の未回答の設問以外はグレーで薄く」。
+  // ★実装で一度はまった。.q-card に opacity を書いても効かない。札は登場時に
+  //   animation:qIn ... forwards を持っており、アニメーションの最終フレーム
+  //   （opacity:1）が宣言より優先される。薄くするのは中身（.q-card > *）に当てる。
+  //   計算値で見ておかないと、クラスが付いているのに効いていない状態を見逃す。
+  await load('index.html'); w=f.contentWindow; d=f.contentDocument; await sleep(600);
+  {
+    const cards=()=>[...d.querySelectorAll('#lq-list .q-card')];
+    const curIdx=()=>cards().findIndex(c=>!c.classList.contains('q-dim'));
+    chk(curIdx()===0,'最初は1問目が濃い: '+curIdx());
+    chk(cards().filter(c=>c.classList.contains('q-dim')).length===4,
+        '残り4問は薄い: '+cards().filter(c=>c.classList.contains('q-dim')).length+'問');
+    /* ★クラスではなく計算値で見る。付いていても効いていないことがある。
+       ★ページ内で計算させる。driver 側の w.getComputedStyle だと、
+         クリック直後の再描画とタイミングが噛み合わず古い値を拾うことがあった
+         （実機では 0.34 なのに 1 が返る）。 */
+    const op=i=>parseFloat(w.eval(
+      "getComputedStyle(document.querySelectorAll('#lq-list .q-card')["+i+"].querySelector('.q-top')).opacity"));
+    chk(op(0)>0.9,'濃い問の中身は不透明: '+op(0));
+    chk(op(1)<0.6,'薄い問の中身は実際に薄い（計算値で確認）: '+op(1));
+
+    cards()[0].querySelectorAll('.sdw')[1].click();
+    await sleep(400);
+    /* ★トランジション（.25s）の完了を待つ作りにしない。この iframe は
+       画面外にあり、ブラウザが描画を間引くので transition が進まない。
+       実機では 0.34 になるのに、ここでは 1 のまま止まる（実際に嵌った）。
+       検査したいのは「薄くなる指定が効いているか」であって遷移の途中経過では
+       ないので、遷移そのものを切ってから測る。 */
+    const noTr2=d.createElement('style');
+    noTr2.textContent='*{transition:none!important;}';
+    d.head.appendChild(noTr2);
+    await sleep(60);
+    chk(curIdx()===1,'1問答えると焦点が2問目へ移る: '+curIdx());
+    chk(op(0)<0.6,'答え終わった問は薄くなる: '+op(0)
+        +'（class='+cards()[0].className+'）');
+    /* 薄い側も押せること。上に戻って答えを変える道を塞がない */
+    chk(w.getComputedStyle(cards()[0]).pointerEvents!=='none',
+        '薄い問も押せる（選び直しを塞がない）');
+    /* 選んだ丸だけは濃さを残す。どこを選んだか見失わせない */
+    const selOp=parseFloat(w.eval(
+      "getComputedStyle(document.querySelectorAll('#lq-list .q-card')[0].querySelector('.sdw.sel .sd')).opacity"));
+    chk(selOp>0.6,'選んだ丸は濃さが残る: '+selOp);
+    noTr2.remove();
+
+    /* 系統名が帯からはみ出して切れていないこと（オーナー指摘「途切れてますよ」） */
+    const band=d.querySelector('#type-overview .cat-band');
+    const ghost=band&&band.querySelector('.cat-ghost');
+    if(ghost){
+      const b=band.getBoundingClientRect(), g=ghost.getBoundingClientRect();
+      chk(g.top>=b.top-1&&g.bottom<=b.bottom+1,
+          '系統名が帯の中に収まっている（overflow:hidden で切られない）: 帯'
+          +Math.round(b.top)+'〜'+Math.round(b.bottom)+' / 文字'+Math.round(g.top)+'〜'+Math.round(g.bottom));
+    }
+  }
+
   // ---------- P. 文字のコントラスト（全要素を機械的に走査）----------
   // 面を明るく作り替えたとき、暗い地の上で読ませる前提だった色が4箇所残っていた
   // （.hero-badge 1.70:1 はオーナーが目視で見つけた）。

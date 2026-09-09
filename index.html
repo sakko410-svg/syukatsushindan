@@ -2207,6 +2207,34 @@ body::after,body::before{content:none;}
 @media(max-width:360px){
   #lq-list .spec-track,#q-list .spec-track{margin-left:0;margin-right:0;}
 }
+
+/* --- 27. いま答える1問だけを濃くする --------------------------------------
+   markCurrentQ() が .q-dim を付け外しする。CSS はその見え方だけを持つ。
+   ★.q-card そのものに opacity を書いても効かない。札は登場時に
+     animation:qIn ... forwards を持っており、アニメーションの最終フレーム
+     （opacity:1）が宣言より優先されるためである。実測して分かった。
+     よって薄くするのは中身（.q-top と目盛の側）に当てる。
+   ★pointer-events は切らない。上に戻って答えを変える道を塞がないため。 */
+#lq-list .q-card>*,#q-list .q-card>*{transition:opacity .25s ease;}
+#lq-list .q-card.q-dim>*,#q-list .q-card.q-dim>*{opacity:.34;}
+/* 答え済みの札は、選んだ丸だけ濃さを残す。どこを選んだか見失わせない */
+#lq-list .q-card.q-dim .sdw.sel .sd,#q-list .q-card.q-dim .sdw.sel .sd{opacity:.85;}
+@media (prefers-reduced-motion:reduce){
+  #lq-list .q-card>*,#q-list .q-card>*{transition:none;}
+}
+
+/* --- 28. 系統名が帯の外へはみ出して切れていた ------------------------------
+   top:13% で中央揃え（translateY(-50%)）にしていたので、文字の上半分が
+   帯の外に出て overflow:hidden に切られていた（オーナー指摘「途切れてますよ」）。
+   上端を基準に置き直し、帯の上の余白もその高さぶん確保する。 */
+.cat-ghost{top:0;transform:translate(-50%,0);}
+.cat-band{padding-top:clamp(52px,13vw,116px);}
+
+/* --- 29. 目盛の焦点表示が楕円になっていた ----------------------------------
+   .sdw（丸を包む枠）は横長なので、そこに outline を出すと楕円で囲まれる。
+   丸そのもの（.sd）を囲む。 */
+.sdw:focus-visible{outline:none;}
+.sdw:focus-visible .sd{outline:2px solid var(--info);outline-offset:3px;}
 </style>
 </head>
 <body data-screen="screen-title">
@@ -3271,6 +3299,7 @@ function renderPage(target){
   const p=facePage(tg);
   list.innerHTML=pagePositions(p).map(pos=>buildCard(f,pos)).join('');
   renderProgSeg(f.seg,p);
+  markCurrentQ();      /* 初期表示・ページ送り・途中復帰のいずれでも焦点を合わせる */
   if(tg==='quiz'){
     const from=p*PAGE_SIZE+1,to=Math.min((p+1)*PAGE_SIZE,Qs.length);
     const pt=document.getElementById('prog-text');
@@ -3334,9 +3363,33 @@ function pick(el){
   updateRemain('lp');updateRemain('quiz');
   updateLpDone();
   updateCtas();
+  markCurrentQ();
   /* 送り先（#lq-done）は updateLpDone() が出したあとでないと隠れているので、
      スクロールはこの順で最後に呼ぶ。 */
   if(firstForPos)scrollToNextQ(el,tg);
+}
+
+/* いま答えるべき1問だけを濃く、それ以外を薄くする（オーナー要望・
+   16Personalities の設問一覧と同じ作法）。
+   ★狙いは「順番に答えてもらう」こと。20問が同じ濃さで並ぶと、
+     どこから手を付けるかを毎回判断させることになる。
+   ★薄いほうも押せるままにする。上に戻って答えを変える道を塞がない
+     （pointer-events を切ると、選び直しができなくなる）。
+   ★「最初の未回答」を現在地とする。飛ばして答えた人も、
+     残っている最初の1問に戻される。 */
+function markCurrentQ(){
+  for(const listId of ['lq-list','q-list']){
+    const list=document.getElementById(listId);
+    if(!list)return;
+    const cards=[...list.querySelectorAll('.q-card')];
+    let cur=cards.findIndex(c=>{
+      const d=c.querySelector('.sdw');
+      const pos=d?parseInt(d.dataset.pos,10):NaN;
+      return isFinite(pos)&&typeof ans[pos]!=='number';
+    });
+    if(cur<0)cur=cards.length-1;          /* 全部答え終わったら最後を残す */
+    cards.forEach((c,i)=>c.classList.toggle('q-dim',i!==cur));
+  }
 }
 
 /* 回答したら次の設問へスクロールする（オーナー要望）。
