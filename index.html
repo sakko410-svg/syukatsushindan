@@ -1991,9 +1991,14 @@ body::after,body::before{content:none;}
    一覧の札も、切り抜き（object-fit:cover ＋ --head の実測値）ではなく
    全身を収める（contain）に変える。ずんぐりした体型は切ると成立しない。
    ============================================================================ */
-.char-frame{aspect-ratio:4/5;width:min(74vw,300px);}
+.char-frame{aspect-ratio:3/4;width:min(74vw,300px);}
+/* ヒーローの浮遊キャラ。新素材は面が明るく（紙の白）、旧素材より
+   見出しの背後で明度を持ち上げてしまう。実測で見出し2行目が 2.42:1 まで
+   落ちた（基準 3:1）。透明度を下げて地に沈める。 */
+.hc-1{--hc-a:.16;}
+.hc-4{--hc-a:.14;}
 .res-char{object-fit:contain!important;object-position:50% 100%!important;}
-.tc img{height:auto!important;aspect-ratio:4/5;object-fit:contain!important;
+.tc img{height:auto!important;aspect-ratio:3/4;object-fit:contain!important;
   object-position:50% 100%!important;background:var(--paper2);}
 .tp-img,.compat-cbox img,.sb-img{object-fit:contain!important;background:var(--paper2);}
 .hero-char{object-fit:contain!important;}

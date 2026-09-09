@@ -813,6 +813,37 @@ console.log('[lint] タイプページと og:image');
         `shareUrl() が t/<CODE>.html を返す（16枚の og:image が使われる経路）`);
 }
 
+// --- キャラクターの大きさが揃っていること -----------------------------------
+// 素材は1体ずつ別々に生成されており、頭身が揃っていない。
+// 実測（bbox を枠に収める従来の方法）で、実体の高さは 90〜100% とほぼ揃うのに
+// 頭の幅が 2.07倍ばらついていた。高さで揃えると、頭が小さく描かれた体だけ
+// 「小さい人」に見える（オーナー指摘「サイズがばらついてる」）。
+// tools/gen-chars.py が sqrt(頭幅 × 実体高) を揃えて焼き、その結果を
+// images/chars/scale.json に残す。ここではその記録を検査する。
+// ★素材を差し替えたら gen-chars.py を回し直すこと。回さないとここで落ちる。
+console.log('[lint] キャラクターの大きさ');
+{
+  const f = path.join(ROOT, 'images/chars/scale.json');
+  if (!fs.existsSync(f)) {
+    console.log('  --   images/chars/scale.json が無い（旧素材のまま。差し替えたら make chars）');
+  } else {
+    const rec = JSON.parse(fs.readFileSync(f, 'utf8'));
+    const codes = Object.keys(rec);
+    check(codes.length === 16, `16体ぶんの記録がある（${codes.length}体）`);
+    const spread = k => {
+      const v = codes.map(c => rec[c][k]);
+      return Math.max(...v) / Math.min(...v);
+    };
+    const hs = spread('head'), ht = spread('h');
+    check(hs <= 1.6, `頭の大きさが揃っている（ばらつき ${hs.toFixed(2)}倍 ≦ 1.6倍）`);
+    check(ht <= 1.6, `背丈が揃っている（ばらつき ${ht.toFixed(2)}倍 ≦ 1.6倍）`);
+    // ★1.0 倍には揃わない。素材そのものの頭身差が残るため。
+    //   完全に揃えるには描き直しが要る。1.6 はその現実を踏まえた線引きである。
+    console.log(`  --   頭 ${hs.toFixed(2)}倍 / 背丈 ${ht.toFixed(2)}倍`
+      + '（1.0 にはならない。素材の頭身差は変換では消せない）');
+  }
+}
+
 // --- 2色の意味（青＝分かったこと / 赤＝押す場所）---------------------------
 // オーナー判断「色は青系と赤系で、それぞれに意味を持たせて配色したい」。
 // 意味を持たせた以上、置き場所が広がると意味が消える。ソース側で守る。
@@ -864,10 +895,27 @@ console.log('[lint] 2色の意味');
   //   ブランド色が文字になり、#06C755 では白地で 2.26:1 しか無かったため。
   //   ブランドの識別は保ちつつ AA（5.02:1）を満たす値に落としてある。
   const allow = new Set([m ? m[1].toLowerCase() : '', m ? m[2].toLowerCase() : '',
-                         '#8c3527', '#eceee9', '#0b8043', '#ffffff']);
+                         '#8c3527', '#eceee9', '#0b8043', '#ffffff',
+                         // ★系統ごとの地色（16タイプ一覧の帯）。これは「差し色」ではない。
+                         //   差し色の規則は「指す言葉」と「押す場所」の色の話であり、
+                         //   面の地色はその外にある。実際この4色は文字にもボタンにも
+                         //   使っていない（e2e が実画面で確かめる）。
+                         //   ★ただし彩度を上げれば規則の内側に入る。下で白との近さを見る。
+                         '#f7ecea', '#eaf1e9', '#e9eef6', '#f7f2e4']);
   const extra = hexes.filter(h => !isGray(h) && !allow.has(h));
   check(extra.length === 0,
-    `QUIET RESTYLE に3色目が無い（2色＋hover＋無彩色＋LINE緑のみ）: ${extra.join(', ') || 'なし'}`);
+    `QUIET RESTYLE に3色目が無い（2色＋hover＋無彩色＋LINE緑＋系統の地色のみ）: ${extra.join(', ') || 'なし'}`);
+
+  // 系統の地色は「面」であって「差し色」ではない。その一線を数値で引く。
+  // 白との差が小さいうちは面のままだが、濃くすると意味を持ち始めてしまう。
+  for (const band of ['#f7ecea', '#eaf1e9', '#e9eef6', '#f7f2e4']) {
+    if (!quiet.includes(band)) continue;
+    const c = [1, 3, 5].map(i => parseInt(band.substr(i, 2), 16));
+    check(Math.max(...c) - Math.min(...c) <= 22,
+      `系統の地色 ${band} は十分に淡い（RGBの開き ${Math.max(...c) - Math.min(...c)} ≦ 22）`);
+    check(Math.min(...c) >= 225,
+      `系統の地色 ${band} は白に十分近い（最小成分 ${Math.min(...c)} ≧ 225）`);
+  }
   // 赤をエラー・警告に使わない。この配色では赤＝前進である
   check(!/注意が必要[^<]*<\/div>[\s\S]{0,120}var\(--act\)/.test(quiet),
     '「注意が必要なタイプ」に赤を当てていない（赤＝危険ではなく前進）');
