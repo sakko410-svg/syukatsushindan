@@ -1754,7 +1754,13 @@ try{
         }
       }
       return [...new Set(out)];})()`);
-    const known = x => /rgb\(31, 58, 147\)|rgb\(168, 64, 47\)/.test(x);
+    /* ★色の値をここに書き写さない。書き写すと、色を変えたときに
+       片方だけ古くなる（実際そうなった）。実物の :root から読む。 */
+    const cs = w.getComputedStyle(d.documentElement);
+    const toRgb = v => { const m = v.trim().match(/^#(..)(..)(..)$/);
+      return m ? 'rgb(' + m.slice(1).map(x => parseInt(x, 16)).join(', ') + ')' : v.trim(); };
+    const PAL = ['--info', '--act'].map(n => toRgb(cs.getPropertyValue(n)));
+    const known = x => PAL.some(c => x.includes(c));
     chk(quizHues.every(known),
         '診断画面の有彩色は青と赤の2つだけ: '+(quizHues.filter(x=>!known(x)).join(' / ')||'違反なし'));
     /* 進捗の環は Q1 から Q20 まで同じ場所に居続ける（オーナー指摘

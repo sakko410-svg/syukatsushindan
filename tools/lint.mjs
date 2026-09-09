@@ -973,19 +973,21 @@ console.log('[lint] 2色の意味');
   //   ブランドの識別は保ちつつ AA（5.02:1）を満たす値に落としてある。
   const allow = new Set([m ? m[1].toLowerCase() : '', m ? m[2].toLowerCase() : '',
                          '#8c3527', '#eceee9', '#0b8043', '#ffffff',
-                         // ★系統ごとの地色（16タイプ一覧の帯）。これは「差し色」ではない。
+                         // ★系統の色。これは「差し色」ではない。
                          //   差し色の規則は「指す言葉」と「押す場所」の色の話であり、
-                         //   面の地色はその外にある。実際この4色は文字にもボタンにも
-                         //   使っていない（e2e が実画面で確かめる）。
-                         //   ★ただし彩度を上げれば規則の内側に入る。下で白との近さを見る。
-                         '#f7ecea', '#eaf1e9', '#e9eef6', '#f7f2e4']);
+                         //   面の地色と帯はその外にある。文字にもボタンにも使わない
+                         //   （e2e が実画面で確かめる）。
+                         //   値はキャラクターの絵から採ったもの。
+                         '#ba1e1e', '#1e361e', '#124296', '#f6c61e',   // 系統の色（帯）
+                         '#f8ecec', '#ecf0ec', '#eaeef7', '#fbf6e8',   // その地色
+                         '#9a1717']);                                  // 押す場所の hover
   const extra = hexes.filter(h => !isGray(h) && !allow.has(h));
   check(extra.length === 0,
     `QUIET RESTYLE に3色目が無い（2色＋hover＋無彩色＋LINE緑＋系統の地色のみ）: ${extra.join(', ') || 'なし'}`);
 
   // 系統の地色は「面」であって「差し色」ではない。その一線を数値で引く。
   // 白との差が小さいうちは面のままだが、濃くすると意味を持ち始めてしまう。
-  for (const band of ['#f7ecea', '#eaf1e9', '#e9eef6', '#f7f2e4']) {
+  for (const band of ['#f8ecec', '#ecf0ec', '#eaeef7', '#fbf6e8']) {
     if (!quiet.includes(band)) continue;
     const c = [1, 3, 5].map(i => parseInt(band.substr(i, 2), 16));
     check(Math.max(...c) - Math.min(...c) <= 22,

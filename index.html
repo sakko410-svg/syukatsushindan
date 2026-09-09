@@ -1577,8 +1577,11 @@ body::before{
    キャラクターを1ミリも触らずに温度が落ちた。よってキャラは無加工で残す。
 
    決めたこと
-     配色 … 墨 #3B3B40（構造）× 群青 #1F3A93（強調）。差し色はこの2つだけ。
-             群青は「軸のマーカー」と「押す場所」の2箇所にしか出さない。
+     配色 … 差し色は2つだけ。値は :root の --info / --act を見ること
+             （ここに書き写すと片方だけ古くなる。実際そうなった）。
+             青＝分かったこと（繰り返し出てよい）／赤＝押す場所（そこだけ）。
+             ★2026-09-08 に値をキャラクターの絵から採り直した。
+               それ以前は 墨 × 群青 だったが、絵と揃っていなかった。
      書体 … ★規則: 指す言葉は明朝。述べる言葉と操作する言葉はゴシック。
              判定は1つ「それだけで誰のことか特定できるか」。
              はいと言えるのは16タイプのコードと名前だけ。よって明朝は
@@ -1633,8 +1636,16 @@ body::before{
        「その側が正解」と読める。
      ★この2行以外に色は書かれていない。旧アクセント（青3種・朱・からし・
        緑・藤の8色）は下でこの2つを参照する。色を変えるならここだけ。 */
-  --info:#1f3a93;  /* 青系。分かったこと */
-  --act:#a8402f;   /* 赤系。これから動くところ */
+  /* ★値はキャラクターの絵から採った（オーナー判断 2026-09-08）。
+     16体の不透明画素を系統ごとに色相で絞り、最頻色を取ったもの。
+       HA 赤 #BA1E1E / HB 緑 #1E361E / DA 青 #124296 / DB 黄 #F6C61E
+     ボタンとバナーには、そのうち赤と青を使う（黄と緑は白抜き文字が載らない）。
+     再採取するときは tools/gen-chars.py と同じ素材から色相窓
+     （赤345-20° / 緑75-165° / 青200-250° / 黄38-62°、彩度0.5以上）で取る。 */
+  --info:#124296;  /* 青系。分かったこと。白抜き 9.35:1 */
+  --act:#ba1e1e;   /* 赤系。これから動くところ。白抜き 6.38:1 */
+  /* 系統の色。帯など「押さない面」にだけ使う。文字は載せない */
+  --cat-ha:#ba1e1e; --cat-hb:#1e361e; --cat-da:#124296; --cat-db:#f6c61e;
   --sumi:var(--info);  /* 構造色は青に寄せる（線・塗り・図版） */
   --gun:var(--info);   /* 旧名。情報側の別名として残す */
 
@@ -1782,7 +1793,7 @@ body::after,body::before{content:none;}
   border-radius:var(--r-1);font-weight:700;letter-spacing:.04em;
 }
 .btn{font-size:1rem;padding:17px 24px;}
-.btn:hover,.d-cta:hover,.friend-btn:hover,.sb-cta:hover{background:#8c3527;}
+.btn:hover,.d-cta:hover,.friend-btn:hover,.sb-cta:hover{background:#9a1717;}
 /* 「もう一度診断する」は前進ではなくやり直しなので赤にしない */
 .retry-btn{background:transparent;color:var(--mid);border-color:var(--border2);}
 /* 青＝分かったこと。職種・内部リンク・タイプコードはこちら */
@@ -2084,11 +2095,8 @@ body::after,body::before{content:none;}
   color:#fff;opacity:.85;line-height:1;white-space:nowrap;pointer-events:none;
   z-index:0;
 }
-/* 地色。キャラの4色を薄めたもの（彩度は落として明度を上げてある） */
-.band-HA{background:#f7ecea;}   /* 赤系 */
-.band-HB{background:#eaf1e9;}   /* 緑系 */
-.band-DA{background:#e9eef6;}   /* 青系 */
-.band-DB{background:#f7f2e4;}   /* 黄系 */
+/* 地色は 24. で系統色から作り直した。ここでは定義しない
+   （同じ値を2箇所に置くと、片方だけ直したときに食い違う）。 */
 /* 札の箱そのものを外す。白い箱が並ぶと帯が背景に見えず、
    背後の系統名も読めない。地色の上にキャラと文字を直に置く（参照と同じ）。
    押せることは focus とホバーで示す。 */
@@ -2106,6 +2114,23 @@ body::after,body::before{content:none;}
 #type-overview .tc-line{background:rgba(27,27,31,.10);}
 /* CTA は帯の外（地は --off のまま） */
 #type-section .wrap>div:last-child{max-width:480px;margin:0 auto;padding:30px 16px 40px;}
+
+/* --- 24. 4色の帯を系統の色にそろえる --------------------------------------
+   オーナー指摘「こういうとこの色は今キャラの色分けで使っている色を使用して」。
+   #lp-quiz-sec::after の7pxの帯が、旧カテゴリ4色（#1a56db / #1d6b4c /
+   #c8412e / #4b4483）のまま残っていた。キャラの色に置き換える。
+   ★この帯は押さない面であり、文字も載らない。だから彩度の高い黄も使える。
+     ボタンとバナーは白抜き文字が載るので、赤と青の2色に限る（--act / --info）。 */
+#lp-quiz-sec::after{
+  background:linear-gradient(90deg,
+    var(--cat-ha) 0 25%, var(--cat-hb) 25% 50%,
+    var(--cat-da) 50% 75%, var(--cat-db) 75% 100%);
+}
+/* 一覧の地色も、採り直した系統色から作る（それぞれを白に寄せたもの） */
+.band-HA{background:#f8ecec;}
+.band-HB{background:#ecf0ec;}
+.band-DA{background:#eaeef7;}
+.band-DB{background:#fbf6e8;}
 </style>
 </head>
 <body data-screen="screen-title">
