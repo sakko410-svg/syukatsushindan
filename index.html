@@ -2237,17 +2237,28 @@ body::after,body::before{content:none;}
 .sdw:focus-visible .sd{outline:2px solid var(--info);outline-offset:3px;}
 /* The ten-character headline scales to the full available hero width. */
 .hero{--hero-gutter:clamp(20px,4vw,80px);background:#fff;min-height:min(820px,100svh);padding:180px var(--hero-gutter) 140px;display:flex;justify-content:center;isolation:isolate;}
-.hero-inner{width:100%;max-width:none;margin:0 auto;text-align:left;z-index:2;container-type:inline-size;}
+.hero-inner{width:100%;max-width:none;margin:0 auto;text-align:center;z-index:2;container-type:inline-size;}
 .hero-inner>.hero-badge{font-family:var(--jp-body);font-size:.75rem;font-weight:700;line-height:1.5;letter-spacing:.1em;color:#505765;background:none;border:0;box-shadow:none;padding:0;margin:0 0 24px;animation:quietEnter .65s .05s both;}
 .hero-badge::before{content:none;}
-.hero-title.type-composition{width:100%;max-width:none;margin:0 0 28px;font-family:var(--jp-disp);font-size:calc((100vw - var(--hero-gutter) - var(--hero-gutter) - 20px)/10);font-weight:900;line-height:1.2;letter-spacing:-.045em;color:#12151d;text-align:left;text-shadow:none;animation:none;}
+.hero-title.type-composition{width:100%;max-width:none;margin:0 0 28px;font-family:var(--jp-disp);font-size:calc((100vw - var(--hero-gutter) - var(--hero-gutter) - 20px)/10);font-weight:900;line-height:1.2;letter-spacing:-.045em;color:#12151d;text-align:center;text-shadow:none;animation:none;}
 @supports(font-size:1cqi){.hero-title.type-composition{font-size:10.2cqi;}}
-.type-prelude{display:block;font-family:var(--jp-body);font-size:clamp(1rem,1.6vw,1.25rem);font-weight:700;line-height:1.6;letter-spacing:.04em;margin-bottom:18px;animation:quietEnter .7s .12s both;}
+.type-prelude{display:block;font-family:var(--jp-body);font-size:clamp(1rem,1.6vw,1.25rem);font-weight:700;line-height:1.6;letter-spacing:.04em;margin-bottom:clamp(42px,6vw,120px);animation:quietEnter .7s .12s both;}
 .title-line{display:block;font-size:1em;line-height:1.2;white-space:nowrap;}
-.title-line-first{animation:phraseReveal .85s .22s cubic-bezier(.16,1,.3,1) both;}
+.title-line-first{animation:quietEnter .85s .22s cubic-bezier(.16,1,.3,1) both;}
+.title-glyph{display:inline-block;position:relative;vertical-align:baseline;}
+.title-ink{position:relative;z-index:2;}
+.letter-character{position:absolute;display:block;width:.68em;height:1.36em;left:50%;top:-.71em;margin-left:-.34em;z-index:3;pointer-events:none;mix-blend-mode:multiply;animation:perchEnter .9s var(--perch-delay,.7s) cubic-bezier(.16,1,.3,1) both;}
+.letter-sprite{display:block;width:100%;height:100%;background-image:url('images/hero/title-perch-sheet-v1.png');background-repeat:no-repeat;background-size:300% 100%;background-position:0 0;transform-origin:50% 67%;animation:perchSway 6s 1.6s ease-in-out infinite;}
+.letter-character.is-reader{--perch-delay:1s;}
+.is-reader .letter-sprite{background-position:100% 0;animation-delay:2.2s;animation-duration:8s;}
+.letter-character.is-peeker{width:.48em;height:.96em;margin-left:-.24em;top:.14em;z-index:1;--perch-delay:1.2s;}
+.is-peeker .letter-sprite{background-position:50% 0;animation:letterPeek 7s 2s ease-in-out infinite;}
+@keyframes perchEnter{from{opacity:0;transform:translateY(-8px);}to{opacity:1;transform:none;}}
+@keyframes perchSway{0%,100%{rotate:-1.5deg;}50%{rotate:1.5deg;}}
+@keyframes letterPeek{0%,70%,100%{translate:0 0;}80%,90%{translate:0 .08em;}}
 .title-focus,.title-stop{color:#1837a6;}
 .hero-sub{max-width:none;font-size:1rem;line-height:1.85;color:#505765;margin:0 0 24px;animation:quietEnter .8s .65s both;}
-.hero-inner>.cont-banner{max-width:35rem;margin:0 0 20px;}
+.hero-inner>.cont-banner{max-width:35rem;margin:0 auto 20px;}
 .hero-start{display:inline-flex;align-items:center;justify-content:center;min-height:52px;gap:24px;margin:0;padding:14px 28px;background:#1837a6;color:#fff;border:0;border-radius:2px;font:inherit;font-size:1rem;font-weight:700;line-height:1.5;letter-spacing:.04em;cursor:pointer;animation:quietEnter .8s .8s both;transition:transform .2s,background .2s;}
 .hero-start:hover{background:#122b82;transform:translateY(-2px);}
 .hero-start:focus-visible{outline:3px solid #1837a6;outline-offset:5px;}
@@ -2270,7 +2281,7 @@ body::after,body::before{content:none;}
  .hero{min-height:0;padding:172px var(--hero-gutter) 116px;}
  .hero-inner>.hero-badge{margin-bottom:18px;}
  .hero-title.type-composition{margin-bottom:22px;}
- .type-prelude{margin-bottom:14px;letter-spacing:.02em;}
+ .type-prelude{margin-bottom:42px;letter-spacing:.02em;}
  .hero-sub{margin-bottom:22px;}
  .stage-char{width:64px;height:82px;}
  .stage-char:nth-child(1){left:6%;top:62px;}
@@ -2282,7 +2293,7 @@ body::after,body::before{content:none;}
  .stage-char:nth-child(7){right:5%;bottom:22px;}
 }
 @media(prefers-reduced-motion:reduce){
- .hero-inner>.hero-badge,.type-prelude,.title-line,.hero-sub,.hero-start,.stage-char,.stage-char img{animation:none!important;transform:none;translate:none;rotate:none;clip-path:none;opacity:1;}
+ .hero-inner>.hero-badge,.type-prelude,.title-line,.hero-sub,.hero-start,.stage-char,.stage-char img,.letter-character,.letter-sprite{animation:none!important;transform:none;translate:none;rotate:none;clip-path:none;opacity:1;}
  .stage-char img{opacity:.55;}
 }
 /* Section decorations keep their own safe gutters and mobile bands. */
@@ -2360,7 +2371,7 @@ body::after,body::before{content:none;}
       <!-- 主見出しは横幅に合わせて拡縮し、画面サイズによらず1行で表示する。 -->
       <h1 class="hero-title type-composition" aria-label="会社に合わせる前に、本当の自分を知ろう。">
         <span class="type-prelude" aria-hidden="true">会社に合わせる前に、</span>
-        <span class="title-line title-line-first" aria-hidden="true">本当の<span class="title-focus">自分</span>を知ろう<span class="title-stop">。</span></span>
+        <span class="title-line title-line-first" aria-hidden="true">本当<span class="title-glyph"><span class="title-ink">の</span><span class="letter-character is-peeker"><span class="letter-sprite"></span></span></span><span class="title-focus"><span class="title-glyph"><span class="title-ink">自</span><span class="letter-character"><span class="letter-sprite"></span></span></span>分</span>を<span class="title-glyph"><span class="title-ink">知</span><span class="letter-character is-reader"><span class="letter-sprite"></span></span></span>ろう<span class="title-stop">。</span></span>
       </h1>
       <!-- 入口の約束と結果画面の主役を揃える（workplace-fit.md U-2）。
            旧「あなたに向いている職種の例と、探し方のヒントまで。」は
