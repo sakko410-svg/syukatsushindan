@@ -2235,67 +2235,144 @@ body::after,body::before{content:none;}
    丸そのもの（.sd）を囲む。 */
 .sdw:focus-visible{outline:none;}
 .sdw:focus-visible .sd{outline:2px solid var(--info);outline-offset:3px;}
-/* The ten-character headline scales to the full available hero width. */
-.hero{--hero-gutter:clamp(20px,4vw,80px);background:#fff;min-height:min(820px,100svh);padding:180px var(--hero-gutter) 140px;display:flex;justify-content:center;isolation:isolate;}
-.hero-inner{width:100%;max-width:none;margin:0 auto;text-align:center;z-index:2;container-type:inline-size;}
-.hero-inner>.hero-badge{font-family:var(--jp-body);font-size:.75rem;font-weight:700;line-height:1.5;letter-spacing:.1em;color:#505765;background:none;border:0;box-shadow:none;padding:0;margin:0 0 24px;animation:quietEnter .65s .05s both;}
-.hero-badge::before{content:none;}
-.hero-title.type-composition{width:100%;max-width:none;margin:0 0 28px;font-family:var(--jp-disp);font-size:calc((100vw - var(--hero-gutter) - var(--hero-gutter) - 20px)/10);font-weight:900;line-height:1.2;letter-spacing:-.045em;color:#12151d;text-align:center;text-shadow:none;animation:none;}
-@supports(font-size:1cqi){.hero-title.type-composition{font-size:10.2cqi;}}
-.type-prelude{display:block;font-family:var(--jp-body);font-size:clamp(1rem,1.6vw,1.25rem);font-weight:700;line-height:1.6;letter-spacing:.04em;margin-bottom:clamp(42px,6vw,120px);animation:quietEnter .7s .12s both;}
-.title-line{display:block;font-size:1em;line-height:1.2;white-space:nowrap;}
-.title-line-first{animation:quietEnter .85s .22s cubic-bezier(.16,1,.3,1) both;}
-.title-glyph{display:inline-block;position:relative;vertical-align:baseline;}
-.title-ink{position:relative;z-index:2;}
-.letter-character{position:absolute;display:block;width:.68em;height:1.36em;left:50%;top:-.71em;margin-left:-.34em;z-index:3;pointer-events:none;mix-blend-mode:multiply;animation:perchEnter .9s var(--perch-delay,.7s) cubic-bezier(.16,1,.3,1) both;}
-.letter-sprite{display:block;width:100%;height:100%;background-image:url('images/hero/title-perch-sheet-v1.png');background-repeat:no-repeat;background-size:300% 100%;background-position:0 0;transform-origin:50% 67%;animation:perchSway 6s 1.6s ease-in-out infinite;}
-.letter-character.is-reader{--perch-delay:1s;}
-.is-reader .letter-sprite{background-position:100% 0;animation-delay:2.2s;animation-duration:8s;}
-.letter-character.is-peeker{width:.48em;height:.96em;margin-left:-.24em;top:.14em;z-index:1;--perch-delay:1.2s;}
-.is-peeker .letter-sprite{background-position:50% 0;animation:letterPeek 7s 2s ease-in-out infinite;}
-@keyframes perchEnter{from{opacity:0;transform:translateY(-8px);}to{opacity:1;transform:none;}}
-@keyframes perchSway{0%,100%{rotate:-1.5deg;}50%{rotate:1.5deg;}}
-@keyframes letterPeek{0%,70%,100%{translate:0 0;}80%,90%{translate:0 .08em;}}
-.title-focus,.title-stop{color:#1837a6;}
-.hero-sub{max-width:none;font-size:1rem;line-height:1.85;color:#505765;margin:0 0 24px;animation:quietEnter .8s .65s both;}
-.hero-inner>.cont-banner{max-width:35rem;margin:0 auto 20px;}
-.hero-start{display:inline-flex;align-items:center;justify-content:center;min-height:52px;gap:24px;margin:0;padding:14px 28px;background:#1837a6;color:#fff;border:0;border-radius:2px;font:inherit;font-size:1rem;font-weight:700;line-height:1.5;letter-spacing:.04em;cursor:pointer;animation:quietEnter .8s .8s both;transition:transform .2s,background .2s;}
-.hero-start:hover{background:#122b82;transform:translateY(-2px);}
-.hero-start:focus-visible{outline:3px solid #1837a6;outline-offset:5px;}
-.hero-cast{position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none;}
-.stage-char{position:absolute;width:88px;height:96px;animation:stageArrival 1.1s var(--delay,.2s) cubic-bezier(.16,1,.3,1) both;pointer-events:none;}
-.stage-char img{display:block;width:100%;height:100%;object-fit:contain;opacity:.55;animation:stageFloat var(--duration,12s) ease-in-out infinite;animation-delay:var(--idle-delay,0s);}
-.stage-char:nth-child(1){left:8%;top:68px;--delay:.15s;--from-x:-24px;}
-.stage-char:nth-child(2){left:31%;top:44px;--delay:.4s;--idle-delay:-3s;}
-.stage-char:nth-child(3){right:30%;top:60px;--delay:.65s;--idle-delay:-5s;--duration:14s;}
-.stage-char:nth-child(4){right:7%;top:38px;--delay:.85s;--from-x:24px;--idle-delay:-7s;}
-.stage-char:nth-child(5){left:6%;bottom:32px;--delay:.3s;--from-x:-24px;--duration:15s;}
-.stage-char:nth-child(6){left:32%;bottom:12px;--delay:.55s;--idle-delay:-4s;}
-.stage-char:nth-child(7){right:30%;bottom:28px;--delay:.75s;--idle-delay:-6s;--duration:16s;}
-.stage-char:nth-child(8){right:6%;bottom:8px;--delay:1s;--from-x:24px;--idle-delay:-2s;}
-@keyframes quietEnter{from{opacity:0;translate:0 12px;}to{opacity:1;translate:0 0;}}
-@keyframes phraseReveal{from{opacity:0;transform:translateY(20px);clip-path:inset(100% 0 0);}to{opacity:1;transform:none;clip-path:inset(0);}}
-@keyframes stageArrival{from{opacity:0;transform:translate(var(--from-x,0),16px) scale(.94);}to{opacity:1;transform:none;}}
-@keyframes stageFloat{0%,100%{translate:0 0;rotate:-2deg;}50%{translate:3px -8px;rotate:2deg;}}
+/* Hero animation and lockup ported from w-t-n-b/main at 9eae465 (2026-09-10).
+   Keep the source timing and glyph groups; use one centered responsive layout. */
+:root{
+  --m:clamp(30px,13.2vw,190px);
+}
+.hlk{
+  font-size:inherit;
+  font-weight:900;line-height:1.05;letter-spacing:-.03em;
+  display:flex;flex-direction:column;align-items:center;
+  margin-bottom:18px;
+}
+.hlk-pre{
+  display:block;align-self:center;
+  font-size:calc(var(--m)*.21);font-weight:700;letter-spacing:.04em;
+  line-height:1.4;margin-bottom:clamp(8px,1.6vw,16px);
+}
+.hlk-row{display:flex;align-items:flex-end;justify-content:center;gap:calc(var(--m)*.03);}
+.hlk-mass{display:flex;}
+.hlk-mass>span{
+  display:inline-block;
+  font-size:var(--m);line-height:.96;
+  letter-spacing:-.045em;
+}
+.hlk-m1>span{color:var(--info);}
+.hlk-side{
+  display:flex;flex-direction:column;align-items:center;
+  font-size:calc(var(--m)*.42);line-height:1.1;
+  padding-bottom:calc(var(--m)*.04);
+}
+.hlk-side>span{
+  font-family:var(--mincho);font-weight:400;
+  font-size:.643em;line-height:1;margin-top:.14em;letter-spacing:0;
+}
+.hlk-par{
+  font-family:var(--mincho);font-weight:400;
+  font-size:calc(var(--m)*.27);line-height:1;
+  padding-bottom:calc(var(--m)*.06);letter-spacing:0;
+}
+.hlk-dot{
+  font-size:calc(var(--m)*.34);line-height:1;
+  padding-bottom:calc(var(--m)*.02);margin-left:-.06em;
+}
+.hero-lead{
+  display:flex;align-items:center;justify-content:center;
+  gap:clamp(20px,5vw,90px);
+}
+.hero-lead-l{
+  display:flex;flex-direction:column;align-items:flex-start;
+  gap:clamp(12px,1.8vw,22px);
+}
+.hero-lead-l .hero-sub{text-align:left;}
+.hero-lead-l:not(.has-cont) .hero-sub{
+  font-size:clamp(1.05rem,1.55vw,1.5rem);
+  line-height:1.85;
+}
 @media(max-width:767px){
- .hero{min-height:0;padding:172px var(--hero-gutter) 116px;}
- .hero-inner>.hero-badge{margin-bottom:18px;}
- .hero-title.type-composition{margin-bottom:22px;}
- .type-prelude{margin-bottom:42px;letter-spacing:.02em;}
- .hero-sub{margin-bottom:22px;}
- .stage-char{width:64px;height:82px;}
- .stage-char:nth-child(1){left:6%;top:62px;}
- .stage-char:nth-child(2){left:calc(50% - 32px);top:46px;}
- .stage-char:nth-child(3){right:5%;top:66px;}
- .stage-char:nth-child(4),.stage-char:nth-child(8){display:none;}
- .stage-char:nth-child(5){left:6%;bottom:18px;}
- .stage-char:nth-child(6){left:calc(50% - 32px);bottom:4px;}
- .stage-char:nth-child(7){right:5%;bottom:22px;}
+  .hero-lead-l:not(.has-cont) .hero-sub{font-size:.94rem;line-height:1.95;}
 }
-@media(prefers-reduced-motion:reduce){
- .hero-inner>.hero-badge,.type-prelude,.title-line,.hero-sub,.hero-start,.stage-char,.stage-char img,.letter-character,.letter-sprite{animation:none!important;transform:none;translate:none;rotate:none;clip-path:none;opacity:1;}
- .stage-char img{opacity:.55;}
+.hero-lead-l .cont-banner{margin:0;max-width:none;}
+.hero-lead .hero-sub{margin:0;width:auto;max-width:none;flex:0 1 auto;}
+@media(max-width:767px){
+  .hero-lead{flex-direction:column;gap:14px;}
+  .hero-lead-l{align-items:center;}
+  .hero-lead-l .hero-sub{text-align:center;}
+  .hlk-note{align-self:auto;}
 }
+.hlk-note{
+  position:relative;display:inline-block;
+  font-family:var(--disp);font-size:clamp(11px,2.1vw,30px);
+  font-weight:700;letter-spacing:.06em;line-height:1.32;
+  color:var(--info);padding-left:clamp(10px,1.6vw,22px);
+  white-space:nowrap;flex:none;align-self:stretch;
+  display:flex;flex-direction:column;justify-content:center;
+}
+.hlk-note>i{
+  position:absolute;left:0;top:0;bottom:0;
+  width:max(2px,.13em);background:var(--info);transform-origin:50% 100%;
+}
+@keyframes hlkRise{
+  from{opacity:0;transform:translateY(.26em);clip-path:inset(112% 0 -12% 0);}
+  to  {opacity:1;transform:none;          clip-path:inset(-12% 0 -12% 0);}
+}
+@keyframes hlkDrop{
+  from{opacity:0;transform:translateY(-.5em);}
+  to  {opacity:1;transform:none;}
+}
+@keyframes hlkRule{from{transform:scaleY(0);}to{transform:scaleY(1);}}
+@keyframes hlkFade{from{opacity:0;}to{opacity:1;}}
+.hlk-pre,.hlk-side,.hlk-mass>span,.hlk-par,.hlk-dot,.hlk-note{opacity:0;}
+.hlk-pre        {animation:hlkRise .62s cubic-bezier(.16,1,.3,1) .05s both;}
+.hlk-side       {animation:hlkRise .70s cubic-bezier(.16,1,.3,1) .34s both;}
+.hlk-m1>span:nth-child(1){animation:hlkRise .74s cubic-bezier(.16,1,.3,1) .18s both;}
+.hlk-m1>span:nth-child(2){animation:hlkRise .74s cubic-bezier(.16,1,.3,1) .26s both;}
+.hlk-par        {animation:hlkDrop .52s cubic-bezier(.16,1,.3,1) .50s both;}
+.hlk-m2>span:nth-child(1){animation:hlkRise .74s cubic-bezier(.16,1,.3,1) .46s both;}
+.hlk-m2>span:nth-child(2){animation:hlkRise .74s cubic-bezier(.16,1,.3,1) .54s both;}
+.hlk-m2>span:nth-child(3){animation:hlkRise .74s cubic-bezier(.16,1,.3,1) .62s both;}
+.hlk-dot        {animation:hlkDrop .46s cubic-bezier(.16,1,.3,1) .78s both;}
+.hlk-note       {animation:hlkFade .5s linear .96s both;}
+.hlk-note>i     {animation:hlkRule .42s cubic-bezier(.16,1,.3,1) .86s both;}
+@media (prefers-reduced-motion:reduce){
+  .hlk-pre,.hlk-side,.hlk-mass>span,.hlk-par,.hlk-dot,.hlk-note,.hlk-note>i{
+    animation:none!important;opacity:1!important;transform:none!important;
+    clip-path:none!important;
+  }
+}
+@media(min-width:768px){
+  .hlk{margin-bottom:22px;}
+}
+
+.hero{background:#fff;min-height:0;padding:clamp(84px,7vw,112px) clamp(16px,3vw,48px) 48px;isolation:isolate;}
+.hero-inner{width:100%;max-width:none;margin:0 auto;text-align:center;}
+.hero-title.hlk{width:100%;max-width:none;margin:0 auto 32px;font-weight:900;color:var(--navy);text-shadow:none;animation:none;}
+.hero-badge{font-size:.75rem;line-height:1.5;letter-spacing:.14em;padding:9px 16px;margin-bottom:24px;border-radius:0;box-shadow:none;}
+.hlk-pre{font-size:clamp(1rem,2.1vw,1.5rem);margin-bottom:clamp(20px,3vw,42px);}
+.hlk-par,.hlk-side>span{font-size:max(12px,calc(var(--m)*.27));}
+.hero-lead{max-width:64rem;margin:0 auto;}
+.hero-lead-l{align-items:center;}
+.hero-lead-l .hero-sub{text-align:center;font-size:clamp(1rem,1.3vw,1.25rem);}
+.hero-lead-l .cont-banner{width:100%;max-width:35rem;}
+.hero-sub{color:var(--mid);}
+.hlk-note{font-size:clamp(14px,1.8vw,26px);}
+.hero-start{display:inline-flex;align-items:center;justify-content:center;min-height:52px;margin:24px auto 0;padding:14px 28px;background:var(--info);color:#fff;border:0;border-radius:2px;font:inherit;font-size:1rem;font-weight:700;cursor:pointer;animation:quietEnter .7s 1s both;transition:background .2s,transform .2s;}
+.hero-start:hover{background:#122b82;transform:translateY(-2px);}
+.hero-start:focus-visible{outline:3px solid var(--info);outline-offset:5px;}
+/* Match upstream character scale; alpha and float timing come from .hc above. */
+.hc{height:min(210px,calc(var(--m)*2.9));}
+@media(min-width:768px){
+ .hc-2,.hc-3{height:min(190px,calc(var(--m)*2.6));}
+ .hc-1,.hc-4{height:min(270px,calc(var(--m)*2.4));}
+}
+@media(max-width:767px){
+ .hero{padding-bottom:32px;}
+ .hero-lead-l .hero-sub{font-size:1rem;}
+ .hlk-note{font-size:14px;}
+}
+@keyframes quietEnter{from{opacity:0;translate:0 12px;}to{opacity:1;translate:0 0;}}
+@media(prefers-reduced-motion:reduce){.hero-start{animation:none!important;opacity:1;}}
 /* Section decorations keep their own safe gutters and mobile bands. */
 .quiet-character:nth-child(5){rotate:8deg;animation-delay:-9s;}
 .quiet-character:nth-child(6){rotate:-12deg;animation-delay:-5s;}
@@ -2365,13 +2442,13 @@ body::after,body::before{content:none;}
 <div id="screen-title" class="screen active">
   <div class="hero">
     <div class="hero-orb o1"></div><div class="hero-orb o2"></div><div class="hero-orb o3"></div>
-    <img class="hero-sil" src="images/chars/a3.webp?v=b01c3987" alt="" aria-hidden="true">
+    <img class="hero-sil" src="images/chars/a3.webp?v=c28e81ff" alt="" aria-hidden="true">
     <div class="hero-inner">
       <div class="hero-badge">就活キャリアタイプ診断</div>
       <!-- 主見出しは横幅に合わせて拡縮し、画面サイズによらず1行で表示する。 -->
-      <h1 class="hero-title type-composition" aria-label="会社に合わせる前に、本当の自分を知ろう。">
-        <span class="type-prelude" aria-hidden="true">会社に合わせる前に、</span>
-        <span class="title-line title-line-first" aria-hidden="true">本当<span class="title-glyph"><span class="title-ink">の</span><span class="letter-character is-peeker"><span class="letter-sprite"></span></span></span><span class="title-focus"><span class="title-glyph"><span class="title-ink">自</span><span class="letter-character"><span class="letter-sprite"></span></span></span>分</span>を<span class="title-glyph"><span class="title-ink">知</span><span class="letter-character is-reader"><span class="letter-sprite"></span></span></span>ろう<span class="title-stop">。</span></span>
+      <h1 class="hero-title hlk" aria-label="会社に合わせる前に、本当の自分を知ろう。">
+        <span class="hlk-pre" aria-hidden="true">会社に合わせる前に、</span>
+        <span class="hlk-row" aria-hidden="true"><span class="hlk-side">本当<span>の</span></span><span class="hlk-mass hlk-m1"><span>自</span><span>分</span></span><span class="hlk-par">を</span><span class="hlk-mass hlk-m2"><span>知</span><span>ろ</span><span>う</span></span><span class="hlk-dot">。</span></span>
       </h1>
       <!-- 入口の約束と結果画面の主役を揃える（workplace-fit.md U-2）。
            旧「あなたに向いている職種の例と、探し方のヒントまで。」は
@@ -2379,7 +2456,9 @@ body::after,body::before{content:none;}
            (b) 「向いている」で断定しながら名詞に「例」を足すヘッジの二重だった
                （同 §5-3。弱めるのは動詞側で行い、名詞に「例」を足さない）。
            51字 → 50字。390px で3行のまま。 -->
-      <p class="hero-sub">20問・約3分でわかるキャリアタイプ診断。<br>あなたが働きやすい職場と、その見分け方まで。</p>
+      <div class="hero-lead">
+        <div class="hero-lead-l">
+          <p class="hero-sub">20問・約3分でわかるキャリアタイプ診断。<br>あなたが働きやすい職場と、その見分け方まで。</p>
       <!-- .hero-trust（「登録不要 ｜ メールアドレス不要 ｜ 無料」）は削除した
            （2026-09-08・オーナー判断）。
            元は design/conversion-structure-and-pc-grid.md S-6 が「着地3秒で
@@ -2392,8 +2471,11 @@ body::after,body::before{content:none;}
            ★戻さないこと。e2e が「この行が復活していない」ことを見ている。
              同じ主張は t/*.html の .cta-note からも外した。 -->
       <div class="cont-banner" id="cont-banner" style="display:none;" onclick="continueDiag()">
-        <div class="cont-body"><span class="cont-title">前回の途中から続ける</span><span class="cont-sub" id="cont-sub">20問中?問に回答済み</span></div>
-        <span class="cont-arrow">→</span>
+            <div class="cont-body"><span class="cont-title">前回の途中から続ける</span><span class="cont-sub" id="cont-sub">20問中?問に回答済み</span></div>
+            <span class="cont-arrow">→</span>
+          </div>
+        </div>
+        <span class="hlk-note" aria-hidden="true"><i></i>FIND<br>YOUR<br>OWN WAY.</span>
       </div>
       <!-- ヒーローCTA（#cta-hero / .btn-wrap）は削除した（オーナー判断・案C）。
            docs/design/wording-audit.md §2-3 は案B（ボタンを「案内」に降格）を
@@ -2627,7 +2709,7 @@ const SITE_BASE='https://w-t-n-b.github.io/syukatsushindan/';
    見えていたのは旧版だった）。URL に ?v= を付けて別物として扱わせる。
    ★焼き直したら（make chars）この値を更新すること。
      images/chars/scale.json の _v と一致しているかを lint が見る。 */
-const ASSET_V='c231e7c6';
+const ASSET_V='c28e81ff';
 const cv=u=>u+'?v='+ASSET_V;
 
 /* GA4 測定ID（2026-09-08 投入）。
@@ -3106,7 +3188,7 @@ function checkSavedProgress(){
       /* curQ は「回答済みの問数」であって到達位置ではない。歯抜けに答えると
          「Q3まで回答済み」が事実と食い違う（wording-audit.md H-5）。
          .prog-seg の aria-valuetext と同じ文型に揃える。 */
-      if(b){b.style.display='flex';document.getElementById('cont-sub').textContent=`${Qs.length}問中${d.curQ}問に回答済み（残り${Qs.length-d.curQ}問）`;}
+      if(b){b.style.display='flex';const col=b.closest('.hero-lead-l');if(col)col.classList.add('has-cont');document.getElementById('cont-sub').textContent=`${Qs.length}問中${d.curQ}問に回答済み（残り${Qs.length-d.curQ}問）`;}
     }
   }catch(e){}
 }
@@ -4351,16 +4433,16 @@ function renderSharedBanner(code){
   if(!inner||hero.querySelector('.hero-cast'))return;
   if(hero.querySelector('.shared-banner'))return;          /* 共有リンク着地時は出さない */
   /* 左→右。.hero::after の4色（a=青 / b=緑 / c=朱 / d=紫）と同じ並び */
-  const CAST=[['a1',1],['b3',2],['c1',3],['d1',4],['a3',5],['b1',6],['c2',7],['d4',8]];
-  const pick=CAST;
+  const CAST=[['a1',1],['b3',2],['c1',3],['d1',4]];
+  const pick=matchMedia('(min-width:768px)').matches?CAST:[CAST[0],CAST[3]];
   const box=document.createElement('div');
   box.className='hero-cast'; box.setAttribute('aria-hidden','true');
   for(const [code,slot] of pick){
     const im=new Image(400,600);
-    const layer=document.createElement('div');layer.className='stage-char';
+    im.className='hc hc-'+slot;
     im.src=cv('images/chars/sm/'+code+'.webp');
     im.alt=''; im.loading='lazy'; im.decoding='async';
-    layer.appendChild(im);box.appendChild(layer);
+    box.appendChild(im);
   }
   hero.insertBefore(box,inner);                            /* 装飾円の後・.hero-inner の前 */
   const start=document.createElement('button');start.type='button';start.className='hero-start';start.textContent='診断をはじめる →';start.addEventListener('click',()=>continueOrStart('hero'));inner.appendChild(start);
