@@ -2351,6 +2351,24 @@ body::after,body::before{content:none;}
  .stage-char:nth-child(5){left:2%;bottom:68px;}.stage-char:nth-child(6){left:35%;bottom:35px;}.stage-char:nth-child(7){right:2%;bottom:85px;}
 }
 @media(prefers-reduced-motion:reduce){.type-composition *{animation:none!important;clip-path:none!important;transform:none!important;}}
+/* Phrase-level typography: a common left edge and uninterrupted reading order. */
+.hero-title.type-composition{width:max-content;max-width:100%;margin:0 auto 32px;letter-spacing:-.045em;}
+.type-composition .type-prelude{font-family:var(--jp-body);font-size:clamp(16px,2vw,22px);line-height:1.6;font-weight:700;letter-spacing:.06em;margin:0 0 20px;}
+.title-line{display:block;white-space:nowrap;font-family:var(--jp-disp);font-weight:900;}
+.title-line-first{font-size:clamp(40px,6.8vw,80px);line-height:1.3;animation:phraseReveal .85s .25s both;}
+.title-focus{color:#1837a6;position:relative;}
+.title-focus::after{content:'';position:absolute;left:2%;right:2%;bottom:-2px;height:3px;background:currentColor;transform-origin:left;animation:titleRule .65s 1.05s both;}
+.title-line-last{font-size:clamp(75px,12.5vw,148px);line-height:1.14;margin-top:3px;letter-spacing:-.06em;animation:phraseReveal 1s .48s both;}
+.title-stop{color:#1837a6;}
+@keyframes phraseReveal{from{opacity:0;transform:translateY(22px);clip-path:inset(100% 0 0);}to{opacity:1;transform:none;clip-path:inset(0);}}
+@keyframes titleRule{from{transform:scaleX(0);}to{transform:scaleX(1);}}
+@media(max-width:767px){
+ .hero-title.type-composition{margin-bottom:26px;}
+ .type-composition .type-prelude{font-size:16px;letter-spacing:.01em;margin-bottom:14px;}
+ .title-line-first{font-size:clamp(39px,9.5vw,65px);}
+ .title-line-last{font-size:clamp(70px,17vw,117px);}
+}
+@media(prefers-reduced-motion:reduce){.title-line,.title-focus::after{animation:none!important;}}
 </style>
 </head>
 <body data-screen="screen-title">
@@ -2397,8 +2415,8 @@ body::after,body::before{content:none;}
            390px 以上では1行のままなので見え方は変わらない。 -->
       <h1 class="hero-title type-composition" aria-label="会社に合わせる前に、本当の自分を知ろう。">
         <span class="type-prelude" aria-hidden="true">会社に合わせる前に、</span>
-        <span class="type-row" aria-hidden="true"><span class="type-aside">本当<span>の</span></span><span class="type-mass type-self"><span>自</span><span>分</span></span><span class="type-particle">を</span></span>
-        <span class="type-row type-row-last" aria-hidden="true"><span class="type-mass type-know"><span>知</span><span>ろ</span><span>う</span></span><span class="type-period">。</span><span class="type-note">FIND<br>YOUR<br>OWN WAY.</span></span>
+        <span class="title-line title-line-first" aria-hidden="true">本当の<span class="title-focus">自分</span>を</span>
+        <span class="title-line title-line-last" aria-hidden="true">知ろう<span class="title-stop">。</span></span>
       </h1>
       <!-- 入口の約束と結果画面の主役を揃える（workplace-fit.md U-2）。
            旧「あなたに向いている職種の例と、探し方のヒントまで。」は
