@@ -2349,7 +2349,18 @@ body::after,body::before{content:none;}
 .hero-inner{width:100%;max-width:none;margin:0 auto;text-align:center;}
 .hero-title.hlk{width:100%;max-width:none;margin:0 auto 32px;font-weight:900;color:var(--navy);text-shadow:none;animation:none;}
 .hero-badge{font-size:.75rem;line-height:1.5;letter-spacing:.14em;padding:9px 16px;margin-bottom:24px;border-radius:0;box-shadow:none;}
-.hlk-pre{font-size:clamp(1rem,2.1vw,1.5rem);margin-bottom:clamp(20px,3vw,42px);}
+.hlk-pre{font-size:clamp(1rem,2.1vw,1.5rem);margin-bottom:calc(var(--m)*.65 + 16px);}
+/* Characters sit outside the animated glyph masks so faces and legs stay intact. */
+.hlk-mass{position:relative;}
+.hero-perch{position:absolute;display:block;width:calc(var(--m)*.5);height:calc(var(--m)*1.066667);top:calc(var(--m)*-.64);left:calc(var(--m)*.18);z-index:3;pointer-events:none;mix-blend-mode:multiply;animation:perchAppear .65s 1.05s both;}
+.hero-perch-art{display:block;width:100%;height:100%;overflow:hidden;background-image:url('images/hero/title-perch-sheet-v1.png');background-repeat:no-repeat;background-size:320% 100%;background-position:0 0;transform-origin:50% 66%;animation:perchRock 7s 1.8s ease-in-out infinite;}
+.hero-perch-reader{animation-delay:1.3s;}
+.hero-perch-reader .hero-perch-art{background-position:100% 0;animation-duration:9s;animation-delay:2.1s;}
+.hero-perch-producer{left:calc(var(--m)*1.2);top:calc(var(--m)*-.605);height:calc(var(--m)*.661232);animation-delay:1.55s;}
+.hero-perch-producer .hero-perch-art{background-size:278.26087% 140.27397%;background-position:50.406504% 0;transform-origin:50% 96%;animation-duration:10s;animation-delay:2.4s;}
+@keyframes perchAppear{from{opacity:0;translate:0 -6px;}to{opacity:1;translate:0 0;}}
+@keyframes perchRock{0%,100%{rotate:-1deg;}50%{rotate:1deg;}}
+@media(prefers-reduced-motion:reduce){.hero-perch,.hero-perch-art{animation:none!important;opacity:1;translate:none;rotate:none;}}
 .hlk-par,.hlk-side>span{font-size:max(12px,calc(var(--m)*.27));}
 .hero-lead{max-width:64rem;margin:0 auto;}
 .hero-lead-l{align-items:center;}
@@ -2448,7 +2459,7 @@ body::after,body::before{content:none;}
       <!-- 主見出しは横幅に合わせて拡縮し、画面サイズによらず1行で表示する。 -->
       <h1 class="hero-title hlk" aria-label="会社に合わせる前に、本当の自分を知ろう。">
         <span class="hlk-pre" aria-hidden="true">会社に合わせる前に、</span>
-        <span class="hlk-row" aria-hidden="true"><span class="hlk-side">本当<span>の</span></span><span class="hlk-mass hlk-m1"><span>自</span><span>分</span></span><span class="hlk-par">を</span><span class="hlk-mass hlk-m2"><span>知</span><span>ろ</span><span>う</span></span><span class="hlk-dot">。</span></span>
+        <span class="hlk-row" aria-hidden="true"><span class="hlk-side">本当<span>の</span></span><span class="hlk-mass hlk-m1"><span>自</span><span>分</span><i class="hero-perch"><i class="hero-perch-art"></i></i><i class="hero-perch hero-perch-producer"><i class="hero-perch-art"></i></i></span><span class="hlk-par">を</span><span class="hlk-mass hlk-m2"><span>知</span><span>ろ</span><span>う</span><i class="hero-perch hero-perch-reader"><i class="hero-perch-art"></i></i></span><span class="hlk-dot">。</span></span>
       </h1>
       <!-- 入口の約束と結果画面の主役を揃える（workplace-fit.md U-2）。
            旧「あなたに向いている職種の例と、探し方のヒントまで。」は
